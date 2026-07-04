@@ -1,69 +1,62 @@
 # **Takım İsmi**
 
-Takım X
+Takım 47
 
 # Ürün İle İlgili Bilgiler
 
 ## Takım Elemanları
 
-- John Doe: Product Owner
-- Jane Doe: Scrum Master
-- Atıl Samancıoğlu: Team Member/Developer
+- Mehmet Kaan Karataş: Product Owner
+- Yusuf Ataş: Scrum Master
+- Eylül Kılıç: Backend Developer
+- Nermin Aybike Ertürk: Frontend Developer
+- Hüseyin Eren Taşkın: QA Tester
 
 ## Ürün İsmi
 
---Movie App--
+--Papyrus AI--
 
 ## Ürün Açıklaması
 
-- Movie App uygulamamız ile insanların izlemek istediği filmlere ve dizilere daha kolay karar vermesini sağlayacağız. İçerisinde binlerce filmi barındıran uygulamamız aynı zamanda Netflix, Prime vb. platformlarda yayınlanıp yayınlanmadığını ve IMDB puanlarını da gösterecek.
+Düşüncelerinizi aklınızdan geçtiği gibi — dağınık, düzensiz ve serbest biçimde — yazmanızı sağlayan ve yapay zeka kullanarak bunları okunabilir bir formata dönüştüren bir web uygulaması. Net başlıklar, gruplandırılmış bölümler ve öne çıkarılan önemli noktalar. Siz sadece yazın, uygulama düzenlesin.
+
+Next.js, FastAPI, Supabase ve Gemini API ile geliştirilmiştir.
 
 ## Ürün Özellikleri
 
-- Filmleri türüne göre ayırma
-- Filmlerin yönetmen, aktör, aktris vb. bilgilerini posteriyle birlikte gösterme
-- IMDB ve Rotten Tomatoes puanlarını gösterme
-- Netflix'te ve Prime'da bulunurluğunu gösterme
-
 ## Hedef Kitle
-
-- Netflix kullanıcıları
-- Prime kullanıcıları
-- Sinema severler
-- Dizi severler
-- 15 - 65 yaş arası kullanıcılar
 
 ## Product Backlog URL
 
-[Miro Backlog Board](https://miro.com/app/board/uXjVOSSCpsI=/)
-
----
 
 # Sprint 1
 
-- **Backlog düzeni ve Story seçimleri**: Backlog'umuz ilk yapılacak story'lere göre düzenlenmiştir. Sprint başına tahmin edilen puan sayısını geçmeyecek şekilde sıradan seçimler yapılmaktadır. Story başına çıkan tahmin puanı, toplam puanın yarısından az tutulmuştur. 
+# Sprint 1
 
-Story'ler yapılacak işlere (task'lere) bölünmüştür. Miro Board'da gözüken kırmızı item'lar yapılacak işleri (task) gösterirken, mavi item'lar story'leri temsil etmektedir.
+- **Backlog düzeni ve Story seçimleri**: Backlog'umuz ilk yapılacak story'lere göre düzenlenmiştir. Sprint başına tahmin edilen puan sayısını geçmeyecek şekilde sıradan seçimler yapılmaktadır. Story başına çıkan tahmin puanı, toplam puanın yarısından az tutulmuştur.
 
-- **Daily Scrum**: Daily Scrum toplantılarının zamansal sebeplerden ötürü Slack üzerinden yapılmasına karar verilmiştir. Daily Scrum toplantısı örneği jpeg veya word olarak Readme'de tarafımızdan paylaşılmaktadır: [Sprint 1 Daily Scrum Chats](https://github.com/OyunveUygulamaAkademisi/BootcampScrumTemplate/blob/main/ProjectManagement/Sprint1Documents/DailyScrumMeetingNotesSprint1.docx?raw=true)
+Story'ler yapılacak işlere (task'lere) bölünmüştür.
 
-- **Sprint board update**: Sprint board screenshotları: 
-![Backlog 1](https://raw.githubusercontent.com/OyunveUygulamaAkademisi/BootcampScrumTemplate/main/ProjectManagement/Sprint1Documents/backlog1.png) 
-![Backlog 2](https://raw.githubusercontent.com/OyunveUygulamaAkademisi/BootcampScrumTemplate/main/ProjectManagement/Sprint1Documents/backlog2.png) 
-![Backlog 3](https://raw.githubusercontent.com/OyunveUygulamaAkademisi/BootcampScrumTemplate/main/ProjectManagement/Sprint1Documents/backlog3.png)
+- **Ekip İletişimi**: Ekip toplantıları 3 günde bir WhatsApp ve Slack üzerinden gerçekleştirilmektedir.
 
-- **Ürün Durumu**: Ekran görüntüleri:
-  ![Screenshot 1](https://github.com/OyunveUygulamaAkademisi/BootcampScrumTemplate/blob/main/ProjectManagement/Sprint1Documents/productss1.png?raw=true)
-  ![Screenshot 2](https://github.com/OyunveUygulamaAkademisi/BootcampScrumTemplate/blob/main/ProjectManagement/Sprint1Documents/productss2.png?raw=true)
+- **Sprint 1 Hedefleri ve Tamamlananlar**:
+  - Proje kapsamı netleştirildi, roller ve sorumluluklar ekibe dağıtıldı
+  - Monorepo iskelet yapısı oluşturuldu (Next.js frontend, FastAPI backend)
+  - Supabase projesi kuruldu: Auth yapılandırması, veritabanı şeması ve RLS politikaları uygulandı
+  - Branch stratejisi ve PR şablonu hazırlandı
+  - API kontratı taslağı oluşturuldu
+  - Ürün Sahibi tarafından rekabet analizi gerçekleştirildi ve ekiple paylaşıldı
+
+- **Sprint board update**
+- **Ürün Durumu**
 
 - **Sprint Review**: 
-Alınan kararlar: Veritabanı oluşturması email ile toplanacak veriler için gerekli görülmüştür. Fakat bir yandan da veritabanı form sayfası için gerekli olmamıştır. O sebeple PBI bir sonraki sprint'e aktarılmıştır. Çıkan ürünün çalışmasında ve testlerinde bir problem görülmemiştir. Ekstra koyulması gereken özellikler belirlenmiştir. Sprint Review katılımcıları: ......
+Sprint sonunda Phase 1 — Foundation başarıyla tamamlanmış ve ekibe sunulmuştur. Teknik iskelet, veritabanı kurulumu ve rol dağılımı gözden geçirilmiştir. Sprint Review doğrultusunda Phase 2 — Core Loop çalışmalarına başlanmasına karar verilmiş, her role ait haftalık görevler yeniden dağıtılmıştır. Sprint Review katılımcıları: Tüm ekip.
 
 - **Sprint Retrospective:**
-  - Takım içindeki görev dağılımıyla ilgili düzenleme yapılması kararı alınmıştır
-  - Tahmin puanları gözden geçirilmeli ve sprint planlama toplantılarında gerekli geri bildirimlerin developer'lar tarafından verildiğine emin olunmalı
-  - Unit test'ler için ayrılan efor/saat arttırılmalı 
-
+  - Birbirini tanımayan bir ekip olarak bir araya gelip projenin ilk ayağını başarıyla tamamlamak olumlu bir başlangıç olarak değerlendirilmiştir
+  - Ekip içi iletişimin henüz yeterli olgunluğa ulaşmadığı gözlemlenmiş, iletişim kanallarının daha aktif kullanılması ve düzenli buluşma sıklığının korunması kararlaştırılmıştır
+  - Görev dağılımının daha adil ve dengeli bir şekilde yürütülmesi gerektiği tespit edilmiş, bir sonraki sprintte iş yükünün ekip üyeleri arasında eşit paylaşılmasına özen gösterilecektir
 ---
 
 # Sprint 2
