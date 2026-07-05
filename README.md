@@ -56,9 +56,11 @@ Story'ler yapılacak işlere (task'lere) bölünmüştür.
   - Ürün Sahibi tarafından rekabet analizi gerçekleştirildi ve ekiple paylaşıldı
 
 - **Sprint board update**
-
+<img width="973" height="912" alt="Ekran görüntüsü 2026-07-05 194737" src="https://github.com/user-attachments/assets/8e951d6a-7c73-468f-9935-025ad24f5aea" />
 
 - **Ürün Durumu**
+<img width="898" height="646" alt="Ekran görüntüsü 2026-07-05 160553" src="https://github.com/user-attachments/assets/d7891f70-e61d-4f5f-bf4e-f5b34691df7e" />
+
 
 - **Sprint Review**:
 Sprint sonunda Phase 1 — Foundation başarıyla tamamlanmış ve ekibe sunulmuştur. Teknik iskelet, veritabanı kurulumu ve rol dağılımı gözden geçirilmiştir. Sprint Review doğrultusunda Phase 2 — Core Loop çalışmalarına başlanmasına karar verilmiş, her role ait haftalık görevler yeniden dağıtılmıştır. Sprint Review katılımcıları: Tüm ekip.
