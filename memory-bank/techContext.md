@@ -10,7 +10,8 @@
 * Python
 * PostgreSQL (via Supabase)
 * Supabase Auth (email + password, email verification)
-* Gemini API (Flash model) — AI categorization/structuring layer
+* OpenAI API (GPT-4o Mini model) — AI categorization/structuring layer
+
 
 ## Development Setup
 Monorepo. Distinct directories for frontend and backend:
@@ -27,7 +28,8 @@ Monorepo. Distinct directories for frontend and backend:
 
 ## Dependencies
 * Frontend: `next`, `react`, `tailwindcss`, `clsx`, `tailwind-merge` (`shadcn/ui` components as needed)
-* Backend: `fastapi`, `uvicorn`, `pydantic`, `supabase` (Python client), `google-generativeai` (Gemini SDK)
+* Backend: `fastapi`, `uvicorn`, `pydantic`, `supabase` (Python client), `openai` (OpenAI Python SDK)
+
 
 ## Code Quality Rules
 * Type-safe architecture (TypeScript frontend, Pydantic models backend)

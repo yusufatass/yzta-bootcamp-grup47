@@ -20,16 +20,24 @@ Takım 47
 
 Düşüncelerinizi aklınızdan geçtiği gibi — dağınık, düzensiz ve serbest biçimde — yazmanızı sağlayan ve yapay zeka kullanarak bunları okunabilir bir formata dönüştüren bir web uygulaması. Net başlıklar, gruplandırılmış bölümler ve öne çıkarılan önemli noktalar. Siz sadece yazın, uygulama düzenlesin.
 
-Next.js, FastAPI, Supabase ve Gemini API ile geliştirilmiştir.
+Next.js, FastAPI, Supabase ve OpenAI API ile geliştirilmiştir.
 
 ## Ürün Özellikleri
 
+- **Serbest metin girişi:** Kullanıcı hiçbir format kısıtlaması olmadan aklına geleni yazar, not anlık olarak kaydedilir
+- **Anonim mod:** Kayıt olmadan not yazılabilir; notlar sadece tarayıcı oturumunda (sessionStorage) tutulur, sekme kapanınca silinir, AI'ya hiç gönderilmez
+- **Kayıtlı mod:** Email + şifre ile kayıt olup email doğrulaması yapan kullanıcılar, notlarını AI'ya gönderebilir
+- **AI destekli kategorileme:** Notlar sabit bir kategori setine (Alışveriş Listesi, Toplantı Notları, Ders Notları, Günlük Plan, Seyahat Listesi, Genel/Diğer) otomatik atanır ve okunabilir formata dönüştürülür
+- **Not geçmişi:** Kenar çubuğunda geçmiş notlara erişim (anonim modda oturum bazlı, kayıtlı modda kalıcı)
+- **Otomatik tam erişim:** Doğrulanan hesaplar ödeme veya ek onay olmadan doğrudan tüm AI özelliklerine erişir
+
 ## Hedef Kitle
+
+Düşüncelerini hızlıca ve düzensiz şekilde not almak isteyen, ancak bu notların sonradan düzenli ve okunabilir hale gelmesini bekleyen öğrenciler, profesyoneller ve günlük hayatında liste/plan tutan herkes. Özellikle ders notu tutan öğrenciler, toplantı notu alan profesyoneller ve karışık günlük görev/alışveriş listeleri tutan kullanıcılar birincil hedef kitledir.
 
 ## Product Backlog URL
 
-
-# Sprint 1
+https://app.notion.com/p/YZTA-Tak-m-47-Papyrus-AI-Sprint-Raporu-394884952fd9803cb22fcefed250e2f8?source=copy_link
 
 # Sprint 1
 
@@ -48,9 +56,11 @@ Story'ler yapılacak işlere (task'lere) bölünmüştür.
   - Ürün Sahibi tarafından rekabet analizi gerçekleştirildi ve ekiple paylaşıldı
 
 - **Sprint board update**
+
+
 - **Ürün Durumu**
 
-- **Sprint Review**: 
+- **Sprint Review**:
 Sprint sonunda Phase 1 — Foundation başarıyla tamamlanmış ve ekibe sunulmuştur. Teknik iskelet, veritabanı kurulumu ve rol dağılımı gözden geçirilmiştir. Sprint Review doğrultusunda Phase 2 — Core Loop çalışmalarına başlanmasına karar verilmiş, her role ait haftalık görevler yeniden dağıtılmıştır. Sprint Review katılımcıları: Tüm ekip.
 
 - **Sprint Retrospective:**
