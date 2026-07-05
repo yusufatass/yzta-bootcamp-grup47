@@ -1,7 +1,7 @@
 # Progress
 
 ## Current Status
-Phase 0 complete. All deliverables have been manually verified: monorepo setup confirmed, branch strategy/PR templates established, live Supabase project configured (Auth, schema, and RLS policies active), API contracts finalized, local `.env` keys populated, and backend `/health` verified.
+Phase 1 in progress. User authentication flow (registration, login, email verification status verification) is fully implemented on both frontend and backend.
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
@@ -12,6 +12,7 @@ Phase 0 complete. All deliverables have been manually verified: monorepo setup c
 * Supabase manual setup guide (`backend/SUPABASE_SETUP.md`) and database schema (`backend/schema.sql`)
 * API contract specifications (`backend/API_CONTRACT.md`)
 * Standalone Gemini prompt experiment script (`backend/prompt_experiment.py`)
+* Authentication System: User registration, login, and verification state management across Next.js and FastAPI using Supabase Auth.
 
 ## What's Left to Build
 
@@ -23,18 +24,19 @@ Phase 0 complete. All deliverables have been manually verified: monorepo setup c
 - [x] Early AI categorization prompt experiments (standalone, not wired in)
 
 ### Phase 1 — Core Loop
-- [ ] Register / login / email verification flow
-- [ ] Note submission endpoint (authenticated)
-- [ ] AI categorization service (Gemini integration)
-- [ ] Note result display on frontend
-- [ ] Persistent storage of categorized notes
-- [ ] Anonymous sessionStorage note flow
+- [x] Register / login / email verification flow
+- [x] Note submission endpoint (authenticated)
+- [x] AI categorization service (OpenAI GPT integration)
+- [x] Note result display on frontend
+- [x] Persistent storage of categorized notes
+- [x] Anonymous sessionStorage note flow
 
 ### Phase 2 — Breadth & Polish
 - [ ] AI prompt refined and tested across all category templates
-- [ ] Note history sidebar (both modes)
+- [x] Note history sidebar (both modes)
 - [ ] UI polish pass (calm/minimal direction)
-- [ ] Basic edge case handling (empty/short/long input)
+- [x] Basic edge case handling (empty/short/long input)
+
 
 ### Phase 3 — Hardening
 - [ ] QA bug fixes

@@ -1,19 +1,20 @@
 # Active Context
 
 ## Current Work Focus
-Phase 1 — Core Loop. Phase 0 is fully verified. Ready to build out the database integration, user authentication (sign up, login, verification), and raw note submission pipelines.
+Phase 2 — Breadth & Polish. The core loop (user authentication, notes database persistence, anonymous sessionStorage migration, and OpenAI GPT-4o Mini note organization) is complete. Next is prompt template refinement and general UI styling polish.
 
 ## Recent Changes
-* Completed and manually verified all Phase 0 foundation requirements.
-* Configured local `.env` files with active Supabase project credentials and a Gemini API key.
-* Verified backend `/health` endpoint and local frontend development builds.
+* Created the OpenAI GPT-4o Mini analyzer service (`backend/app/services/ai.py`) to categorize and structure note content with JSON schema retry validations.
+* Wired the AI service into backend note creation and migration database pipelines.
+* Built a custom React markdown rendering parser to display structured note summaries in the workspace.
+* Implemented an "Organizing your note..." client loading screen during note submission.
+* Integrated color-coded category badges on sidebar cards.
 
 ## Next Steps
-1. Build the user authentication pages (Register, Login, Verification redirect) on the frontend.
-2. Integrate Supabase Auth middleware on the backend to validate incoming JWTs.
-3. Create the note database repository and service on the backend to save notes.
-4. Implement the note submission endpoint (`POST /api/notes`) and integrate the Gemini client for categorization.
-5. Set up the frontend `sessionStorage` flow for anonymous users.
+1. Refine the AI prompt template and test categorization across multiple edge cases.
+2. Conduct a general UI/UX polish pass to align with the calm/minimalist direction.
+3. Establish seeding scripts for verified demo accounts.
+
 
 ## Active Decisions and Considerations
 * Anonymous users must be blocked from the AI pipeline at the backend, not just hidden in the UI — this needs to be true from the first version of the notes endpoint, not patched in later

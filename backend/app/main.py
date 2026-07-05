@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.routers.auth import router as auth_router
+from app.routers.notes import router as notes_router
 
 app = FastAPI(
     title="Unstructured Notes Organizer API",
@@ -15,6 +17,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include Routers
+app.include_router(auth_router)
+app.include_router(notes_router)
 
 
 @app.get("/health")
