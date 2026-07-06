@@ -1,18 +1,20 @@
 # Progress
 
 ## Current Status
-Phase 1 in progress. User authentication flow (registration, login, email verification status verification) is fully implemented on both frontend and backend.
+Phase 2 (Breadth & Polish) is complete. The prompt categorization has been refined and verified across all note templates, edge-case validation has been added, and the UI has been polished with a clean, calm design style.
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
-* Basic Next.js frontend rendering a clean starting screen (verifiably builds successfully)
-* FastAPI backend with a working `/health` health-check endpoint (verifiably runs successfully)
+* Next.js frontend rendering a clean note-taking application (builds successfully)
+* FastAPI backend with a working `/health` health-check endpoint (runs successfully)
 * Root `.gitignore` and `.env.example` configurations in place
 * Branch strategy (`CONTRIBUTING.md`) and PR template (`.github/PULL_REQUEST_TEMPLATE.md`)
 * Supabase manual setup guide (`backend/SUPABASE_SETUP.md`) and database schema (`backend/schema.sql`)
 * API contract specifications (`backend/API_CONTRACT.md`)
-* Standalone Gemini prompt experiment script (`backend/prompt_experiment.py`)
 * Authentication System: User registration, login, and verification state management across Next.js and FastAPI using Supabase Auth.
+* OpenAI GPT-4o Mini integration with resilient formatting prompts for all six note types (Shopping List, Meeting Notes, Lecture Notes, Daily Plan, Travel List, General / Other).
+* Inline validation and edge-case handling (rejection of notes under 10 chars, truncation of notes over 4000 chars).
+* Polished minimalist visual design with smooth indicator animations, responsive sidebar layout, and sticky glassmorphic navigation header.
 
 ## What's Left to Build
 
@@ -32,15 +34,15 @@ Phase 1 in progress. User authentication flow (registration, login, email verifi
 - [x] Anonymous sessionStorage note flow
 
 ### Phase 2 — Breadth & Polish
-- [ ] AI prompt refined and tested across all category templates
+- [x] AI prompt refined and tested across all category templates
 - [x] Note history sidebar (both modes)
-- [ ] UI polish pass (calm/minimal direction)
+- [x] UI polish pass (calm/minimal direction)
 - [x] Basic edge case handling (empty/short/long input)
 
 
 ### Phase 3 — Hardening
 - [ ] QA bug fixes
-- [ ] AI output validation/retry logic
+- [x] AI output validation/retry logic
 - [ ] Response time check
 - [ ] Seeded demo accounts
 
@@ -51,4 +53,4 @@ Phase 1 in progress. User authentication flow (registration, login, email verifi
 - [ ] Demo rehearsal
 
 ## Known Issues
-* None yet — project hasn't started.
+* Users must add a valid `OPENAI_API_KEY` to the `backend/.env` file to trigger the actual AI note-organizing features. Without it, the application falls back gracefully with a configuration warning.

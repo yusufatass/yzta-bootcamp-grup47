@@ -35,19 +35,27 @@ async def create_note(
     note_data: NoteCreate,
     ctx: UserContext = Depends(get_user_context)
 ):
-    if not note_data.raw_text.strip():
+    raw_text = note_data.raw_text
+    
+    # 1. Reject empty or notes under 10 characters
+    if not raw_text or len(raw_text.strip()) < 10:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Note text cannot be empty"
+            detail="Note must be at least 10 characters long."
         )
     
+    # 2. Truncate notes longer than 4000 characters before sending to AI
+    ai_text = raw_text
+    if len(raw_text) > 4000:
+        ai_text = raw_text[:4000]
+    
     try:
-        # Call AI service to categorize and structure the raw text
-        ai_result = analyze_note_content(note_data.raw_text)
+        # Call AI service with the (possibly truncated) text
+        ai_result = analyze_note_content(ai_text)
         
         payload = {
             "user_id": ctx.user.id,
-            "raw_text": note_data.raw_text,
+            "raw_text": raw_text,  # Keep the original raw text intact
             "category": ai_result["category"],
             "structured_content": ai_result["structured_content"]
         }
@@ -58,11 +66,14 @@ async def create_note(
                 detail="Failed to save note"
             )
         return res.data[0]
+    except HTTPException as http_ex:
+        raise http_ex
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to create note: {str(e)}"
         )
+
 
 
 @router.get("")

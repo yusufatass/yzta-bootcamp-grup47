@@ -20,22 +20,37 @@ VALID_CATEGORIES = {
     "General / Other"
 }
 
-SYSTEM_PROMPT = """You are an expert personal organizer AI. Your job is to take raw, messy, unstructured notes and organize them.
+SYSTEM_PROMPT = """You are an expert personal organizer AI. Your job is to take raw, messy, unstructured notes and organize them into clean, structured formatting.
 
 You MUST respond with a JSON object. The JSON object MUST have exactly these two keys:
 1. "category": A string representing the note's category. It MUST be exactly one of these six values:
-   - "Shopping List"
+   - "Shopping List" (Only apply when the note is an actual list of items to purchase, not when it merely mentions buying something or researching a purchase)
    - "Meeting Notes"
    - "Lecture Notes"
    - "Daily Plan"
    - "Travel List"
-   - "General / Other"
+   - "General / Other" (Use this for research notes, thoughts, ideas, and anything that does not clearly fit another category)
 
 2. "structured_content": A JSON object containing:
    - "title": A concise, clear title for the note.
    - "markdown": The note rewritten in a beautiful, readable format. Use clear headings, grouped bullet points, and highlight key details or action items.
 
-Do not include any pre-text, post-text, or markdown block wrappers around the JSON. Return only the raw JSON string."""
+You MUST format the "markdown" string based on the determined "category" as follows:
+- For "Shopping List": Group items by section (e.g., Produce, Dairy, Bakery, Meat, Household, Pantry) if inferable from context. If not inferable, format as a clean, unified checklist (using `- [ ]` or `-`).
+- For "Meeting Notes": Include sections for:
+  - **Attendees**: (List individuals if mentioned, otherwise write "Not specified")
+  - **Topics Discussed**: (Key discussion points)
+  - **Action Items**: (Use checkboxes `- [ ]` showing task, owner, and deadline if mentioned, e.g. `- [ ] Task name (Owner: Name, Deadline: Date)`)
+- For "Lecture Notes": Structure with:
+  - **Topic Heading**: (Clear main topic)
+  - **Key Concepts**: (Crucial terms, formulas, or theorems with concise explanations)
+  - **Summary Points**: (Key takeaways or summary)
+- For "Daily Plan": Format as a time-based schedule (if times are mentioned, e.g., `09:00 AM - Task`) or a priority-based task list (e.g. `### High Priority Tasks`, `### Medium Priority Tasks`).
+- For "Travel List": Group packing items by category (e.g., Documents, Clothing, Toiletries, Electronics, Miscellaneous) to make packing easy.
+- For "General / Other": Write a clean summary with logical section headings and bullet points.
+
+Strictly adhere to the standard markdown conventions. Use headers (`##` or `###`), bold text (`**bold**`), and bullet points/lists properly. Do not write any wrappers like ```json ... ``` around the returned JSON. Output only raw JSON."""
+
 
 def analyze_note_content(raw_text: str) -> dict:
     """

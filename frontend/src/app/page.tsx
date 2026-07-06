@@ -35,6 +35,7 @@ export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isOrganizing, setIsOrganizing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Set mounted to true on client to prevent hydration mismatch
@@ -137,6 +138,7 @@ export default function Home() {
     setUser(null);
     setSelectedNote(null);
     setNotes([]);
+    setError(null);
     // Reload local notes
     const storedNotes = sessionStorage.getItem("anonymous_notes");
     if (storedNotes) {
@@ -148,7 +150,14 @@ export default function Home() {
 
   const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noteText.trim()) return;
+    setError(null);
+    const trimmed = noteText.trim();
+    if (!trimmed) return;
+
+    if (trimmed.length < 10) {
+      setError("Note must be at least 10 characters long.");
+      return;
+    }
 
     if (user) {
       setIsOrganizing(true);
@@ -167,7 +176,7 @@ export default function Home() {
         // Automatically select the saved structured note to show organized content
         setSelectedNote(mappedNote);
       } catch (err: any) {
-        alert(err.message || "Failed to save note to backend");
+        setError(err.message || "Failed to save note to backend");
       } finally {
         setIsOrganizing(false);
       }
@@ -198,6 +207,7 @@ export default function Home() {
     if (selectedNote?.id === noteId) {
       setSelectedNote(null);
     }
+
     if (user) {
       try {
         await deleteNote(noteId);
@@ -347,7 +357,7 @@ export default function Home() {
   return (
     <div className="h-screen max-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col overflow-hidden">
       {/* Top Navigation Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-4">
+      <header className="sticky top-0 z-20 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md px-6 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <span>📝</span>
@@ -404,35 +414,46 @@ export default function Home() {
             </h2>
             {selectedNote && (
               <button
-                onClick={() => setSelectedNote(null)}
-                className="ml-2 text-xs text-zinc-650 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950"
+                onClick={() => {
+                  setSelectedNote(null);
+                  setError(null);
+                }}
+                className="ml-2 text-xs text-zinc-650 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
               >
                 <span>+</span> New Note
               </button>
             )}
           </div>
           {notes.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
-              <span className="text-2xl mb-1">📭</span>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">No notes yet</p>
-              <p className="text-[10px] text-zinc-400 mt-1">Start writing to see history here</p>
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
+              <span className="text-3xl mb-3 animate-pulse">✍️</span>
+              <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Your space is empty</h3>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 max-w-[180px] mx-auto leading-relaxed">
+                Type your thoughts freely. Our AI will group, clean, and structure them for you.
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  onClick={() => setSelectedNote(note)}
-                  className={`group relative p-3 rounded-xl border transition-colors text-left cursor-pointer ${
+                  onClick={() => {
+                    setSelectedNote(note);
+                    setError(null);
+                  }}
+                  className={`group relative p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${
                     selectedNote?.id === note.id
-                      ? "border-zinc-900 bg-zinc-50 dark:border-zinc-400 dark:bg-zinc-950/80"
-                      : "border-zinc-100 bg-zinc-50/50 hover:bg-zinc-50 dark:border-zinc-850 dark:bg-zinc-950/50 dark:hover:bg-zinc-950"
+                      ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-850 dark:ring-zinc-350 shadow-sm"
+                      : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-955/60 dark:hover:border-zinc-700"
                   }`}
                 >
+                  {selectedNote?.id === note.id && (
+                    <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
+                  )}
                   <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate pr-6">
                     {note.title || "Untitled Note"}
                   </p>
-                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1 pr-6">
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
                     {note.raw_text}
                   </p>
                   <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-850">
@@ -479,8 +500,11 @@ export default function Home() {
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4 mb-4">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setSelectedNote(null)}
-                  className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+                  onClick={() => {
+                    setSelectedNote(null);
+                    setError(null);
+                  }}
+                  className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
                   title="Back to Note Input"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -557,6 +581,12 @@ export default function Home() {
                   className="flex-1 w-full rounded-xl border border-zinc-200 bg-zinc-50/30 p-4 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/30 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400 dark:focus:bg-zinc-950 resize-none min-h-0"
                 />
               </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-xl text-xs text-red-600 dark:text-red-400 font-medium text-left">
+                  ⚠️ {error}
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                 <div className="text-left">
