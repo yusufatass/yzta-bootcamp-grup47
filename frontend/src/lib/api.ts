@@ -34,7 +34,7 @@ export async function registerUser(email: string, password: string) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.detail || "Registration failed");
+    throw new Error(data.error || data.detail || "Registration failed");
   }
   return data;
 }
@@ -58,7 +58,7 @@ export async function loginUser(email: string, password: string): Promise<LoginR
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.detail || "Login failed");
+    throw new Error(data.error || data.detail || "Login failed");
   }
   return data;
 }
@@ -81,7 +81,7 @@ export async function getCurrentUser(): Promise<UserMe> {
     if (response.status === 401) {
       clearAuthToken();
     }
-    throw new Error(data.detail || "Failed to retrieve user info");
+    throw new Error(data.error || data.detail || "Failed to retrieve user info");
   }
   return data;
 }
@@ -106,7 +106,7 @@ export async function migrateNotes(notes: MigrateNoteItem[]): Promise<any> {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.detail || "Migration failed");
+    throw new Error(data.error || data.detail || "Migration failed");
   }
   return data;
 }
@@ -126,7 +126,7 @@ export async function createNote(raw_text: string): Promise<any> {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.detail || "Failed to create note");
+    throw new Error(data.error || data.detail || "Failed to create note");
   }
   return data;
 }
@@ -144,7 +144,7 @@ export async function listNotes(): Promise<any[]> {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.detail || "Failed to retrieve notes");
+    throw new Error(data.error || data.detail || "Failed to retrieve notes");
   }
   return data;
 }
@@ -162,7 +162,7 @@ export async function deleteNote(noteId: string): Promise<any> {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.detail || "Failed to delete note");
+    throw new Error(data.error || data.detail || "Failed to delete note");
   }
   return data;
 }

@@ -109,12 +109,23 @@ def analyze_note_content(raw_text: str) -> dict:
             raise ValueError(f"Invalid category: {category}")
             
         # Verify structure
-        if "title" not in structured_content or "markdown" not in structured_content:
-            raise ValueError("Missing title or markdown in structured_content")
+        if not isinstance(structured_content, dict):
+            raise ValueError("structured_content is not a dictionary")
+            
+        title = structured_content.get("title")
+        markdown = structured_content.get("markdown")
+        
+        if not isinstance(title, str) or not title.strip():
+            raise ValueError("title is missing, empty, or not a string")
+        if not isinstance(markdown, str) or not markdown.strip():
+            raise ValueError("markdown is missing, empty, or not a string")
             
         return {
             "category": category,
-            "structured_content": structured_content
+            "structured_content": {
+                "title": title.strip(),
+                "markdown": markdown.strip()
+            }
         }
         
     except (json.JSONDecodeError, ValueError) as e:
@@ -122,7 +133,7 @@ def analyze_note_content(raw_text: str) -> dict:
         
         # Attempt 2 (Retry once)
         try:
-            extra_instruction = "Ensure the output is valid JSON. The category MUST be exactly one of the six allowed values."
+            extra_instruction = "Ensure the output is valid JSON. The category MUST be exactly one of the six allowed values. The structured_content object MUST contain non-empty 'title' and 'markdown' strings."
             data = call_api(raw_text, extra_instruction=extra_instruction)
             category = data.get("category")
             structured_content = data.get("structured_content", {})
@@ -131,35 +142,36 @@ def analyze_note_content(raw_text: str) -> dict:
             if category not in VALID_CATEGORIES:
                 category = "General / Other"
                 
-            # Verify structure (fall back to basic wrapping if still missing keys)
+            # Verify structure
             if not isinstance(structured_content, dict):
                 structured_content = {}
-            if "title" not in structured_content:
-                structured_content["title"] = "Organized Note"
-            if "markdown" not in structured_content:
-                structured_content["markdown"] = raw_text
-
+            
+            title = structured_content.get("title")
+            markdown = structured_content.get("markdown")
+            
+            if not isinstance(title, str) or not title.strip() or not isinstance(markdown, str) or not markdown.strip():
+                # If retry also fails (validation failed), return a safe fallback
+                title = raw_text[:50].strip() or "Untitled Note"
+                markdown = f"<p>{raw_text}</p>"
+            else:
+                title = title.strip()
+                markdown = markdown.strip()
+                
             return {
                 "category": category,
-                "structured_content": structured_content
-            }
-            
-        except json.JSONDecodeError as json_err:
-            logger.error(f"AI Service Attempt 2 failed with malformed JSON: {str(json_err)}")
-            # Return graceful error
-            return {
-                "category": "General / Other",
                 "structured_content": {
-                    "title": "Analysis Failed",
-                    "markdown": f"### Error\nFailed to parse organized content.\n\n### Raw Text\n{raw_text}"
+                    "title": title,
+                    "markdown": markdown
                 }
             }
-        except Exception as other_err:
-            logger.error(f"AI Service Attempt 2 failed with unexpected error: {str(other_err)}")
+            
+        except Exception as retry_err:
+            logger.error(f"AI Service Attempt 2 failed: {str(retry_err)}")
+            # If retry also fails (exception raised), return the safe fallback
             return {
                 "category": "General / Other",
                 "structured_content": {
-                    "title": "Analysis Failed",
-                    "markdown": f"### Error\nAn unexpected error occurred during AI analysis.\n\n### Raw Text\n{raw_text}"
+                    "title": raw_text[:50].strip() or "Untitled Note",
+                    "markdown": f"<p>{raw_text}</p>"
                 }
             }

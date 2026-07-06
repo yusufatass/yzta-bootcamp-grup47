@@ -213,7 +213,7 @@ export default function Home() {
         await deleteNote(noteId);
         setNotes(notes.filter(n => n.id !== noteId));
       } catch (err: any) {
-        alert(err.message || "Failed to delete note");
+        setError(err.message || "Failed to delete note");
       }
     } else {
       const updatedNotes = notes.filter(n => n.id !== noteId);

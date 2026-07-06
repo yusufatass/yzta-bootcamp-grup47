@@ -1,21 +1,21 @@
 # Active Context
 
 ## Current Work Focus
-Phase 3 — Hardening. Phase 2 (Breadth & Polish) is fully complete. We have refined prompt structures, implemented inline error/validation states, enforced text limits (>= 10 chars, <= 4000 chars), and polished the sidebar/header UI. Next, we will focus on QA testing, error recovery, and seeding demo accounts.
+Phase 3 — Hardening. We have successfully implemented seeded demo accounts, integrated dual-pass AI output validation with custom paragraph fallback mechanisms, and unified backend error responses into a consistent JSON format. Next, we will perform remaining QA bug fixes and check response times.
 
 ## Recent Changes
-* Refined and verified system prompt templates for all six note categories.
-* Implemented length validation (notes under 10 chars are rejected, notes over 4000 chars are truncated before sending to AI).
-* Redesigned sidebar notes list with active note indicator bars, cleaner layouts, and micro-interactions.
-* Added a beautiful sticky glassmorphic navigation header and inline form validation error alerts.
-* Updated custom markdown inline parser styles to support beautiful font hierarchy and list spacing.
+* Created the idempotent `backend/seed_demo.py` seeding script to initialize confirmed demo accounts (`demo@notes.com`, `test@notes.com`) pre-populated with notes for all six categories.
+* Implemented double-pass AI output validation in `backend/app/services/ai.py` (checks for non-empty title/markdown, retries once, then falls back to title = raw[:50] and markdown wrapped in a paragraph).
+* Unified backend error response formats to consistently return `{"error": "message"}` for HTTP exceptions, validation errors, and unhandled system failures.
+* Updated frontend API utilities to read `data.error` as the primary source of error text.
+* Replaced frontend `alert()` calls with state-based `setError` rendering in `page.tsx`.
 
 ## Next Steps
-1. Conduct QA testing sweeps for edge-case errors.
-2. Establish script or database seeds for verified demo accounts.
-3. Verify note migration under unstable network scenarios.
+1. Conduct QA testing sweeps for edge-case note creations.
+2. Verify response times for note generation and DB operations under load.
+3. Begin Phase 4 — Demo Readiness.
 
 ## Active Decisions and Considerations
-* Keep the frontend simple and fast, relying on inline states rather than aggressive pop-ups.
-* Anonymous notes stay in sessionStorage and migrate seamlessly to backend databases upon login.
-* Keep demo environments predictable — seed verified accounts rather than relying on live signup during presentations.
+* Maintain backend idempotency in database seeding so developers can run migrations/seeding safely on demand.
+* Prevent silent failures at all costs — always display a clean local validation error message if the API fails.
+* Ensure fallback formats are standard compliant so the markdown parser displays them properly.

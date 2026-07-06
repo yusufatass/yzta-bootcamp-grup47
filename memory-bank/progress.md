@@ -1,7 +1,7 @@
 # Progress
 
 ## Current Status
-Phase 2 (Breadth & Polish) is complete. The prompt categorization has been refined and verified across all note templates, edge-case validation has been added, and the UI has been polished with a clean, calm design style.
+Phase 3 (Hardening) is in progress. We have successfully created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, and unified backend error responses.
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
@@ -15,6 +15,9 @@ Phase 2 (Breadth & Polish) is complete. The prompt categorization has been refin
 * OpenAI GPT-4o Mini integration with resilient formatting prompts for all six note types (Shopping List, Meeting Notes, Lecture Notes, Daily Plan, Travel List, General / Other).
 * Inline validation and edge-case handling (rejection of notes under 10 chars, truncation of notes over 4000 chars).
 * Polished minimalist visual design with smooth indicator animations, responsive sidebar layout, and sticky glassmorphic navigation header.
+* Automated seeding script (`backend/seed_demo.py`) creating verified, pre-confirmed demo accounts (`demo@notes.com`, `test@notes.com`) with realistic notes.
+* Comprehensive global exception handlers returning consistent `{"error": "message"}` structures.
+* Strict AI output validation ensuring `title` and `markdown` exist, with double-pass retry logic and paragraph fallbacks.
 
 ## What's Left to Build
 
@@ -44,7 +47,7 @@ Phase 2 (Breadth & Polish) is complete. The prompt categorization has been refin
 - [ ] QA bug fixes
 - [x] AI output validation/retry logic
 - [ ] Response time check
-- [ ] Seeded demo accounts
+- [x] Seeded demo accounts
 
 ### Phase 4 — Demo Readiness
 - [ ] Final pitch materials
