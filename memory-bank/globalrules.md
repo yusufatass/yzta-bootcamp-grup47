@@ -16,7 +16,7 @@ Before writing any code:
 
 ## Critical Product Rules (non-negotiable)
 
-* Anonymous (not logged-in) users get ZERO AI access — plain text notes only, stored in browser `sessionStorage`, cleared on tab close
+* Anonymous (not logged-in) users get ZERO AI access, but they CAN manually format their notes using the toolbar. Their notes are stored in browser `sessionStorage` and cleared on tab close
 * AI categorization/structuring is only available to authenticated, email-verified users
 * No real payment system of any kind — no Stripe, no checkout flow, no card form. A verified signup grants full access automatically
 * Auth = email + password with email verification (Supabase Auth)

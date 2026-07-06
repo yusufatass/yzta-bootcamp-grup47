@@ -1,7 +1,7 @@
 # Progress
 
 ## Current Status
-Phase 3 (Hardening) is in progress. We have successfully created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, and unified backend error responses.
+Phase 3 (Hardening) is in progress. We have successfully created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, unified backend error responses, implemented fully editable notes (Improvement #1), added a password reset flow (Improvement #2), added password field UX toggles/validation enhancements, implemented First Name/Last Name registration and display (Improvement #3), and implemented an onboarding modal walkthrough for anonymous users (Improvement #4).
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
@@ -18,6 +18,15 @@ Phase 3 (Hardening) is in progress. We have successfully created idempotent seed
 * Automated seeding script (`backend/seed_demo.py`) creating verified, pre-confirmed demo accounts (`demo@notes.com`, `test@notes.com`) with realistic notes.
 * Comprehensive global exception handlers returning consistent `{"error": "message"}` structures.
 * Strict AI output validation ensuring `title` and `markdown` exist, with double-pass retry logic and paragraph fallbacks.
+* Editable Notes: Authenticated users can edit their own notes and trigger full AI re-organization via PUT. Anonymous users can edit notes locally in plaintext.
+* Password Reset: Native reset-password email triggers and JWT token recovery logic for updating passwords.
+* Password UX Enhancements: Show/hide eye icon toggles across login, registration, and reset-password forms, with strict confirm-password match validation on registration.
+* Name Fields Registration: First Name + Last Name collected during signup, stored in Supabase user metadata, returned via GET `/api/auth/me`, and displayed in the main workspace header (falling back to email).
+* Anonymous Onboarding Modal: A 3-step feature tour modal triggering on the 1st note save and every 4th note save thereafter for anonymous users. Dismissing the modal closes the current instance but does not suppress future recurring triggers. Interactive progress dots allow users to jump directly to any step.
+* Anonymous Note Creation Flow: Saving a note in anonymous mode correctly clears inputs and returns the user to the clean, empty note creation editor form while adding the note to the history sidebar.
+* 30-Day Free Trial Flow: Calculates remaining trial duration based on Supabase user registration date. If the trial is active, notes are structured using OpenAI GPT-4o Mini. If 30+ days have passed, AI formatting is skipped, notes are saved as Plain Text, and clear warning banners and UI messages notify the user.
+* Manual Formatting Toolbar & Split Save Actions: Added inline markdown formatting controls (Bold, Italic, Underline, Heading, Bullet List, and Checklist) above the note inputs for both creation and editing modes. The list buttons support inserting formatting at the start of the current line or batch-prefixing multiple selected lines. Implemented split save actions ("Save with AI" and "Save as-is") for authenticated users to choose between automated AI categorization and preserving their manual formatting without AI. Enabled plain text markdown rendering for anonymous and trial-expired users with custom `<u>` tag parsing support.
+* Interactive Checkboxes: Detects markdown checkbox syntax (`- [ ]`, `- [x]`, `* [ ]`, `* [x]`) and renders them as real, styled clickable checkboxes. Clicking a checkbox toggles its state (visually applying checkmarks and line-through text styling) and persists the updated markdown in the background (to the database for authenticated users and `sessionStorage` for anonymous users) without re-triggering AI processing.
 
 ## What's Left to Build
 
@@ -44,7 +53,7 @@ Phase 3 (Hardening) is in progress. We have successfully created idempotent seed
 
 
 ### Phase 3 — Hardening
-- [ ] QA bug fixes
+- [x] QA bug fixes
 - [x] AI output validation/retry logic
 - [ ] Response time check
 - [x] Seeded demo accounts

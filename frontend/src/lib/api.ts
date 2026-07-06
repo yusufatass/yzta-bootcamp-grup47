@@ -21,15 +21,19 @@ export interface UserMe {
   id: string;
   email: string;
   email_confirmed: boolean;
+  first_name?: string;
+  last_name?: string;
+  trial_ended: boolean;
+  trial_days_left: number;
 }
 
-export async function registerUser(email: string, password: string) {
+export async function registerUser(email: string, password: string, first_name: string, last_name: string) {
   const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, first_name, last_name }),
   });
 
   const data = await response.json();
@@ -111,7 +115,7 @@ export async function migrateNotes(notes: MigrateNoteItem[]): Promise<any> {
   return data;
 }
 
-export async function createNote(raw_text: string): Promise<any> {
+export async function createNote(raw_text: string, skip_ai: boolean = false): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new Error("No auth token found");
 
@@ -121,7 +125,7 @@ export async function createNote(raw_text: string): Promise<any> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ raw_text }),
+    body: JSON.stringify({ raw_text, skip_ai }),
   });
 
   const data = await response.json();
@@ -163,6 +167,65 @@ export async function deleteNote(noteId: string): Promise<any> {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || data.detail || "Failed to delete note");
+  }
+  return data;
+}
+
+export async function updateNote(
+  noteId: string, 
+  raw_text: string, 
+  skip_ai: boolean = false,
+  category?: string,
+  structured_content?: any
+): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new Error("No auth token found");
+
+  const response = await fetch(`${BACKEND_URL}/api/notes/${noteId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ raw_text, skip_ai, category, structured_content }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.detail || "Failed to update note");
+  }
+  return data;
+}
+
+export async function forgotPassword(email: string): Promise<any> {
+  const response = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.detail || "Failed to request password reset");
+  }
+  return data;
+}
+
+export async function resetPassword(token: string, password: string): Promise<any> {
+  const response = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ password }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.detail || "Failed to reset password");
   }
   return data;
 }
