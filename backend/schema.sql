@@ -10,8 +10,12 @@ CREATE TABLE IF NOT EXISTS public.notes (
     raw_text TEXT NOT NULL,
     category VARCHAR(50) NOT NULL, -- Fixed categories: 'Shopping List', 'Meeting Notes', 'Lecture Notes', 'Daily Plan', 'Travel List', 'General / Other'
     structured_content JSONB NOT NULL, -- Houses structured content like markdown sections, headings, bullet points
+    title_is_custom BOOLEAN NOT NULL DEFAULT FALSE, -- True when the user has manually renamed the title; AI updates will not overwrite it
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Run this migration on existing databases:
+-- ALTER TABLE public.notes ADD COLUMN IF NOT EXISTS title_is_custom BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Enable Row Level Security (RLS) so users can only read/write their own notes
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;

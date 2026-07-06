@@ -13,8 +13,10 @@ import {
   createNote,
   listNotes,
   deleteNote,
-  updateNote
+  updateNote,
+  renameNoteTitle
 } from "@/lib/api";
+import { ThemeToggle } from "@/lib/theme";
 
 interface Note {
   id: string;
@@ -22,6 +24,7 @@ interface Note {
   created_at: string;
   category: string;
   title?: string;
+  title_is_custom?: boolean;
   structured_content?: {
     title: string;
     markdown: string;
@@ -41,7 +44,25 @@ export default function Home() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  // Title rename state
+  const [isTitleEditing, setIsTitleEditing] = useState(false);
+  const [titleEditValue, setTitleEditValue] = useState("");
+  const [isTitleSaving, setIsTitleSaving] = useState(false);
   const router = useRouter();
+
+  const filteredNotes = notes.filter((note) => {
+    const query = searchQuery.trim().toLowerCase();
+    const titleMatch = note.title ? note.title.toLowerCase().includes(query) : false;
+    const structuredTitleMatch = note.structured_content?.title ? note.structured_content.title.toLowerCase().includes(query) : false;
+    const rawTextMatch = note.raw_text ? note.raw_text.toLowerCase().includes(query) : false;
+    const matchesSearch = !query || titleMatch || structuredTitleMatch || rawTextMatch;
+
+    const matchesCategory = categoryFilter === "All" || note.category === categoryFilter;
+
+    return matchesSearch && matchesCategory;
+  });
 
   // Set mounted to true on client to prevent hydration mismatch
   useEffect(() => {
@@ -433,6 +454,12 @@ export default function Home() {
       return;
     }
 
+    // If the raw text hasn't changed, skip the update entirely — no AI call, no DB write
+    if (trimmed === selectedNote!.raw_text.trim()) {
+      setIsEditing(false);
+      return;
+    }
+
     if (user) {
       setIsUpdating(true);
       try {
@@ -443,6 +470,7 @@ export default function Home() {
           created_at: updated.created_at,
           category: updated.category,
           title: updated.structured_content?.title || updated.raw_text.split("\n")[0].substring(0, 30),
+          title_is_custom: updated.title_is_custom ?? false,
           structured_content: updated.structured_content
         };
         // Update the note in notes list
@@ -473,6 +501,62 @@ export default function Home() {
       setSelectedNote(mappedNote);
       setIsEditing(false);
     }
+  };
+
+  const handleRenameTitle = async () => {
+    const newTitle = titleEditValue.trim();
+    if (!newTitle || !selectedNote) return;
+    if (newTitle === (selectedNote.structured_content?.title || selectedNote.title)) {
+      setIsTitleEditing(false);
+      return;
+    }
+
+    setIsTitleSaving(true);
+    const updatedNote: Note = {
+      ...selectedNote,
+      title: newTitle,
+      title_is_custom: true,
+      structured_content: selectedNote.structured_content
+        ? { ...selectedNote.structured_content, title: newTitle }
+        : { title: newTitle, markdown: selectedNote.raw_text }
+    };
+
+    // Optimistic update
+    setSelectedNote(updatedNote);
+    setNotes((prev) => prev.map(n => n.id === updatedNote.id ? updatedNote : n));
+    setIsTitleEditing(false);
+
+    if (user) {
+      try {
+        const result = await renameNoteTitle(selectedNote.id, newTitle);
+        // Sync with server response
+        const synced: Note = {
+          ...updatedNote,
+          title_is_custom: result.title_is_custom ?? true,
+          structured_content: result.structured_content ?? updatedNote.structured_content
+        };
+        setSelectedNote(synced);
+        setNotes((prev) => prev.map(n => n.id === synced.id ? synced : n));
+      } catch (err: any) {
+        setError(err.message || "Failed to rename title");
+        // Roll back optimistic update
+        setSelectedNote(selectedNote);
+        setNotes((prev) => prev.map(n => n.id === selectedNote.id ? selectedNote : n));
+      }
+    } else {
+      // Anonymous: persist to sessionStorage
+      const stored = sessionStorage.getItem("anonymous_notes");
+      if (stored) {
+        try {
+          const parsed: Note[] = JSON.parse(stored);
+          const updatedList = parsed.map(n => n.id === updatedNote.id ? updatedNote : n);
+          sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedList));
+        } catch (e) {
+          console.error("Failed to persist title rename to sessionStorage:", e);
+        }
+      }
+    }
+    setIsTitleSaving(false);
   };
 
   const handleUpdateNote = async (e: React.FormEvent) => {
@@ -671,7 +755,8 @@ export default function Home() {
             <span>Unstructured Notes</span>
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             {loading ? (
               <div className="w-24 h-8 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
             ) : user ? (
@@ -722,14 +807,15 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main Workspace Layout */}
       <main className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-6 gap-6 overflow-hidden min-h-0">
         {/* Left Sidebar: Note History */}
-        <section className="w-full md:w-80 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 overflow-y-auto max-h-[300px] md:max-h-none">
-          <div className="flex items-center justify-between mb-3">
+        <section className="w-full md:w-80 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 max-h-[300px] md:max-h-none min-h-0">
+          <div className="flex items-center justify-between mb-3 shrink-0">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center justify-between w-full">
               <span>Note History</span>
-              <span className="text-xs font-normal text-zinc-500">{notes.length} notes</span>
+              <span className="text-xs font-normal text-zinc-500">
+                {user ? `${filteredNotes.length} notes` : `${notes.length} notes`}
+              </span>
             </h2>
             {selectedNote && (
               <button
@@ -737,6 +823,7 @@ export default function Home() {
                   setSelectedNote(null);
                   setError(null);
                   setIsEditing(false);
+                  setIsTitleEditing(false);
                   setEditText("");
                 }}
                 className="ml-2 text-xs text-zinc-650 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
@@ -745,36 +832,99 @@ export default function Home() {
               </button>
             )}
           </div>
-          {notes.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
-              <span className="text-3xl mb-3 animate-pulse">✍️</span>
-              <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Your space is empty</h3>
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 max-w-[180px] mx-auto leading-relaxed">
-                Type your thoughts freely. Our AI will group, clean, and structure them for you.
-              </p>
+
+          {/* Search & Filter Controls (only if authenticated and notes exist) */}
+          {user && notes.length > 0 && (
+            <div className="space-y-2 mb-3 shrink-0">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl pl-8 pr-8 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                />
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-650 dark:text-zinc-500 dark:hover:text-zinc-300"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl px-3 py-1.5 pr-8 text-xs text-zinc-750 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-500 cursor-pointer appearance-none"
+                >
+                  <option value="All">All Categories</option>
+                  <option value="Shopping List">Shopping List</option>
+                  <option value="Meeting Notes">Meeting Notes</option>
+                  <option value="Lecture Notes">Lecture Notes</option>
+                  <option value="Daily Plan">Daily Plan</option>
+                  <option value="Travel List">Travel List</option>
+                  <option value="General / Other">General / Other</option>
+                  <option value="Plain Text">Plain Text</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 dark:text-zinc-500">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {notes.map((note) => (
+          )}
+
+          {/* Scrolling Note List container */}
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1 -mr-1 scrollbar-thin">
+            {notes.length === 0 ? (
+              <div className="flex-grow flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
+                <span className="text-3xl mb-3 animate-pulse">✍️</span>
+                <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Your space is empty</h3>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 max-w-[180px] mx-auto leading-relaxed">
+                  Type your thoughts freely. Our AI will group, clean, and structure them for you.
+                </p>
+              </div>
+            ) : user && filteredNotes.length === 0 ? (
+              <div className="flex-grow flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
+                <span className="text-2xl mb-2">🔍</span>
+                <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">No notes found</h3>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 max-w-[180px] mx-auto leading-relaxed">
+                  Try adjusting your search query or category filter.
+                </p>
+              </div>
+            ) : (
+              (user ? filteredNotes : notes).map((note) => (
                 <div
                   key={note.id}
                   onClick={() => {
                     setSelectedNote(note);
                     setError(null);
                     setIsEditing(false);
+                    setIsTitleEditing(false);
                     setEditText(note.raw_text);
                   }}
                   className={`group relative p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${
                     selectedNote?.id === note.id
                       ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-850 dark:ring-zinc-350 shadow-sm"
-                      : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-955/60 dark:hover:border-zinc-700"
+                      : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-950/60 dark:hover:border-zinc-700"
                   }`}
                 >
                   {selectedNote?.id === note.id && (
                     <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
                   )}
                   <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate pr-6">
-                    {note.title || "Untitled Note"}
+                    {note.structured_content?.title || note.title || "Untitled Note"}
                   </p>
                   <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
                     {note.raw_text}
@@ -812,9 +962,9 @@ export default function Home() {
                     </svg>
                   </button>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </section>
 
         {/* Center Workspace */}
@@ -827,6 +977,7 @@ export default function Home() {
                     setSelectedNote(null);
                     setError(null);
                     setIsEditing(false);
+                    setIsTitleEditing(false);
                     setEditText("");
                   }}
                   className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
@@ -837,9 +988,60 @@ export default function Home() {
                   </svg>
                 </button>
                 <div>
-                  <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50">
-                    {selectedNote.structured_content?.title || selectedNote.title || "Untitled Note"}
-                  </h2>
+                  {/* Inline editable title */}
+                  {isTitleEditing ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        autoFocus
+                        type="text"
+                        value={titleEditValue}
+                        onChange={(e) => setTitleEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { e.preventDefault(); handleRenameTitle(); }
+                          if (e.key === "Escape") { setIsTitleEditing(false); }
+                        }}
+                        onBlur={handleRenameTitle}
+                        maxLength={100}
+                        className="text-base font-bold bg-transparent border-b border-zinc-400 dark:border-zinc-500 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:border-zinc-700 dark:focus:border-zinc-300 min-w-0 w-48 sm:w-64 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); handleRenameTitle(); }}
+                        className="shrink-0 p-1 rounded text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                        title="Save title"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 group/title">
+                      <h2 className={`text-base font-bold text-zinc-900 dark:text-zinc-50 ${isTitleSaving ? "opacity-60" : ""}`}>
+                        {selectedNote.structured_content?.title || selectedNote.title || "Untitled Note"}
+                      </h2>
+                      {selectedNote.title_is_custom && (
+                        <span title="Custom title — AI won't overwrite this" className="text-zinc-400 dark:text-zinc-500 shrink-0">
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                          </svg>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTitleEditValue(selectedNote.structured_content?.title || selectedNote.title || "");
+                          setIsTitleEditing(true);
+                        }}
+                        className="opacity-0 group-hover/title:opacity-100 shrink-0 p-0.5 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all"
+                        title="Rename title"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getCategoryColor(selectedNote.category)}`}>
                       {selectedNote.category}
@@ -1252,7 +1454,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {step === 1 && (
             <div className="space-y-4">
               {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 border border-zinc-800/20">
+              <div className="w-full h-40 bg-zinc-100 dark:bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800">
                 <span className="text-2xl mb-1">🪄</span>
                 <span className="text-xs uppercase tracking-wider font-semibold">illustration</span>
               </div>
@@ -1268,7 +1470,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {step === 2 && (
             <div className="space-y-4">
               {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 border border-zinc-800/20">
+              <div className="w-full h-40 bg-zinc-100 dark:bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800">
                 <span className="text-2xl mb-1">🎁</span>
                 <span className="text-xs uppercase tracking-wider font-semibold">illustration</span>
               </div>
@@ -1284,7 +1486,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {step === 3 && (
             <div className="space-y-4">
               {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 border border-zinc-800/20">
+              <div className="w-full h-40 bg-zinc-100 dark:bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800">
                 <span className="text-2xl mb-1">🚀</span>
                 <span className="text-xs uppercase tracking-wider font-semibold">illustration</span>
               </div>

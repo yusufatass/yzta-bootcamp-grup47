@@ -1,42 +1,52 @@
 # Phase 2+ Improvements
- 
+
 A running list of feature improvements to work through one at a time. Complete each item, test it, push it, then check it off before moving to the next. Do not batch these into a single implementation pass.
- 
+
 ## Priority Order
- 
-### 1. Editable notes (highest value)
+
+### 1. Editable notes (highest value) — DONE
 - [x] Allow an authenticated user to edit a note after it has been saved
 - **Decision made:** Editing does NOT re-run AI on every keystroke. The user edits the raw text freely, then triggers a single "Update" action. On update, the AI re-processes the ENTIRE note (not a merge) and overwrites category + structured_content.
-- **Technical note:** Reuse the existing "raw text → AI → organize → save" flow, but as an UPDATE on the existing note (PUT/PATCH on /api/notes/{id}) instead of a CREATE. No new merge logic needed.
-- Anonymous notes remain plain-text and freely editable locally (no AI), consistent with current behavior.
-### 2. Password reset ("forgot password")
-- [x] Add a "Forgot password?" flow using Supabase Auth's built-in password reset
-- **Technical note:** Supabase Auth provides this natively — request reset email, handle the reset link, set new password. Add /forgot-password and /reset-password pages.
-### 3. Name fields on registration
-- [x] Add first name + last name fields to the register form
-- **Technical note:** Store as Supabase user metadata (user_metadata) during signup. Expose via /api/auth/me. Display the user's name in the top-right header instead of (or alongside) the email.
-### 4. Onboarding + free trial messaging
-- [x] Show an onboarding screen at the moment an anonymous user saves their first note
-- **Content:** Introduce the AI feature and highlight the free trial offer to encourage signup.
-- **Decision:** The trial is a real (simple) time limit, not just messaging. On registration, record the signup date. AI features work for 30 days from signup. After 30 days, AI access is disabled and the user sees a "trial ended" message. No real billing — this is purely to encourage signup and simulate a freemium model. Given this is a bootcamp project reviewed by a small evaluation team, a simple date check is enough.
-- **Technical note:** Check (now - signup_date) < 30 days before allowing AI calls in the notes endpoint. Signup date is available from Supabase Auth user data.
+- **Technical note:** Reuses the existing "raw text → AI → organize → save" flow, but as an UPDATE (PUT /api/notes/{id}) instead of a CREATE. Anonymous notes remain locally editable with no AI.
+
+### 2. Password reset ("forgot password") — DONE
+- [x] "Forgot password?" flow using Supabase Auth's built-in password reset
+- Added /forgot-password and /reset-password pages. Also added show/hide password toggle across all password fields and a confirm-password field on registration.
+
+### 3. Name fields on registration — DONE
+- [x] First name + last name fields on the register form
+- Stored as Supabase user metadata, exposed via /api/auth/me, shown in the top-right header. Falls back to email for older accounts without name metadata.
+
+### 4. Onboarding + free trial — DONE
+- [x] Onboarding modal for anonymous users (1st note, then every 4th note; recurring reminder, dismiss only closes the current instance)
+- [x] Real 30-day trial limit: AI works for 30 days from signup, then disables with a "trial ended" message. Notes still save as plain text after expiry. No real billing — simulated for the demo.
+- **Pending:** Mascot illustrations are placeholders (solid black boxes) until the mascot is finalized.
+
 ### 5. Database storage structure review — RESOLVED, no change needed
-- **Concern raised:** Storing notes as plain text feels insecure/unprofessional; an admin could read users' notes.
-- **Decision:** Keep notes as-is (plain text in the DB). True "admin cannot read" would require client-side encryption, which is fundamentally incompatible with the core AI feature — the AI must be able to read note content to organize it. If notes were encrypted, they could not be sent to the AI at all.
-- **What we rely on instead (standard for AI note apps like Notion AI, Google Keep):** RLS restricts per-user access (done), secrets kept in .env (done), and a privacy note stating notes are processed by AI. This is an acceptable, defensible standard for this project.
-- **Action:** None. Do not build client-side encryption — it would break the main feature and blow up scope.
-### 6. Email verification template polish (cosmetic)
-- [ ] Customize the Supabase email verification template so it looks branded, not plain
-- **Technical note:** Done via Supabase dashboard → Authentication → Emails → Templates. Requires custom SMTP setup to edit templates. Low risk, cosmetic.
-### 7. Anonymous manual formatting toolbar (lowest priority — reconsider)
-- [ ] A formatting bar (bold, italic, underline, headings) for anonymous users
-- **Caution:** The product's core promise is "you don't format, the AI does." Giving anonymous users a manual formatting toolbar slightly contradicts that message. Discuss whether this is worth building before starting.
-### 8. Interactive checkboxes for list-type notes
-- [ ] Render `- [ ]` markdown as real clickable checkboxes (not plain text)
-- Most valuable for Shopping List and Daily Plan categories — let users check off items
-- Technical note: checkbox state needs to persist (save checked state back to the note)
+- **Concern:** Storing notes as plain text feels insecure; an admin could read users' notes.
+- **Decision:** Keep as-is. True "admin cannot read" requires client-side encryption, which is incompatible with the core AI feature (the AI must read the note to organize it). Rely on RLS (per-user access), secrets in .env, and a privacy note. Standard for AI note apps. No action.
+
+### 6. Email verification template polish (cosmetic) — ON HOLD
+- [ ] Customize the Supabase email verification template so it looks branded
+- **On hold until the mascot/branding is finalized** — easier to design once visual identity exists.
+- **Technical note:** Supabase dashboard → Authentication → Emails → Templates. Requires custom SMTP to edit templates. Low risk.
+
+### 7. Manual formatting toolbar — DONE (scope changed)
+- [x] Originally scoped as "anonymous only, reconsider." Decision expanded it: a formatting toolbar (bold, italic, underline, headings, bullet list, checklist) is available to ALL users, making the app usable as a plain note-taking tool too.
+- Authenticated users get two save actions: "Save with AI" (AI reorganizes) and "Save as-is" (keeps manual formatting, category = Plain Text, no AI). Anonymous users format manually with no AI.
+- **Note:** This broadened the product positioning (now competes with general note apps like Notion/Google Keep, not just AI tools). Reflected in productContext.md, projectbrief.md, and globalrules.md.
+
+### 8. Interactive checkboxes for list-type notes — DONE
+- [x] `- [ ]` / `- [x]` markdown renders as real clickable checkboxes; toggling persists (DB for authenticated, sessionStorage for anonymous) without re-running AI
+- Works for both AI-organized notes and manually formatted / Plain Text notes. Toolbar has bullet-list and checklist buttons.
+
+## Backlog (not yet started)
+- **Search / filter:** Search notes by title/content and filter by category. Becomes valuable as note count grows; strong demo feature.
+- **Delete confirmation:** Confirm dialog before deleting a note (avoid accidental loss).
+- **Mascot illustrations:** Replace placeholder boxes in the onboarding modal once the mascot is designed.
+
 ## Working Rules
 - One item at a time: implement → test manually → check off here → next.
 - The AI agent must NOT run git push or commit. The project lead handles all git operations manually.
 - Update progress.md and activeContext.md as normal when a feature is completed.
-- Do not start deployment until this list is at a good stopping point — but do not delay deployment to the final days either.
+- Do not delay deployment to the final days — get a live URL up while there's still time to fix issues.

@@ -230,3 +230,22 @@ export async function resetPassword(token: string, password: string): Promise<an
   return data;
 }
 
+export async function renameNoteTitle(noteId: string, title: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new Error("No auth token found");
+
+  const response = await fetch(`${BACKEND_URL}/api/notes/${noteId}/title`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.detail || "Failed to rename note title");
+  }
+  return data;
+}

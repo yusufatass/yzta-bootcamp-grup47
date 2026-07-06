@@ -1,7 +1,7 @@
 # Progress
 
 ## Current Status
-Phase 3 (Hardening) is in progress. We have successfully created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, unified backend error responses, implemented fully editable notes (Improvement #1), added a password reset flow (Improvement #2), added password field UX toggles/validation enhancements, implemented First Name/Last Name registration and display (Improvement #3), and implemented an onboarding modal walkthrough for anonymous users (Improvement #4).
+Phase 3 (Hardening) is in progress. We have successfully implemented a global light/dark theme toggle (Improvement #6), created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, unified backend error responses, implemented fully editable notes (Improvement #1), added a password reset flow (Improvement #2), added password field UX toggles/validation enhancements, implemented First Name/Last Name registration and display (Improvement #3), and implemented an onboarding modal walkthrough for anonymous users (Improvement #4).
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
@@ -27,6 +27,8 @@ Phase 3 (Hardening) is in progress. We have successfully created idempotent seed
 * 30-Day Free Trial Flow: Calculates remaining trial duration based on Supabase user registration date. If the trial is active, notes are structured using OpenAI GPT-4o Mini. If 30+ days have passed, AI formatting is skipped, notes are saved as Plain Text, and clear warning banners and UI messages notify the user.
 * Manual Formatting Toolbar & Split Save Actions: Added inline markdown formatting controls (Bold, Italic, Underline, Heading, Bullet List, and Checklist) above the note inputs for both creation and editing modes. The list buttons support inserting formatting at the start of the current line or batch-prefixing multiple selected lines. Implemented split save actions ("Save with AI" and "Save as-is") for authenticated users to choose between automated AI categorization and preserving their manual formatting without AI. Enabled plain text markdown rendering for anonymous and trial-expired users with custom `<u>` tag parsing support.
 * Interactive Checkboxes: Detects markdown checkbox syntax (`- [ ]`, `- [x]`, `* [ ]`, `* [x]`) and renders them as real, styled clickable checkboxes. Clicking a checkbox toggles its state (visually applying checkmarks and line-through text styling) and persists the updated markdown in the background (to the database for authenticated users and `sessionStorage` for anonymous users) without re-triggering AI processing.
+* Global Theme Toggle (Light/Dark): A fully functioning theme-toggle (sun/moon icon button) in the header (visible to all users), persisting choices in `localStorage` and defaulting to dark mode. Leverages custom-variant class-based styling for Tailwind v4 and prevents flash-on-load via an inlined blocking head script. Applies cleanly to all routes, dialogs, badges, checklists, custom title forms, and the onboarding walkthrough.
+
 
 ## What's Left to Build
 
@@ -48,6 +50,8 @@ Phase 3 (Hardening) is in progress. We have successfully created idempotent seed
 ### Phase 2 — Breadth & Polish
 - [x] AI prompt refined and tested across all category templates
 - [x] Note history sidebar (both modes)
+- [x] Client-side real-time Search and Category Filtering in note history sidebar (authenticated users)
+- [x] Manual inline title rename (click pencil icon → edit → Enter/blur to save; AI updates preserve custom title via title_is_custom flag)
 - [x] UI polish pass (calm/minimal direction)
 - [x] Basic edge case handling (empty/short/long input)
 
@@ -55,6 +59,8 @@ Phase 3 (Hardening) is in progress. We have successfully created idempotent seed
 ### Phase 3 — Hardening
 - [x] QA bug fixes
 - [x] AI output validation/retry logic
+- [x] Skip redundant update when raw text is unchanged ("Update with AI" / "Update as-is" no-ops if content hasn't changed)
+- [x] Global light/dark theme toggle (Improvement #6)
 - [ ] Response time check
 - [x] Seeded demo accounts
 

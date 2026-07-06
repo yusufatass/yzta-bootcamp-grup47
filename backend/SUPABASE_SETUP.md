@@ -42,3 +42,14 @@ We use email/password sign-up with email verification (which is required by the 
      - Backend: `SUPABASE_ANON_KEY`
    - **Service Role API key**: (under `Project API keys` -> `service_role secret`) Copy and set as:
      - Backend: `SUPABASE_SERVICE_ROLE_KEY`
+
+## 5. Applying Migrations to an Existing Database
+
+When the schema evolves after the initial setup, apply the following migrations via **SQL Editor → New query → Run**:
+
+### Migration 001 — Add `title_is_custom` column (for manual title rename feature)
+
+```sql
+ALTER TABLE public.notes
+  ADD COLUMN IF NOT EXISTS title_is_custom BOOLEAN NOT NULL DEFAULT FALSE;
+```

@@ -18,6 +18,9 @@ class NoteUpdate(BaseModel):
     category: Optional[str] = None
     structured_content: Optional[dict] = None
 
+class NoteRenameTitle(BaseModel):
+    title: str
+
 class NoteMigrateItem(BaseModel):
     raw_text: str
     created_at: str
@@ -164,20 +167,28 @@ async def update_note(
         
     try:
         # 3. Enforce ownership and check existence
-        existing = ctx.client.table("notes").select("user_id").eq("id", note_id).execute()
+        existing = ctx.client.table("notes").select("user_id, title_is_custom, structured_content").eq("id", note_id).execute()
         if not existing.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Note not found"
             )
             
-        note_owner = existing.data[0]["user_id"]
+        existing_note = existing.data[0]
+        note_owner = existing_note["user_id"]
         if str(note_owner).lower() != str(ctx.user.id).lower():
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to update this note."
             )
-            
+
+        # Capture any user-set custom title before we overwrite structured_content
+        title_is_custom = existing_note.get("title_is_custom", False)
+        custom_title = (
+            existing_note.get("structured_content", {}).get("title")
+            if title_is_custom else None
+        )
+
         if trial_ended or skip_ai:
             payload = {
                 "raw_text": raw_text
@@ -188,9 +199,15 @@ async def update_note(
                 payload["category"] = "Plain Text"
 
             if note_data.structured_content is not None:
-                payload["structured_content"] = note_data.structured_content
+                sc = note_data.structured_content
+                if title_is_custom and custom_title:
+                    sc = dict(sc)
+                    sc["title"] = custom_title
+                payload["structured_content"] = sc
             else:
-                title_fallback = raw_text.split("\n")[0][:30] + ("..." if len(raw_text.split("\n")[0]) > 30 or len(raw_text) > 30 else "")
+                title_fallback = custom_title if title_is_custom and custom_title else (
+                    raw_text.split("\n")[0][:30] + ("..." if len(raw_text.split("\n")[0]) > 30 or len(raw_text) > 30 else "")
+                )
                 payload["structured_content"] = {
                     "title": title_fallback,
                     "markdown": raw_text
@@ -199,10 +216,16 @@ async def update_note(
             # 4. Re-run AI service (full processing)
             ai_result = analyze_note_content(ai_text)
             
+            structured = ai_result["structured_content"]
+            # If user has a custom title, preserve it — don't let AI overwrite it
+            if title_is_custom and custom_title:
+                structured = dict(structured)
+                structured["title"] = custom_title
+
             payload = {
                 "raw_text": raw_text,
                 "category": ai_result["category"],
-                "structured_content": ai_result["structured_content"]
+                "structured_content": structured
             }
         
         res = ctx.client.table("notes").update(payload).eq("id", note_id).execute()
@@ -221,6 +244,54 @@ async def update_note(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to update note: {str(e)}"
+        )
+
+@router.patch("/{note_id}/title")
+async def rename_note_title(
+    note_id: str,
+    title_data: NoteRenameTitle,
+    ctx: UserContext = Depends(get_user_context)
+):
+    new_title = title_data.title.strip()
+    if not new_title:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Title cannot be empty."
+        )
+    if len(new_title) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Title must be 100 characters or fewer."
+        )
+    try:
+        existing = ctx.client.table("notes").select("user_id, structured_content").eq("id", note_id).execute()
+        if not existing.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+
+        note_owner = existing.data[0]["user_id"]
+        if str(note_owner).lower() != str(ctx.user.id).lower():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to update this note.")
+
+        # Merge new title into existing structured_content
+        current_sc = existing.data[0].get("structured_content") or {}
+        updated_sc = dict(current_sc)
+        updated_sc["title"] = new_title
+
+        res = ctx.client.table("notes").update({
+            "structured_content": updated_sc,
+            "title_is_custom": True
+        }).eq("id", note_id).execute()
+
+        if not res.data:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to rename note")
+
+        return res.data[0]
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to rename note title: {str(e)}"
         )
 
 @router.post("/migrate")
