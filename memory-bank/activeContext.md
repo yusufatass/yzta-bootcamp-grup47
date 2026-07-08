@@ -1,10 +1,15 @@
 # Active Context
 
 
-## Current Work Focus
-Phase 3 — Hardening. We have successfully implemented a global light/dark theme toggle, refactored the AI layer to use a Groq primary + OpenAI fallback multi-LLM architecture, seeded demo accounts, integrated dual-pass AI output validation with custom paragraph fallback mechanisms, unified backend error responses, implemented editable notes, integrated a password reset flow, added password field UX toggles/validation, added name fields on registration, and implemented an anonymous onboarding modal. Next, we will perform remaining QA bug fixes.
+### Current Work Focus
+Phase 4 — Demo Readiness. We have successfully finalized Phase 3 (Hardening) by completing a comprehensive Light/Dark Mode theme audit across all pages and components, fixing all custom zinc shade typos, adding standard option background styling, enhancing the onboarding modal walkthrough with beautiful CSS mock-ups, implementing a custom and accessible Delete Confirmation Dialog, and verifying full system compilation and build stability.
 
 ## Recent Changes
+* Implemented Delete Confirmation Dialog (Improvement #10): Intercepts all note deletion requests with a custom accessible modal. The modal defaults focus to Cancel to avoid accidental keyboard/mouse triggers, supports Escape key and backdrop click-outside dismissal, uses smooth entry/backdrop transition states, fades out deleted note cards smoothly in the sidebar over 300ms, and shows a temporary success toast message ("Note deleted successfully.") upon completion.
+* Audited and resolved all non-standard, custom zinc shade classes in `frontend/src/app/page.tsx` (like `bg-zinc-455`, `dark:disabled:text-zinc-650`, `border-zinc-150`, `dark:border-zinc-850`, `hover:text-zinc-650`, `text-zinc-650`, `hover:text-zinc-850`, `text-zinc-808`), mapping them back to standard Tailwind v4 palette classes.
+* Enhanced the three anonymous onboarding modal walkthrough steps with responsive, theme-aware CSS/SVG visual mock-ups (messy-vs-clean text organizing flow with magic wand indicator, remaining calendar days remaining trial card, and secure profile badge validation).
+* Added explicit high-contrast theme-aware styling to the Category Filter dropdown option tags to ensure correct background/text readability across all web browsers.
+* Verified compilation correctness and build consistency by executing a production bundle check (`npm run build`) which succeeded with exit code 0.
 * Created the idempotent `backend/seed_demo.py` seeding script to initialize confirmed demo accounts (`demo@notes.com`, `test@notes.com`) pre-populated with notes for all six categories.
 * Implemented double-pass AI output validation in `backend/app/services/ai.py` (checks for non-empty title/markdown, retries once, then falls back to title = raw[:50] and markdown wrapped in a paragraph).
 * Unified backend error response formats to consistently return `{"error": "message"}` for HTTP exceptions, validation errors, and unhandled system failures.
@@ -26,11 +31,9 @@ Phase 3 — Hardening. We have successfully implemented a global light/dark them
 * Refactored AI layer to introduce a clean provider abstraction supporting a multi-LLM structure (Groq as Primary, OpenAI as Fallback). The AI service attempts note organization using Groq first, retrying once on failure. If Groq fails after retrying or is unconfigured, the service falls back automatically to OpenAI GPT-4o Mini. Logs which provider served each request without revealing note contents.
 
 
-
 ## Next Steps
 1. Apply `SUPABASE_SETUP.md` Migration 001 in the Supabase SQL Editor (one-time, manual step).
-2. Verify response times for note generation and DB operations under load.
-3. Begin Phase 4 — Demo Readiness.
+2. Begin Phase 4 — Demo Readiness: finalize pitch materials, write README, and conduct demo rehearsal.
 
 ## Active Decisions and Considerations
 * Maintain backend idempotency in database seeding so developers can run migrations/seeding safely on demand.

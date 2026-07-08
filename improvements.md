@@ -40,9 +40,13 @@ A running list of feature improvements to work through one at a time. Complete e
 - [x] `- [ ]` / `- [x]` markdown renders as real clickable checkboxes; toggling persists (DB for authenticated, sessionStorage for anonymous) without re-running AI
 - Works for both AI-organized notes and manually formatted / Plain Text notes. Toolbar has bullet-list and checklist buttons.
 
+### 9. Search / filter — DONE
+- [x] Search notes by title/content and filter by category (both search query and category filters run client-side in real-time, matching queries case-insensitively).
+
+### 10. Delete confirmation — DONE
+- [x] Implement a custom, accessible, theme-aware delete confirmation dialog that intercepts note deletions, with smooth entry transitions and note card fade-out animations.
+
 ## Backlog (not yet started)
-- **Search / filter:** Search notes by title/content and filter by category. Becomes valuable as note count grows; strong demo feature.
-- **Delete confirmation:** Confirm dialog before deleting a note (avoid accidental loss).
 - **Mascot illustrations:** Replace placeholder boxes in the onboarding modal once the mascot is designed.
 
 ## Working Rules

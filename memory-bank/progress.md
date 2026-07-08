@@ -1,7 +1,7 @@
 # Progress
 
-## Current Status
-Phase 3 (Hardening) is in progress. We have successfully implemented a global light/dark theme toggle (Improvement #6), refactored the AI layer to use Groq as primary and OpenAI as fallback with a clean provider abstraction, created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, unified backend error responses, implemented fully editable notes (Improvement #1), added a password reset flow (Improvement #2), added password field UX toggles/validation enhancements, implemented First Name/Last Name registration and display (Improvement #3), and implemented an onboarding modal walkthrough for anonymous users (Improvement #4).
+### Current Status
+Phase 3 (Hardening) is now fully completed! We have conducted a complete audit and hardening of the Light/Dark mode theme across all pages, components, modals, and templates, fixing all non-standard Tailwind class typos and contrast bugs. We also designed beautiful, detailed mock-up visual illustrations for the onboarding modal steps, implemented a Delete Confirmation Dialog (Improvement #10) to prevent accidental data loss with micro-animations and accessibility features, and verified that a full production build (`npm run build`) compiles cleanly without any TypeScript or Next.js issues. The application is completely ready for Phase 4 (Demo Readiness).
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
@@ -23,7 +23,9 @@ Phase 3 (Hardening) is in progress. We have successfully implemented a global li
 * Password UX Enhancements: Show/hide eye icon toggles across login, registration, and reset-password forms, with strict confirm-password match validation on registration.
 * Name Fields Registration: First Name + Last Name collected during signup, stored in Supabase user metadata, returned via GET `/api/auth/me`, and displayed in the main workspace header (falling back to email).
 * Anonymous Onboarding Modal: A 3-step feature tour modal triggering on the 1st note save and every 4th note save thereafter for anonymous users. Dismissing the modal closes the current instance but does not suppress future recurring triggers. Interactive progress dots allow users to jump directly to any step.
+* Onboarding Modal Enhanced Illustrations: Replaced standard plain text boxes with three detailed CSS/SVG mock-ups: a messy vs. organized text comparison view with a magic wand indicator, an active 30-day trial remaining card, and a secure verification user card.
 * Anonymous Note Creation Flow: Saving a note in anonymous mode correctly clears inputs and returns the user to the clean, empty note creation editor form while adding the note to the history sidebar.
+* Delete Confirmation Dialog: Intercepts note deletion actions with a custom modal, defaulting focus to Cancel to avoid accidental deletes, supporting Escape key and click-outside dismissal, animating card fade-out in the sidebar, and showing a success toast on completion.
 * 30-Day Free Trial Flow: Calculates remaining trial duration based on Supabase user registration date. If the trial is active, notes are structured using OpenAI GPT-4o Mini. If 30+ days have passed, AI formatting is skipped, notes are saved as Plain Text, and clear warning banners and UI messages notify the user.
 * Manual Formatting Toolbar & Split Save Actions: Added inline markdown formatting controls (Bold, Italic, Underline, Heading, Bullet List, and Checklist) above the note inputs for both creation and editing modes. The list buttons support inserting formatting at the start of the current line or batch-prefixing multiple selected lines. Implemented split save actions ("Save with AI" and "Save as-is") for authenticated users to choose between automated AI categorization and preserving their manual formatting without AI. Enabled plain text markdown rendering for anonymous and trial-expired users with custom `<u>` tag parsing support.
 * Interactive Checkboxes: Detects markdown checkbox syntax (`- [ ]`, `- [x]`, `* [ ]`, `* [x]`) and renders them as real, styled clickable checkboxes. Clicking a checkbox toggles its state (visually applying checkmarks and line-through text styling) and persists the updated markdown in the background (to the database for authenticated users and `sessionStorage` for anonymous users) without re-triggering AI processing.
@@ -63,7 +65,9 @@ Phase 3 (Hardening) is in progress. We have successfully implemented a global li
 - [x] AI output validation/retry logic
 - [x] Skip redundant update when raw text is unchanged ("Update with AI" / "Update as-is" no-ops if content hasn't changed)
 - [x] Global light/dark theme toggle (Improvement #6)
-- [ ] Response time check
+- [x] Theme Audit & Invalid Class Typos Audited & Fixed
+- [x] Delete Confirmation Dialog (Improvement #10)
+- [x] Response time check
 - [x] Seeded demo accounts
 
 ### Phase 4 — Demo Readiness

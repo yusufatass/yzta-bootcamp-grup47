@@ -52,6 +52,22 @@ export default function Home() {
   const [isTitleSaving, setIsTitleSaving] = useState(false);
   const router = useRouter();
 
+  // Delete confirmation & toast state
+  const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastVisible(true), 10);
+    setTimeout(() => {
+      setToastVisible(false);
+      setTimeout(() => setToastMessage(null), 300);
+    }, 3000);
+  };
+
+
   const filteredNotes = notes.filter((note) => {
     const query = searchQuery.trim().toLowerCase();
     const titleMatch = note.title ? note.title.toLowerCase().includes(query) : false;
@@ -423,26 +439,48 @@ export default function Home() {
     }
   };
 
-  const handleDeleteNote = async (noteId: string) => {
-    if (selectedNote?.id === noteId) {
-      setSelectedNote(null);
-      setIsEditing(false);
-      setEditText("");
-    }
-
-    if (user) {
-      try {
-        await deleteNote(noteId);
-        setNotes(notes.filter(n => n.id !== noteId));
-      } catch (err: any) {
-        setError(err.message || "Failed to delete note");
-      }
-    } else {
-      const updatedNotes = notes.filter(n => n.id !== noteId);
-      setNotes(updatedNotes);
-      sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
-    }
+  const handleDeleteNote = (noteId: string) => {
+    setNoteIdToDelete(noteId);
   };
+
+  const executeDeleteNote = async () => {
+    if (!noteIdToDelete) return;
+    const targetId = noteIdToDelete;
+
+    // Close the dialog immediately
+    setNoteIdToDelete(null);
+
+    // Set the note card ID currently being deleted to play the fade-out transition
+    setDeletingNoteId(targetId);
+
+    // Wait 300ms for sidebar fade-out transition to complete
+    setTimeout(async () => {
+      if (selectedNote?.id === targetId) {
+        setSelectedNote(null);
+        setIsEditing(false);
+        setEditText("");
+      }
+
+      if (user) {
+        try {
+          await deleteNote(targetId);
+          setNotes((prevNotes) => prevNotes.filter((n) => n.id !== targetId));
+          showToast("Note deleted successfully.");
+        } catch (err: any) {
+          setError(err.message || "Failed to delete note");
+        } finally {
+          setDeletingNoteId(null);
+        }
+      } else {
+        const updatedNotes = notes.filter((n) => n.id !== targetId);
+        setNotes(updatedNotes);
+        sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
+        setDeletingNoteId(null);
+        showToast("Note deleted successfully.");
+      }
+    }, 300);
+  };
+
 
   const handleUpdateNoteAction = async (skipAi: boolean) => {
     setError(null);
@@ -580,7 +618,7 @@ export default function Home() {
       case "Pending AI processing":
         return "bg-zinc-100 text-zinc-600 ring-zinc-500/10 dark:bg-zinc-800 dark:text-zinc-400 animate-pulse";
       default:
-        return "bg-zinc-100 text-zinc-650 ring-zinc-550/10 dark:bg-zinc-800/50 dark:text-zinc-400";
+        return "bg-zinc-100 text-zinc-600 ring-zinc-500/10 dark:bg-zinc-800/50 dark:text-zinc-400";
     }
   };
 
@@ -633,7 +671,7 @@ export default function Home() {
           );
         } else if (tokenType === "italic") {
           parts.push(
-            <em key={index} className="italic text-zinc-808 dark:text-zinc-200">
+            <em key={index} className="italic text-zinc-800 dark:text-zinc-200">
               {parseInline(content)}
             </em>
           );
@@ -711,7 +749,7 @@ export default function Home() {
       }
       if (line.startsWith("- ") || line.startsWith("* ")) {
         return (
-          <li key={idx} className="ml-4 list-disc text-sm text-zinc-750 dark:text-zinc-350 my-1 leading-relaxed">
+          <li key={idx} className="ml-4 list-disc text-sm text-zinc-700 dark:text-zinc-300 my-1 leading-relaxed">
             {parseInline(line.substring(2))}
           </li>
         );
@@ -720,7 +758,7 @@ export default function Home() {
         return <div key={idx} className="h-2"></div>;
       }
       return (
-        <p key={idx} className="text-sm text-zinc-750 dark:text-zinc-355 my-1 leading-relaxed">
+        <p key={idx} className="text-sm text-zinc-700 dark:text-zinc-300 my-1 leading-relaxed">
           {parseInline(line)}
         </p>
       );
@@ -734,12 +772,12 @@ export default function Home() {
         <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-4">
           <div className="flex items-center justify-between max-w-7xl mx-auto">
             <span className="text-xl font-bold text-zinc-900 dark:text-white">Unstructured Notes</span>
-            <div className="w-24 h-8 bg-zinc-200 dark:bg-zinc-850 rounded animate-pulse"></div>
+            <div className="w-24 h-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>
         </header>
         <div className="flex max-w-7xl mx-auto p-6 gap-6">
-          <div className="w-1/3 h-64 bg-zinc-200 dark:bg-zinc-850 rounded animate-pulse"></div>
-          <div className="w-2/3 h-64 bg-zinc-200 dark:bg-zinc-850 rounded animate-pulse"></div>
+          <div className="w-1/3 h-64 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
+          <div className="w-2/3 h-64 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
         </div>
       </div>
     );
@@ -763,7 +801,7 @@ export default function Home() {
               <div className="flex items-center gap-4">
                 {user.trial_ended ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 ring-1 ring-inset ring-zinc-600/20 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-500/20">
-                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-455"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400"></span>
                     Trial Ended
                   </span>
                 ) : (
@@ -826,7 +864,7 @@ export default function Home() {
                   setIsTitleEditing(false);
                   setEditText("");
                 }}
-                className="ml-2 text-xs text-zinc-650 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
+                className="ml-2 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
               >
                 <span>+</span> New Note
               </button>
@@ -853,7 +891,7 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-650 dark:text-zinc-500 dark:hover:text-zinc-300"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -865,16 +903,16 @@ export default function Home() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl px-3 py-1.5 pr-8 text-xs text-zinc-750 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-500 cursor-pointer appearance-none"
+                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl px-3 py-1.5 pr-8 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-500 cursor-pointer appearance-none"
                 >
-                  <option value="All">All Categories</option>
-                  <option value="Shopping List">Shopping List</option>
-                  <option value="Meeting Notes">Meeting Notes</option>
-                  <option value="Lecture Notes">Lecture Notes</option>
-                  <option value="Daily Plan">Daily Plan</option>
-                  <option value="Travel List">Travel List</option>
-                  <option value="General / Other">General / Other</option>
-                  <option value="Plain Text">Plain Text</option>
+                  <option value="All" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">All Categories</option>
+                  <option value="Shopping List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Shopping List</option>
+                  <option value="Meeting Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Meeting Notes</option>
+                  <option value="Lecture Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Lecture Notes</option>
+                  <option value="Daily Plan" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Daily Plan</option>
+                  <option value="Travel List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Travel List</option>
+                  <option value="General / Other" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">General / Other</option>
+                  <option value="Plain Text" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Plain Text</option>
                 </select>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 dark:text-zinc-500">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -914,9 +952,11 @@ export default function Home() {
                     setIsTitleEditing(false);
                     setEditText(note.raw_text);
                   }}
-                  className={`group relative p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${
+                  className={`group relative p-4 rounded-xl border transition-all text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${
+                    deletingNoteId === note.id ? "opacity-0 scale-95 pointer-events-none duration-300" : "duration-200"
+                  } ${
                     selectedNote?.id === note.id
-                      ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-850 dark:ring-zinc-350 shadow-sm"
+                      ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-800 dark:ring-zinc-300 shadow-sm"
                       : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-950/60 dark:hover:border-zinc-700"
                   }`}
                 >
@@ -929,7 +969,7 @@ export default function Home() {
                   <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
                     {note.raw_text}
                   </p>
-                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-850">
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                     <span className="text-[9px] text-zinc-400">
                       {new Date(note.created_at).toLocaleDateString()}
                     </span>
@@ -944,7 +984,7 @@ export default function Home() {
                       e.stopPropagation();
                       handleDeleteNote(note.id);
                     }}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-850"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800"
                     title="Delete note"
                   >
                     <svg
@@ -1185,7 +1225,7 @@ export default function Home() {
                         type="button"
                         onClick={() => handleUpdateNoteAction(true)}
                         disabled={isUpdating || !editText.trim()}
-                        className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-650 transition-colors"
+                        className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                       >
                         Update
                       </button>
@@ -1203,7 +1243,7 @@ export default function Home() {
                           type="button"
                           onClick={() => handleUpdateNoteAction(false)}
                           disabled={isUpdating || !editText.trim()}
-                          className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-650 transition-colors"
+                          className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                         >
                           Update with AI
                         </button>
@@ -1214,7 +1254,7 @@ export default function Home() {
                       type="button"
                       onClick={() => handleUpdateNoteAction(true)}
                       disabled={isUpdating || !editText.trim()}
-                      className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-650 transition-colors"
+                      className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                     >
                       Update
                     </button>
@@ -1228,7 +1268,7 @@ export default function Home() {
                     {parseMarkdown(selectedNote.structured_content.markdown)}
                   </div>
                 ) : (
-                  <div className="text-left whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-mono bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-150 dark:border-zinc-850">
+                  <div className="text-left whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-mono bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">
                     {selectedNote.raw_text}
                   </div>
                 )}
@@ -1238,7 +1278,7 @@ export default function Home() {
                     <summary className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 cursor-pointer font-semibold outline-none select-none">
                       Show Raw Unstructured Text
                     </summary>
-                    <div className="mt-3 text-left whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-150 dark:border-zinc-850 font-mono">
+                    <div className="mt-3 text-left whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 font-mono">
                       {selectedNote.raw_text}
                     </div>
                   </details>
@@ -1370,7 +1410,7 @@ export default function Home() {
                       type="button"
                       onClick={() => handleSaveNoteAction(true)}
                       disabled={!noteText.trim()}
-                      className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-650 transition-colors"
+                      className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                     >
                       Save Note
                     </button>
@@ -1388,7 +1428,7 @@ export default function Home() {
                         type="button"
                         onClick={() => handleSaveNoteAction(false)}
                         disabled={!noteText.trim()}
-                        className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-650 transition-colors"
+                        className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                       >
                         Save with AI
                       </button>
@@ -1399,7 +1439,7 @@ export default function Home() {
                     type="button"
                     onClick={() => handleSaveNoteAction(true)}
                     disabled={!noteText.trim()}
-                    className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-650 transition-colors"
+                    className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                   >
                     Save Note
                   </button>
@@ -1411,6 +1451,23 @@ export default function Home() {
       </main>
 
       <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />
+
+      <DeleteConfirmationDialog
+        isOpen={noteIdToDelete !== null}
+        onClose={() => setNoteIdToDelete(null)}
+        onConfirm={executeDeleteNote}
+      />
+
+      {toastMessage && (
+        <div
+          className={`fixed bottom-4 right-4 z-50 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 px-4 py-2.5 rounded-xl shadow-lg border border-zinc-800 dark:border-zinc-200 text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform ${
+            toastVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-95"
+          }`}
+        >
+          <span>✅</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -1441,7 +1498,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         {/* Close button at top right */}
         <button
           onClick={handleDismiss}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200 transition-colors"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
           aria-label="Close"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1454,9 +1511,37 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {step === 1 && (
             <div className="space-y-4">
               {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-100 dark:bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800">
-                <span className="text-2xl mb-1">🪄</span>
-                <span className="text-xs uppercase tracking-wider font-semibold">illustration</span>
+              <div className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div className="flex items-center justify-center gap-4 w-full px-6">
+                  {/* Messy raw text block */}
+                  <div className="flex-1 max-w-[120px] p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-left space-y-1.5 opacity-60">
+                    <div className="h-1.5 w-3/4 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
+                    <div className="h-1 w-5/6 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+                    <div className="h-1.5 w-1/2 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
+                    <div className="h-1 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+                  </div>
+                  {/* Arrow with magic wand icon */}
+                  <div className="flex flex-col items-center text-zinc-400 dark:text-zinc-500 text-sm font-semibold select-none">
+                    <span className="text-xl animate-bounce">🪄</span>
+                    <span className="text-xs">➜</span>
+                  </div>
+                  {/* Structured clean block */}
+                  <div className="flex-1 max-w-[120px] p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-left space-y-2 ring-1 ring-zinc-950/5 dark:ring-white/5">
+                    <div className="h-2 w-1/2 bg-zinc-900 dark:bg-zinc-100 rounded"></div>
+                    <div className="flex gap-1">
+                      <div className="h-3 w-8 bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-[6px] font-bold rounded flex items-center justify-center">
+                        AI
+                      </div>
+                      <div className="h-3 w-6 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-[6px] rounded flex items-center justify-center">
+                        List
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="h-1 w-full bg-zinc-300 dark:bg-zinc-700 rounded"></div>
+                      <div className="h-1 w-5/6 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                 Your notes are messy? Let AI organize them for you.
@@ -1470,9 +1555,15 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {step === 2 && (
             <div className="space-y-4">
               {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-100 dark:bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800">
-                <span className="text-2xl mb-1">🎁</span>
-                <span className="text-xs uppercase tracking-wider font-semibold">illustration</span>
+              <div className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div className="relative p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl max-w-[150px] w-full text-center shadow-sm">
+                  <div className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Free Trial</div>
+                  <div className="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 font-mono mt-1">30</div>
+                  <div className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-1">Days Remaining</div>
+                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+                    Active
+                  </div>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                 Try it free for 30 days — no card required.
@@ -1486,9 +1577,21 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {step === 3 && (
             <div className="space-y-4">
               {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-100 dark:bg-zinc-950 rounded-xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-800">
-                <span className="text-2xl mb-1">🚀</span>
-                <span className="text-xs uppercase tracking-wider font-semibold">illustration</span>
+              <div className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div className="p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl max-w-[180px] w-full space-y-2.5 shadow-sm text-left">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-7 w-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs">
+                      👤
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="h-1.5 w-16 bg-zinc-900 dark:bg-zinc-100 rounded"></div>
+                      <div className="h-1 w-24 bg-zinc-400 dark:bg-zinc-600 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-lg text-[9px] font-semibold justify-center">
+                    <span>🛡️</span> Secure Verification
+                  </div>
+                </div>
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                 Get Started Now
@@ -1532,7 +1635,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="text-xs font-semibold text-zinc-500 hover:text-zinc-850 dark:hover:text-zinc-300 transition-colors"
+                className="text-xs font-semibold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
               >
                 Maybe later
               </button>
@@ -1551,7 +1654,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 <button
                   type="button"
                   onClick={handleDismiss}
-                  className="text-xs font-semibold text-zinc-500 hover:text-zinc-850 dark:hover:text-zinc-300 transition-colors sm:hidden"
+                  className="text-xs font-semibold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors sm:hidden"
                 >
                   Maybe later
                 </button>
@@ -1565,6 +1668,79 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               </div>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface DeleteConfirmationDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirmationDialogProps) {
+  const [animateShow, setAnimateShow] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const raf = requestAnimationFrame(() => setAnimateShow(true));
+      return () => cancelAnimationFrame(raf);
+    } else {
+      setAnimateShow(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm transition-opacity duration-200 ${
+        animateShow ? "opacity-100" : "opacity-0"
+      }`}
+      onClick={onClose}
+    >
+      <div
+        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-200 transform ${
+          animateShow ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Delete Note?</h3>
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          Are you sure you want to delete this note? This action cannot be undone.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            autoFocus
+            type="button"
+            onClick={onClose}
+            className="flex-1 sm:flex-initial rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 sm:flex-initial rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
