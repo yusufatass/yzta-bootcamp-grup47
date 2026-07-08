@@ -1,7 +1,7 @@
 # Progress
 
 ## Current Status
-Phase 3 (Hardening) is in progress. We have successfully implemented a global light/dark theme toggle (Improvement #6), created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, unified backend error responses, implemented fully editable notes (Improvement #1), added a password reset flow (Improvement #2), added password field UX toggles/validation enhancements, implemented First Name/Last Name registration and display (Improvement #3), and implemented an onboarding modal walkthrough for anonymous users (Improvement #4).
+Phase 3 (Hardening) is in progress. We have successfully implemented a global light/dark theme toggle (Improvement #6), refactored the AI layer to use Groq as primary and OpenAI as fallback with a clean provider abstraction, created idempotent seeding scripts for demo user accounts, implemented robust title/markdown validation with a safe fallback mechanism, unified backend error responses, implemented fully editable notes (Improvement #1), added a password reset flow (Improvement #2), added password field UX toggles/validation enhancements, implemented First Name/Last Name registration and display (Improvement #3), and implemented an onboarding modal walkthrough for anonymous users (Improvement #4).
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)
@@ -28,6 +28,8 @@ Phase 3 (Hardening) is in progress. We have successfully implemented a global li
 * Manual Formatting Toolbar & Split Save Actions: Added inline markdown formatting controls (Bold, Italic, Underline, Heading, Bullet List, and Checklist) above the note inputs for both creation and editing modes. The list buttons support inserting formatting at the start of the current line or batch-prefixing multiple selected lines. Implemented split save actions ("Save with AI" and "Save as-is") for authenticated users to choose between automated AI categorization and preserving their manual formatting without AI. Enabled plain text markdown rendering for anonymous and trial-expired users with custom `<u>` tag parsing support.
 * Interactive Checkboxes: Detects markdown checkbox syntax (`- [ ]`, `- [x]`, `* [ ]`, `* [x]`) and renders them as real, styled clickable checkboxes. Clicking a checkbox toggles its state (visually applying checkmarks and line-through text styling) and persists the updated markdown in the background (to the database for authenticated users and `sessionStorage` for anonymous users) without re-triggering AI processing.
 * Global Theme Toggle (Light/Dark): A fully functioning theme-toggle (sun/moon icon button) in the header (visible to all users), persisting choices in `localStorage` and defaulting to dark mode. Leverages custom-variant class-based styling for Tailwind v4 and prevents flash-on-load via an inlined blocking head script. Applies cleanly to all routes, dialogs, badges, checklists, custom title forms, and the onboarding walkthrough.
+* Multi-LLM AI Fallback: Refactored the AI service to use a clean provider abstraction. The service attempts note analysis with Groq (Llama-3.3-70b-versatile) first, retrying once on failure. If Groq is unavailable or fails after its retry, it automatically falls back to OpenAI GPT-4o Mini. Both providers share the same validation and JSON schema contract, logging success without exposing full note contents.
+
 
 
 ## What's Left to Build

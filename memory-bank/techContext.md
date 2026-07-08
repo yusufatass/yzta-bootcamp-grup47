@@ -10,7 +10,7 @@
 * Python
 * PostgreSQL (via Supabase)
 * Supabase Auth (email + password, email verification)
-* OpenAI API (GPT-4o Mini model) — AI categorization/structuring layer
+* AI Layer: Groq API (Primary, Llama-3.3-70b-versatile) with OpenAI API (Fallback, GPT-4o Mini) — Multi-LLM provider abstraction with automatic fallback and single-retry capability.
 
 
 ## Development Setup
@@ -28,7 +28,7 @@ Monorepo. Distinct directories for frontend and backend:
 
 ## Dependencies
 * Frontend: `next`, `react`, `tailwindcss`, `clsx`, `tailwind-merge` (`shadcn/ui` components as needed)
-* Backend: `fastapi`, `uvicorn`, `pydantic`, `supabase` (Python client), `openai` (OpenAI Python SDK)
+* Backend: `fastapi`, `uvicorn`, `pydantic`, `supabase` (Python client), `openai` (OpenAI Python SDK used for both OpenAI and Groq APIs)
 
 
 ## Code Quality Rules
