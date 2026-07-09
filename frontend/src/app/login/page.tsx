@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { loginUser, setAuthToken } from "@/lib/api";
 import { ThemeToggle } from "@/lib/theme";
 
@@ -44,6 +45,20 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-6 dark:bg-zinc-950">
+      <div className="absolute top-4 left-4 flex items-center gap-2">
+        <Link href="/" className="inline-flex items-center gap-2 text-zinc-605 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors text-sm font-semibold">
+          <Image
+            src="/mascot/logo.png"
+            alt="Antigravity logo"
+            width={51}
+            height={28}
+            style={{ width: 'auto', height: 'auto' }}
+            className="object-contain"
+            priority
+          />
+          <span>← Back to App</span>
+        </Link>
+      </div>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
