@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   getCurrentUser, 
   getAuthToken, 
@@ -54,6 +55,7 @@ export default function Home() {
 
   // Delete confirmation & toast state
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
+  const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
@@ -263,7 +265,12 @@ export default function Home() {
     }, 0);
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setIsSignOutModalOpen(true);
+  };
+
+  const executeLogout = () => {
+    setIsSignOutModalOpen(false);
     clearAuthToken();
     setUser(null);
     setSelectedNote(null);
@@ -769,9 +776,20 @@ export default function Home() {
   if (!mounted) {
     return (
       <div className="h-screen max-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col overflow-hidden">
-        <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-4">
+        <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-2.5">
           <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <span className="text-xl font-bold text-zinc-900 dark:text-white">Unstructured Notes</span>
+            <div className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+              <Image
+                src="/mascot/logo.png"
+                alt="Unstructured Notes Logo"
+                width={51}
+                height={28}
+                className="object-contain"
+                style={{ width: 'auto', height: 'auto' }}
+                priority
+              />
+              <span>Unstructured Notes</span>
+            </div>
             <div className="w-24 h-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>
         </header>
@@ -786,14 +804,31 @@ export default function Home() {
   return (
     <div className="h-screen max-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col overflow-hidden">
       {/* Top Navigation Header */}
-      <header className="sticky top-0 z-20 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md px-6 py-4">
+      <header className="sticky top-0 z-20 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md px-6 py-2.5">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-            <span>📝</span>
+            <Image
+              src="/mascot/logo.png"
+              alt="Unstructured Notes Logo"
+              width={51}
+              height={28}
+              className="object-contain"
+              style={{ width: 'auto', height: 'auto' }}
+              priority
+            />
             <span>Unstructured Notes</span>
           </Link>
           
           <div className="flex items-center gap-3">
+            <Link
+              href="/premium"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-sm transition-all duration-200 cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span>Premium</span>
+            </Link>
             <ThemeToggle />
             {loading ? (
               <div className="w-24 h-8 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
@@ -814,7 +849,7 @@ export default function Home() {
                   {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : user.email}
                 </span>
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                   className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 >
                   Sign Out
@@ -927,7 +962,16 @@ export default function Home() {
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 -mr-1 scrollbar-thin">
             {notes.length === 0 ? (
               <div className="flex-grow flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
-                <span className="text-3xl mb-3 animate-pulse">✍️</span>
+                <div className="mb-3">
+                  <Image
+                    src="/mascot/empty-state-resting.png"
+                    alt="Sloth resting"
+                    width={110}
+                    height={110}
+                    className="object-contain"
+                    style={{ width: 'auto', height: 'auto' }}
+                  />
+                </div>
                 <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Your space is empty</h3>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 max-w-[180px] mx-auto leading-relaxed">
                   Type your thoughts freely. Our AI will group, clean, and structure them for you.
@@ -1458,6 +1502,12 @@ export default function Home() {
         onConfirm={executeDeleteNote}
       />
 
+      <SignOutConfirmationDialog
+        isOpen={isSignOutModalOpen}
+        onClose={() => setIsSignOutModalOpen(false)}
+        onConfirm={executeLogout}
+      />
+
       {toastMessage && (
         <div
           className={`fixed bottom-4 right-4 z-50 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 px-4 py-2.5 rounded-xl shadow-lg border border-zinc-800 dark:border-zinc-200 text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform ${
@@ -1510,38 +1560,14 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         <div className="flex-1 flex flex-col justify-center mt-4">
           {step === 1 && (
             <div className="space-y-4">
-              {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                <div className="flex items-center justify-center gap-4 w-full px-6">
-                  {/* Messy raw text block */}
-                  <div className="flex-1 max-w-[120px] p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-left space-y-1.5 opacity-60">
-                    <div className="h-1.5 w-3/4 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
-                    <div className="h-1 w-5/6 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
-                    <div className="h-1.5 w-1/2 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
-                    <div className="h-1 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
-                  </div>
-                  {/* Arrow with magic wand icon */}
-                  <div className="flex flex-col items-center text-zinc-400 dark:text-zinc-500 text-sm font-semibold select-none">
-                    <span className="text-xl animate-bounce">🪄</span>
-                    <span className="text-xs">➜</span>
-                  </div>
-                  {/* Structured clean block */}
-                  <div className="flex-1 max-w-[120px] p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-left space-y-2 ring-1 ring-zinc-950/5 dark:ring-white/5">
-                    <div className="h-2 w-1/2 bg-zinc-900 dark:bg-zinc-100 rounded"></div>
-                    <div className="flex gap-1">
-                      <div className="h-3 w-8 bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-[6px] font-bold rounded flex items-center justify-center">
-                        AI
-                      </div>
-                      <div className="h-3 w-6 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-[6px] rounded flex items-center justify-center">
-                        List
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="h-1 w-full bg-zinc-300 dark:bg-zinc-700 rounded"></div>
-                      <div className="h-1 w-5/6 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative w-full h-52 mb-6">
+                <Image
+                  src="/mascot/onboarding-organize.png"
+                  alt="Sloth organizing notes"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                 Your notes are messy? Let AI organize them for you.
@@ -1554,16 +1580,14 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
           {step === 2 && (
             <div className="space-y-4">
-              {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                <div className="relative p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl max-w-[150px] w-full text-center shadow-sm">
-                  <div className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Free Trial</div>
-                  <div className="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 font-mono mt-1">30</div>
-                  <div className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-1">Days Remaining</div>
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow">
-                    Active
-                  </div>
-                </div>
+              <div className="relative w-full h-52 mb-6">
+                <Image
+                  src="/mascot/working-on.png"
+                  alt="Sloth thinking and working"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                 Try it free for 30 days — no card required.
@@ -1576,22 +1600,14 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
           {step === 3 && (
             <div className="space-y-4">
-              {/* Illustration Placeholder */}
-              <div className="w-full h-40 bg-zinc-50 dark:bg-zinc-950 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                <div className="p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl max-w-[180px] w-full space-y-2.5 shadow-sm text-left">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-7 w-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs">
-                      👤
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="h-1.5 w-16 bg-zinc-900 dark:bg-zinc-100 rounded"></div>
-                      <div className="h-1 w-24 bg-zinc-400 dark:bg-zinc-600 rounded"></div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-lg text-[9px] font-semibold justify-center">
-                    <span>🛡️</span> Secure Verification
-                  </div>
-                </div>
+              <div className="relative w-full h-52 mb-6">
+                <Image
+                  src="/mascot/success-thumbsup.png"
+                  alt="Celebrating sloth"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                 Get Started Now
@@ -1740,6 +1756,90 @@ function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirma
             className="flex-1 sm:flex-initial rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
           >
             Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface SignOutConfirmationDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfirmationDialogProps) {
+  const [animateShow, setAnimateShow] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const raf = requestAnimationFrame(() => setAnimateShow(true));
+      return () => cancelAnimationFrame(raf);
+    } else {
+      setAnimateShow(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm transition-opacity duration-200 ${
+        animateShow ? "opacity-100" : "opacity-0"
+      }`}
+      onClick={onClose}
+    >
+      <div
+        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-200 transform text-center ${
+          animateShow ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-full flex justify-center mb-4">
+          <Image
+            src="/mascot/logout-goodby.png"
+            alt="Sloth waving goodbye"
+            width={120}
+            height={120}
+            className="object-contain"
+            style={{ width: 'auto', height: 'auto' }}
+            priority
+          />
+        </div>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Sign Out</h3>
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          Are you sure you want to sign out? Any unsaved local changes might be lost.
+        </p>
+        <div className="mt-6 flex justify-center gap-3">
+          <button
+            autoFocus
+            type="button"
+            onClick={onClose}
+            className="flex-1 sm:flex-initial rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 sm:flex-initial rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
+          >
+            Sign Out
           </button>
         </div>
       </div>
