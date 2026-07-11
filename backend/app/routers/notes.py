@@ -75,6 +75,7 @@ async def create_note(
             payload = {
                 "user_id": ctx.user.id,
                 "raw_text": raw_text,
+                "original_raw_text": raw_text,
                 "category": "Plain Text",
                 "structured_content": {
                     "title": title_fallback,
@@ -92,6 +93,7 @@ async def create_note(
             payload = {
                 "user_id": ctx.user.id,
                 "raw_text": raw_text,  # Keep the original raw text intact
+                "original_raw_text": raw_text,
                 "category": ai_result["category"],
                 "structured_content": ai_result["structured_content"]
             }
@@ -329,6 +331,7 @@ async def migrate_notes(
                 db_notes.append({
                     "user_id": ctx.user.id,
                     "raw_text": item.raw_text,
+                    "original_raw_text": item.raw_text,
                     "category": "Plain Text",
                     "structured_content": {
                         "title": title_fallback,
@@ -343,6 +346,7 @@ async def migrate_notes(
                 db_notes.append({
                     "user_id": ctx.user.id,
                     "raw_text": item.raw_text,
+                    "original_raw_text": item.raw_text,
                     "category": ai_result["category"],
                     "structured_content": ai_result["structured_content"],
                     "created_at": item.created_at

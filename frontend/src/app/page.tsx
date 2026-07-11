@@ -4,11 +4,11 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { 
-  getCurrentUser, 
-  getAuthToken, 
-  setAuthToken, 
-  clearAuthToken, 
+import {
+  getCurrentUser,
+  getAuthToken,
+  setAuthToken,
+  clearAuthToken,
   UserMe,
   migrateNotes,
   createNote,
@@ -22,6 +22,7 @@ import { ThemeToggle } from "@/lib/theme";
 interface Note {
   id: string;
   raw_text: string;
+  original_raw_text?: string;
   created_at: string;
   category: string;
   title?: string;
@@ -197,7 +198,7 @@ export default function Home() {
           router.push("/verify");
           return;
         }
-        
+
         setUser(currentUser);
 
         // Perform migration if there are anonymous notes in sessionStorage
@@ -226,9 +227,11 @@ export default function Home() {
         setNotes(dbNotes.map((n: any) => ({
           id: n.id,
           raw_text: n.raw_text,
+          original_raw_text: n.original_raw_text || n.raw_text,
           created_at: n.created_at,
           category: n.category,
           title: n.structured_content?.title || n.raw_text.split("\n")[0].substring(0, 30),
+          title_is_custom: n.title_is_custom ?? false,
           structured_content: n.structured_content
         })));
       } catch (err) {
@@ -239,7 +242,7 @@ export default function Home() {
         if (storedNotes) {
           try {
             setNotes(JSON.parse(storedNotes));
-          } catch (e) {}
+          } catch (e) { }
         }
       } finally {
         setLoading(false);
@@ -264,7 +267,7 @@ export default function Home() {
 
     if (type === "bullet" || type === "checklist") {
       const prefixToInsert = type === "bullet" ? "- " : "- [ ] ";
-      
+
       if (start === end) {
         // No selection: toggle current line
         let lineStart = start;
@@ -284,12 +287,12 @@ export default function Home() {
         while (selEnd < text.length && text[selEnd] !== "\n" && text[selEnd] !== "\r") {
           selEnd++;
         }
-        
+
         const rangeText = text.substring(selStart, selEnd);
         const lines = rangeText.split("\n");
         const formattedLines = lines.map(line => prefixToInsert + line);
         const replacement = formattedLines.join("\n");
-        
+
         newText = text.substring(0, selStart) + replacement + text.substring(selEnd);
         newStart = selStart;
         newEnd = selStart + replacement.length;
@@ -355,7 +358,7 @@ export default function Home() {
     if (storedNotes) {
       try {
         setNotes(JSON.parse(storedNotes));
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -376,9 +379,11 @@ export default function Home() {
         const mappedNote: Note = {
           id: savedNote.id,
           raw_text: savedNote.raw_text,
+          original_raw_text: savedNote.original_raw_text || savedNote.raw_text,
           created_at: savedNote.created_at,
           category: savedNote.category,
           title: savedNote.structured_content?.title || savedNote.raw_text.split("\n")[0].substring(0, 30),
+          title_is_custom: savedNote.title_is_custom ?? false,
           structured_content: savedNote.structured_content
         };
         setNotes((prevNotes) => [mappedNote, ...prevNotes]);
@@ -392,14 +397,15 @@ export default function Home() {
       }
     } else {
       // Anonymous saving
-      const id = typeof crypto !== "undefined" && crypto.randomUUID 
-        ? crypto.randomUUID() 
+      const id = typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
         : Math.random().toString(36).substring(2, 9);
 
       const titleText = noteText.split("\n")[0].substring(0, 30) + (noteText.length > 30 ? "..." : "");
       const newNote: Note = {
         id,
         raw_text: noteText,
+        original_raw_text: noteText,
         created_at: new Date().toISOString(),
         category: "Plain Text",
         title: titleText,
@@ -460,7 +466,7 @@ export default function Home() {
     let newRawText = selectedNote.raw_text;
     const rawLines = newRawText.split("\n");
     const contentText = suffix.replace(/^\]\s*/, "").trim();
-    
+
     if (contentText) {
       for (let j = 0; j < rawLines.length; j++) {
         const rawLine = rawLines[j];
@@ -571,8 +577,11 @@ export default function Home() {
       return;
     }
 
-    // If the raw text hasn't changed, skip the update entirely — unless we are requesting a prompt override
-    if (!promptType && !customPrompt && trimmed === selectedNote!.raw_text.trim()) {
+    // BUG 3 FIX: compare trimmed against BOTH the original raw_text AND the saved AI markdown.
+    // This catches whitespace-only changes regardless of which version is currently in the editor.
+    const rawNormalized = selectedNote!.raw_text.trim();
+    const aiNormalized = selectedNote!.structured_content?.markdown?.trim() ?? "";
+    if (!promptType && !customPrompt && (trimmed === rawNormalized || trimmed === aiNormalized)) {
       setIsEditing(false);
       return;
     }
@@ -580,18 +589,45 @@ export default function Home() {
     if (user) {
       setIsUpdating(true);
       try {
-        const updated = await updateNote(
-          selectedNote!.id,
-          trimmed,
-          skipAi,
-          undefined,
-          undefined,
-          promptType,
-          customPrompt
-        );
+        let updated: any;
+
+        if (skipAi) {
+          // "Update as-is":
+          //   • raw_text gets updated to the current editor content (trimmed).
+          //   • structured_content.markdown gets updated to the current editor content (trimmed).
+          //   • title gets preserved.
+          const existingTitle =
+            selectedNote!.structured_content?.title ||
+            selectedNote!.title ||
+            selectedNote!.raw_text.split("\n")[0].substring(0, 30);
+
+          updated = await updateNote(
+            selectedNote!.id,
+            trimmed,                                         // CURRENT editor content becomes raw_text
+            true,                                            // skip_ai
+            selectedNote!.category,                          // preserve existing category
+            { title: existingTitle, markdown: trimmed },     // structured_content with edited text
+            undefined,
+            undefined
+          );
+        } else {
+          // "Update with AI": the currently edited text becomes the new raw_text that
+          // the AI will process and re-structure.
+          updated = await updateNote(
+            selectedNote!.id,
+            trimmed,                                         // CURRENT editor content becomes raw_text
+            false,                                           // skip_ai
+            undefined,
+            undefined,
+            promptType,
+            customPrompt
+          );
+        }
+
         const mappedNote: Note = {
           id: updated.id,
           raw_text: updated.raw_text,
+          original_raw_text: updated.original_raw_text || updated.raw_text,
           created_at: updated.created_at,
           category: updated.category,
           title: updated.structured_content?.title || updated.raw_text.split("\n")[0].substring(0, 30),
@@ -610,16 +646,22 @@ export default function Home() {
       }
     } else {
       // Anonymous note local update (no AI)
+      const existingTitle =
+        selectedNote!.structured_content?.title ||
+        selectedNote!.title ||
+        trimmed.split("\n")[0].substring(0, 30) + (trimmed.length > 30 ? "..." : "");
+
       const mappedNote: Note = {
         ...selectedNote!,
         raw_text: trimmed,
-        title: trimmed.split("\n")[0].substring(0, 30) + (trimmed.length > 30 ? "..." : ""),
+        original_raw_text: selectedNote!.original_raw_text || selectedNote!.raw_text,
+        title: existingTitle,
         structured_content: {
-          title: trimmed.split("\n")[0].substring(0, 30) + (trimmed.length > 30 ? "..." : ""),
+          title: existingTitle,
           markdown: trimmed
         }
       };
-      
+
       const updatedNotes = notes.map(n => n.id === mappedNote.id ? mappedNote : n);
       setNotes(updatedNotes);
       sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
@@ -627,6 +669,7 @@ export default function Home() {
       setIsEditing(false);
     }
   };
+
 
   const handleRenameTitle = async () => {
     const newTitle = titleEditValue.trim();
@@ -783,21 +826,20 @@ export default function Home() {
         const indent = checkboxMatch[1];
         const isChecked = checkboxMatch[2].toLowerCase() === "x";
         const contentText = checkboxMatch[3];
-        
+
         return (
-          <div 
-            key={idx} 
+          <div
+            key={idx}
             className="flex items-start gap-2.5 my-1.5 text-sm leading-relaxed text-left"
             style={{ paddingLeft: `${Math.max(16, indent.length * 12)}px` }}
           >
             <button
               type="button"
               onClick={() => handleToggleCheckbox(idx)}
-              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors focus:outline-none focus:ring-1 focus:ring-zinc-500 ${
-                isChecked 
-                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-950" 
+              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors focus:outline-none focus:ring-1 focus:ring-zinc-500 ${isChecked
+                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-950"
                   : "border-zinc-300 bg-white text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900"
-              }`}
+                }`}
               title={isChecked ? "Mark as unchecked" : "Mark as checked"}
             >
               {isChecked && (
@@ -898,16 +940,16 @@ export default function Home() {
             />
             <span>Unstructured Notes</span>
           </Link>
-          
+
           <div className="flex items-center gap-3">
             {!loading && !user && (
               <Link
                 href="/premium"
                 className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 dark:text-amber-400 shadow-sm transition-all duration-200 cursor-pointer"
               >
-                <svg 
-                  className="w-3.5 h-3.5 transform group-hover:scale-110 group-hover:rotate-12 transition-transform duration-250 ease-out" 
-                  fill="currentColor" 
+                <svg
+                  className="w-3.5 h-3.5 transform group-hover:scale-110 group-hover:rotate-12 transition-transform duration-250 ease-out"
+                  fill="currentColor"
                   viewBox="0 0 20 20"
                 >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -931,7 +973,7 @@ export default function Home() {
                     AI Active ({user.trial_days_left}d left)
                   </span>
                 )}
-                
+
                 {/* Profile Dropdown Container */}
                 <div className="relative">
                   <button
@@ -952,8 +994,8 @@ export default function Home() {
                   {isProfileDropdownOpen && (
                     <>
                       {/* Invisible backdrop to close the dropdown */}
-                      <div 
-                        className="fixed inset-0 z-30" 
+                      <div
+                        className="fixed inset-0 z-30"
                         onClick={() => setIsProfileDropdownOpen(false)}
                       />
                       <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg py-1.5 z-40 animate-in fade-in slide-in-from-top-1 duration-100">
@@ -1127,13 +1169,11 @@ export default function Home() {
                     setIsTitleEditing(false);
                     setEditText(note.raw_text);
                   }}
-                  className={`group relative p-4 rounded-xl border transition-all text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${
-                    deletingNoteId === note.id ? "opacity-0 scale-95 pointer-events-none duration-300" : "duration-200"
-                  } ${
-                    selectedNote?.id === note.id
+                  className={`group relative p-4 rounded-xl border transition-all text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${deletingNoteId === note.id ? "opacity-0 scale-95 pointer-events-none duration-300" : "duration-200"
+                    } ${selectedNote?.id === note.id
                       ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-800 dark:ring-zinc-300 shadow-sm"
                       : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-950/60 dark:hover:border-zinc-700"
-                  }`}
+                    }`}
                 >
                   {selectedNote?.id === note.id && (
                     <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
@@ -1152,7 +1192,7 @@ export default function Home() {
                       {note.category}
                     </span>
                   </div>
-                  
+
                   {/* Delete button (visible on hover) */}
                   <button
                     onClick={(e) => {
@@ -1267,7 +1307,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {!isEditing && (
                   <button
@@ -1301,70 +1341,99 @@ export default function Home() {
                   </div>
                 )}
                 <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex items-center justify-between mb-2">
+                  {/* Toggle row: label + restore toggle + formatting toolbar */}
+                  <div className="flex flex-wrap items-center justify-between gap-y-1.5 mb-2">
                     <label
                       htmlFor="edit_raw_text"
-                      className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 text-left"
+                      className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 text-left shrink-0"
                     >
                       Edit note content
                     </label>
-                    
-                    {/* Formatting Toolbar */}
-                    <div className="flex items-center gap-1 bg-zinc-50 dark:bg-zinc-950 p-1 rounded-lg border border-zinc-200/60 dark:border-zinc-800/60">
-                      <button
-                        type="button"
-                        onClick={() => applyFormat("bold", true)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs font-bold transition-colors"
-                        title="Bold"
-                      >
-                        B
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyFormat("italic", true)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs italic font-serif transition-colors"
-                        title="Italic"
-                      >
-                        I
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyFormat("underline", true)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs underline transition-colors"
-                        title="Underline"
-                      >
-                        U
-                      </button>
-                      <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1"></div>
-                      <button
-                        type="button"
-                        onClick={() => applyFormat("heading", true)}
-                        className="h-7 px-2 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[10px] font-extrabold tracking-wider transition-colors"
-                        title="Add Heading"
-                      >
-                        H1/H2
-                      </button>
-                      <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1"></div>
-                      <button
-                        type="button"
-                        onClick={() => applyFormat("bullet", true)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
-                        title="Bullet List"
-                      >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyFormat("checklist", true)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
-                        title="Checklist"
-                      >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </button>
+
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      {/* Raw ↔ AI version toggle — only for AI-organized notes */}
+                      {selectedNote &&
+                        selectedNote.category !== "Plain Text" &&
+                        selectedNote.structured_content?.markdown &&
+                        selectedNote.structured_content.markdown.trim() !== (selectedNote.original_raw_text || selectedNote.raw_text).trim() && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const rawVal = selectedNote.original_raw_text || selectedNote.raw_text;
+                              const aiVal = selectedNote.structured_content!.markdown;
+                              // If the editor currently shows the AI version, load raw; otherwise load AI
+                              const showingAi = editText.trim() === aiVal.trim();
+                              setEditText(showingAi ? rawVal : aiVal);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md border border-zinc-200/80 dark:border-zinc-700/80 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors"
+                            title="Switch between raw input and AI-organised version"
+                          >
+                            <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            {editText.trim() === (selectedNote.original_raw_text || selectedNote.raw_text).trim()
+                              ? "Restore AI version"
+                              : "Restore raw text"}
+                          </button>
+                        )}
+
+                      {/* Formatting Toolbar */}
+                      <div className="flex items-center gap-1 bg-zinc-50 dark:bg-zinc-950 p-1 rounded-lg border border-zinc-200/60 dark:border-zinc-800/60">
+                        <button
+                          type="button"
+                          onClick={() => applyFormat("bold", true)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs font-bold transition-colors"
+                          title="Bold"
+                        >
+                          B
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyFormat("italic", true)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs italic font-serif transition-colors"
+                          title="Italic"
+                        >
+                          I
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyFormat("underline", true)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs underline transition-colors"
+                          title="Underline"
+                        >
+                          U
+                        </button>
+                        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1"></div>
+                        <button
+                          type="button"
+                          onClick={() => applyFormat("heading", true)}
+                          className="h-7 px-2 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[10px] font-extrabold tracking-wider transition-colors"
+                          title="Add Heading"
+                        >
+                          H1/H2
+                        </button>
+                        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1"></div>
+                        <button
+                          type="button"
+                          onClick={() => applyFormat("bullet", true)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
+                          title="Bullet List"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyFormat("checklist", true)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
+                          title="Checklist"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <textarea
@@ -1455,8 +1524,8 @@ export default function Home() {
                                     />
                                   </div>
                                   <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                                    {PRESET_PROMPTS.filter(p => 
-                                      p.label.toLowerCase().includes(promptQuery.toLowerCase()) || 
+                                    {PRESET_PROMPTS.filter(p =>
+                                      p.label.toLowerCase().includes(promptQuery.toLowerCase()) ||
                                       p.description.toLowerCase().includes(promptQuery.toLowerCase())
                                     ).map((prompt) => (
                                       <button
@@ -1580,7 +1649,7 @@ export default function Home() {
                   >
                     Write your thoughts freely...
                   </label>
-                  
+
                   {/* Formatting Toolbar */}
                   <div className="flex items-center gap-1 bg-zinc-50 dark:bg-zinc-950 p-1 rounded-lg border border-zinc-200/60 dark:border-zinc-800/60">
                     <button
@@ -1740,8 +1809,8 @@ export default function Home() {
                                   />
                                 </div>
                                 <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                                  {PRESET_PROMPTS.filter(p => 
-                                    p.label.toLowerCase().includes(savePromptQuery.toLowerCase()) || 
+                                  {PRESET_PROMPTS.filter(p =>
+                                    p.label.toLowerCase().includes(savePromptQuery.toLowerCase()) ||
                                     p.description.toLowerCase().includes(savePromptQuery.toLowerCase())
                                   ).map((prompt) => (
                                     <button
@@ -1841,9 +1910,8 @@ export default function Home() {
 
       {toastMessage && (
         <div
-          className={`fixed bottom-4 right-4 z-50 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 px-4 py-2.5 rounded-xl shadow-lg border border-zinc-800 dark:border-zinc-200 text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform ${
-            toastVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-95"
-          }`}
+          className={`fixed bottom-4 right-4 z-50 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 px-4 py-2.5 rounded-xl shadow-lg border border-zinc-800 dark:border-zinc-200 text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform ${toastVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-95"
+            }`}
         >
           <span>✅</span>
           <span>{toastMessage}</span>
@@ -1959,11 +2027,10 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 key={s}
                 type="button"
                 onClick={() => setStep(s)}
-                className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
-                  step === s 
-                    ? "w-6 bg-zinc-900 dark:bg-white" 
+                className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${step === s
+                    ? "w-6 bg-zinc-900 dark:bg-white"
                     : "w-1.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-400 dark:hover:bg-zinc-700"
-                }`}
+                  }`}
                 aria-label={`Go to step ${s}`}
               />
             ))}
@@ -2057,15 +2124,13 @@ function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirma
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm transition-opacity duration-200 ${
-        animateShow ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm transition-opacity duration-200 ${animateShow ? "opacity-100" : "opacity-0"
+        }`}
       onClick={onClose}
     >
       <div
-        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-200 transform ${
-          animateShow ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
+        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-200 transform ${animateShow ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Delete Note?</h3>
@@ -2130,15 +2195,13 @@ function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfir
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm transition-opacity duration-200 ${
-        animateShow ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-sm transition-opacity duration-200 ${animateShow ? "opacity-100" : "opacity-0"
+        }`}
       onClick={onClose}
     >
       <div
-        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-200 transform text-center ${
-          animateShow ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
+        className={`w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-200 transform text-center ${animateShow ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-full flex justify-center mb-4">

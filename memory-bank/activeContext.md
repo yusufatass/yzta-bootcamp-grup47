@@ -5,6 +5,24 @@
 Phase 4 — Demo Readiness. We have successfully finalized Phase 3 (Hardening) by completing a comprehensive Light/Dark Mode theme audit across all pages and components, fixing all custom zinc shade typos, adding standard option background styling, enhancing the onboarding modal walkthrough with beautiful CSS mock-ups, implementing a custom and accessible Delete Confirmation Dialog, adding a conditional "Restore raw text" editor feature, and verifying full system compilation and build stability.
 
 ## Recent Changes
+* **[Database Schema Change & Note Save Logic Refactor — 2026-07-11]** Implemented a schema change and code refactor to properly decouple the note's original raw text from the latest/current text:
+  - **Database Migration 002**: Added `original_raw_text TEXT` column to the `notes` table (documented in `SUPABASE_SETUP.md` and `schema.sql`), set once during note creation and never updated again. Pre-migration notes fallback to using `raw_text` as `original_raw_text`.
+  - **Decoupled Fields**:
+    - `raw_text` now always tracks the CURRENT/latest text saved in the editor (updates on every save, both "Update as-is" and "Update with AI").
+    - `original_raw_text` holds the first ever unstructured note text, used exclusively by the "Restore raw text" toggle.
+    - `structured_content` tracks the current display markdown and title, updating on every save.
+  - **Frontend Updates**:
+    - "Update as-is" saves current editor text to both `raw_text` and `structured_content` while preserving the title.
+    - "Update with AI" saves current editor text to `raw_text`, processes it with AI, and saves the result to `structured_content`.
+    - Version toggle is updated to swap the editor between `original_raw_text` (with fallback to `raw_text` for old notes) and `structured_content.markdown`.
+  - **Build**: Successfully compiled Next.js with Exit code 0.
+* **[Audit/Validation — 2026-07-11]** Performed a comprehensive code audit of all three core note-saving flows and layout integrity in `page.tsx`. All four areas passed:
+  - **"Update as-is"** (line 1440/1559): calls `handleUpdateNoteAction(true)` → `skipAi=true` → `updateNote(..., skip_ai=true, ...)` → backend bypasses LLM entirely. ✅ Clean.
+  - **"Update with AI" split button** (lines 1449–1552): Left button calls `handleUpdateNoteAction(false)`; chevron toggles `isPromptDropdownOpen`; preset selection calls `handleUpdateNoteAction(false, prompt.id)`; custom text calls `handleUpdateNoteAction(false, undefined, customPromptText)`. Dropdown renders `absolute right-0 bottom-full mb-2 z-[100]` — opens upward above button row. ✅ Clean.
+  - **Version toggle** (lines 1315–1338): `type="button"` — does NOT submit the form. Conditions: `selectedNote && category !== "Plain Text" && structured_content.markdown exists && markdown ≠ raw_text`. Click simply calls `setEditText()` — zero API or AI calls. Label switches based on `editText.trim() === raw_text.trim()`. ✅ Clean.
+  - **Layout integrity** (lines 1305–1398): Outer row is `flex flex-wrap justify-between gap-y-1.5`. Toggle + formatting toolbar live inside a `flex items-center gap-2 flex-wrap justify-end` wrapper. All buttons are `type="button"` — none accidentally submit the form. The `<form onSubmit={handleUpdateNote}>` handler at line 687 calls `e.preventDefault()` then delegates to `handleUpdateNoteAction(skipAiDefault)` — accidental Enter key presses are safe. No event propagation bugs. ✅ Clean.
+  - **Build**: `npm run build` → `Exit code: 0`. All 9 routes compiled cleanly with no TypeScript errors.
+* **[Regression Fix]** Re-implemented the raw/AI version toggle button in the note edit view after it was accidentally removed during a codebase cleanup/formatting pass. The button is now correctly re-added into `page.tsx` using only the existing `raw_text` and `structured_content.markdown` fields — no new DB columns required. Visibility is guarded by three conditions: (1) a note is selected, (2) the note's category is not "Plain Text" (i.e. it was AI-organised), and (3) `structured_content.markdown` differs from `raw_text`. The label correctly reads "Restore raw text" when the editor shows the AI version, and "Restore AI version" when it shows the raw text. The toolbar row was refactored from a single-flex-row to a flex-wrap layout so the toggle button and formatting toolbar coexist cleanly at all viewport widths.
 * Upgraded both the "Update with AI" and "Save with AI" editor action buttons into unified Split Buttons with a context-aware AI Prompt Dropdown Menu (allowing preset prompts like 🌸 Simplify, 💡 Explain, 📝 Improve, or custom raw instructions via 💬 Ask AI Assistant), resolving parent container clipping by switching overflow behavior from `overflow-hidden` to `overflow-visible` on the main Center Workspace card `<section>` and `<form>` wrappers and elevating dropdown z-index to `z-[100]`, alongside outside-click backdrop handling.
 * Fixed note card title rendering bug in the sidebar Note History list by explicitly rendering `{note.title}` inside a semantic `<h3>` element with clean padding and low-cognitive-load spacing.
 * Modified the frontend API payload for note creation and updates to support optional `prompt_type` and `custom_prompt` parameters.
@@ -48,7 +66,7 @@ Phase 4 — Demo Readiness. We have successfully finalized Phase 3 (Hardening) b
 
 ## Next Steps
 1. Apply `SUPABASE_SETUP.md` Migration 001 in the Supabase SQL Editor (one-time, manual step).
-2. Begin Phase 4 — Demo Readiness: finalize pitch materials, write README, and conduct demo rehearsal.
+2. Continue Phase 4 — Demo Readiness: finalize pitch materials, write README, and conduct demo rehearsal.
 
 ## Active Decisions and Considerations
 * Maintain backend idempotency in database seeding so developers can run migrations/seeding safely on demand.
