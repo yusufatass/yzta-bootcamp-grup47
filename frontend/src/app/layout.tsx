@@ -38,12 +38,36 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var t = localStorage.getItem('theme');
-                  if (t === 'light') {
+                  var mode = localStorage.getItem('themeMode') || localStorage.getItem('theme') || 'dark';
+                  if (mode === 'light') {
                     document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.remove('theme-custom');
+                  } else if (mode === 'custom') {
+                    document.documentElement.classList.add('theme-custom');
+                    var colorsStr = localStorage.getItem('customColors');
+                    if (colorsStr) {
+                      var colors = JSON.parse(colorsStr);
+                      document.documentElement.style.setProperty('--custom-bg', colors.bg);
+                      document.documentElement.style.setProperty('--custom-panel-bg', colors.panelBg);
+                      document.documentElement.style.setProperty('--custom-text', colors.text);
+                      document.documentElement.style.setProperty('--custom-border', colors.border);
+                      document.documentElement.style.setProperty('--custom-border-darker', colors.borderDarker);
+                      document.documentElement.style.setProperty('--custom-border-lighter', colors.borderLighter);
+                      document.documentElement.style.setProperty('--custom-text-muted', colors.textMuted);
+                      document.documentElement.style.setProperty('--custom-text-secondary', colors.textSecondary);
+                      document.documentElement.style.setProperty('--custom-accent', colors.accent);
+                      document.documentElement.style.setProperty('--custom-accent-hover', colors.accentHover);
+                      document.documentElement.style.setProperty('--custom-accent-light', colors.accentLight);
+                    }
+                    var isDark = localStorage.getItem('customIsDark') === 'true';
+                    if (isDark) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
                   } else {
-                    // default to dark (no pref set, or pref === 'dark')
                     document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('theme-custom');
                   }
                 } catch(e) {
                   document.documentElement.classList.add('dark');
