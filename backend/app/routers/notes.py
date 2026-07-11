@@ -11,12 +11,16 @@ router = APIRouter(prefix="/api/notes", tags=["notes"])
 class NoteCreate(BaseModel):
     raw_text: str
     skip_ai: bool = False
+    prompt_type: Optional[str] = None
+    custom_prompt: Optional[str] = None
 
 class NoteUpdate(BaseModel):
     raw_text: str
     skip_ai: bool = False
     category: Optional[str] = None
     structured_content: Optional[dict] = None
+    prompt_type: Optional[str] = None
+    custom_prompt: Optional[str] = None
 
 class NoteRenameTitle(BaseModel):
     title: str
@@ -79,7 +83,11 @@ async def create_note(
             }
         else:
             # Call AI service with the (possibly truncated) text
-            ai_result = analyze_note_content(ai_text)
+            ai_result = analyze_note_content(
+                ai_text,
+                prompt_type=note_data.prompt_type,
+                custom_prompt=note_data.custom_prompt
+            )
             
             payload = {
                 "user_id": ctx.user.id,
@@ -214,7 +222,11 @@ async def update_note(
                 }
         else:
             # 4. Re-run AI service (full processing)
-            ai_result = analyze_note_content(ai_text)
+            ai_result = analyze_note_content(
+                ai_text,
+                prompt_type=note_data.prompt_type,
+                custom_prompt=note_data.custom_prompt
+            )
             
             structured = ai_result["structured_content"]
             # If user has a custom title, preserve it — don't let AI overwrite it

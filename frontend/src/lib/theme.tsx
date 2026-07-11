@@ -84,7 +84,7 @@ export function generateFullColors(
 export const PRESETS: PresetTheme[] = [
   {
     id: "sepia",
-    name: "Sepia (Warm/Retro)",
+    name: "Sepia",
     isDark: false,
     colors: {
       bg: "#f4efe2",
@@ -95,7 +95,7 @@ export const PRESETS: PresetTheme[] = [
   },
   {
     id: "forest",
-    name: "Forest (Doğa)",
+    name: "Forest",
     isDark: false,
     colors: {
       bg: "#eef1ed",
@@ -106,7 +106,7 @@ export const PRESETS: PresetTheme[] = [
   },
   {
     id: "cyberpunk",
-    name: "Cyberpunk (Neon)",
+    name: "Cyberpunk",
     isDark: true,
     colors: {
       bg: "#0a0915",
@@ -117,7 +117,7 @@ export const PRESETS: PresetTheme[] = [
   },
   {
     id: "nord",
-    name: "Nord Ice (Kuzey)",
+    name: "Nord Ice",
     isDark: true,
     colors: {
       bg: "#2e3440",
@@ -318,7 +318,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M4.098 19.902a3.75 3.75 0 015.304 0l6.401-6.402M4.098 19.902l9.713-9.712m-9.713 9.712l-1.33 1.33A1 1 0 005.187 23h1.365a1 1 0 00.707-.293l1.33-1.33m0 0l11.24-11.24a3.75 3.75 0 10-5.304-5.304L5.187 15.93m15.528 2.218a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zm-3.472-9.437a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM3.75 6.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 010-1.5zM5.25 3a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H6a.75.75 0 01-.75-.75z" />
         </svg>
         <span className="text-xs font-semibold hidden md:inline">
-          {themeMode === "light" ? "Beyaz" : themeMode === "dark" ? "Siyah" : "Özel"}
+          {themeMode === "light" ? "Light" : themeMode === "dark" ? "Dark" : "Custom"}
         </span>
       </button>
 
@@ -326,13 +326,13 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         <div className="absolute right-0 mt-2 w-72 origin-top-right rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl z-50 p-4 font-sans focus:outline-none transition-all">
           <div className="flex items-center justify-between mb-3 border-b border-zinc-100 dark:border-zinc-800 pb-2">
             <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-1.5">
-              <span>🎨</span> Tema Ayarları
+              <span>🎨</span> Theme Settings
             </span>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-xs"
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-xs cursor-pointer"
             >
-              Kapat
+              Close
             </button>
           </div>
 
@@ -341,35 +341,35 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             <button
               type="button"
               onClick={() => setThemeMode("light")}
-              className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all ${
+              className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all cursor-pointer ${
                 themeMode === "light"
                   ? "bg-white text-zinc-900 shadow dark:bg-zinc-800 dark:text-zinc-50"
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              Beyaz
+              Light
             </button>
             <button
               type="button"
               onClick={() => setThemeMode("dark")}
-              className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all ${
+              className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all cursor-pointer ${
                 themeMode === "dark"
                   ? "bg-white text-zinc-900 shadow dark:bg-zinc-800 dark:text-zinc-50"
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              Siyah
+              Dark
             </button>
             <button
               type="button"
               onClick={() => setThemeMode("custom")}
-              className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all ${
+              className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all cursor-pointer ${
                 themeMode === "custom"
                   ? "bg-white text-zinc-900 shadow dark:bg-zinc-800 dark:text-zinc-50"
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              Özel
+              Custom
             </button>
           </div>
 
@@ -379,7 +379,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
               {/* Presets grid */}
               <div>
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  Hazır Paletler
+                  PRESET PALETTES
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   {PRESETS.map((p) => (
@@ -387,7 +387,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                       key={p.id}
                       type="button"
                       onClick={() => selectPreset(p)}
-                      className="flex items-center gap-2 p-2 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 hover:bg-zinc-50 dark:hover:bg-zinc-950 text-left transition-colors group"
+                      className="flex items-center gap-2 p-2 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 hover:bg-zinc-50 dark:hover:bg-zinc-950 text-left transition-colors group cursor-pointer"
                     >
                       <span
                         className="h-4 w-4 rounded-full border border-zinc-300/40 flex-shrink-0 flex items-center justify-center"
@@ -406,12 +406,12 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
               {/* Color Customizer */}
               <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  Renkleri Özelleştir
+                  CUSTOMIZE COLORS
                 </span>
                 <div className="space-y-2">
                   {/* Background Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Arka Plan</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Background</span>
                     <input
                       type="color"
                       value={customColors.bg}
@@ -422,7 +422,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Panel Background Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Kutular / Paneller</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Cards / Panels</span>
                     <input
                       type="color"
                       value={customColors.panelBg}
@@ -433,7 +433,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Text Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Metin Rengi</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Text Color</span>
                     <input
                       type="color"
                       value={customColors.text}
@@ -444,7 +444,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Accent Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Vurgu / Accent</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Accent Color</span>
                     <input
                       type="color"
                       value={customColors.accent}
@@ -455,7 +455,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Dark Mode Toggle for Custom */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Koyu Mod Tabanlı mı?</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Is Dark Mode Based?</span>
                     <button
                       type="button"
                       onClick={() => setCustomColors(customColors, !customIsDark)}

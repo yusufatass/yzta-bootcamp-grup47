@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Optional
 from openai import OpenAI
 from app.config import settings
 
@@ -71,7 +72,7 @@ class AIProvider(ABC):
         pass
 
     @abstractmethod
-    def analyze_attempt(self, raw_text: str, extra_instruction: str = "") -> dict:
+    def analyze_attempt(self, raw_text: str, extra_instruction: str = "", prompt_instruction: str = "") -> dict:
         """Performs a single attempt to analyze the note."""
         pass
 
@@ -85,11 +86,13 @@ class GroqProvider(AIProvider):
         key = settings.GROQ_API_KEY
         return bool(key and "your-groq-api-key" not in key)
 
-    def analyze_attempt(self, raw_text: str, extra_instruction: str = "") -> dict:
+    def analyze_attempt(self, raw_text: str, extra_instruction: str = "", prompt_instruction: str = "") -> dict:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": raw_text}
         ]
+        if prompt_instruction:
+            messages.append({"role": "system", "content": prompt_instruction})
+        messages.append({"role": "user", "content": raw_text})
         if extra_instruction:
             messages.append({"role": "system", "content": extra_instruction})
 
@@ -118,11 +121,13 @@ class OpenAIProvider(AIProvider):
         key = settings.OPENAI_API_KEY
         return bool(key and "your-openai-api-key" not in key)
 
-    def analyze_attempt(self, raw_text: str, extra_instruction: str = "") -> dict:
+    def analyze_attempt(self, raw_text: str, extra_instruction: str = "", prompt_instruction: str = "") -> dict:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": raw_text}
         ]
+        if prompt_instruction:
+            messages.append({"role": "system", "content": prompt_instruction})
+        messages.append({"role": "user", "content": raw_text})
         if extra_instruction:
             messages.append({"role": "system", "content": extra_instruction})
 
@@ -167,14 +172,14 @@ def validate_and_format_response(data: dict) -> dict:
     }
 
 
-def run_provider_with_retry(provider: AIProvider, raw_text: str) -> dict:
+def run_provider_with_retry(provider: AIProvider, raw_text: str, prompt_instruction: str = "") -> dict:
     """
     Runs a single provider. If the first attempt fails or is malformed,
     it retries once with an extra corrective system prompt instruction.
     """
     # Attempt 1
     try:
-        data = provider.analyze_attempt(raw_text)
+        data = provider.analyze_attempt(raw_text, prompt_instruction=prompt_instruction)
         return validate_and_format_response(data)
     except Exception as e:
         logger.warning(f"{provider.name} Attempt 1 failed: {str(e)}. Retrying...")
@@ -184,11 +189,15 @@ def run_provider_with_retry(provider: AIProvider, raw_text: str) -> dict:
             "Ensure the output is valid JSON. The category MUST be exactly one of the six allowed values. "
             "The structured_content object MUST contain non-empty 'title' and 'markdown' strings."
         )
-        data = provider.analyze_attempt(raw_text, extra_instruction=extra_instruction)
+        data = provider.analyze_attempt(raw_text, extra_instruction=extra_instruction, prompt_instruction=prompt_instruction)
         return validate_and_format_response(data)
 
 
-def analyze_note_content(raw_text: str) -> dict:
+def analyze_note_content(
+    raw_text: str,
+    prompt_type: Optional[str] = None,
+    custom_prompt: Optional[str] = None
+) -> dict:
     """
     Analyzes raw note text, categorizing and organizing it.
     Order:
@@ -206,6 +215,17 @@ def analyze_note_content(raw_text: str) -> dict:
             }
         }
 
+    # Build prompt_instruction based on prompt_type or custom_prompt
+    prompt_instruction = ""
+    if prompt_type == "simplify":
+        prompt_instruction = "The user wants to simplify this note. Rewrite it in simpler terms, clearly and elegantly while preserving core data."
+    elif prompt_type == "explain":
+        prompt_instruction = "The user wants to explain complex jargon or concepts inside this note. Explain any complex concepts, terms, or jargon in-line or in a dedicated section."
+    elif prompt_type == "improve":
+        prompt_instruction = "The user wants to improve this note. Polish the grammar, flow, clarity, and ensure a professional tone."
+    elif custom_prompt and custom_prompt.strip():
+        prompt_instruction = f"The user has provided a custom instruction for this note: '{custom_prompt.strip()}'. Apply this request while structuring the note."
+
     providers = [
         GroqProvider(),
         OpenAIProvider()
@@ -221,7 +241,7 @@ def analyze_note_content(raw_text: str) -> dict:
 
         try:
             logger.info(f"Attempting note analysis with {provider.name}...")
-            result = run_provider_with_retry(provider, raw_text)
+            result = run_provider_with_retry(provider, raw_text, prompt_instruction=prompt_instruction)
             
             # Log success (do NOT log full note content)
             logger.info(f"Note analysis successfully served by {provider.name}")
