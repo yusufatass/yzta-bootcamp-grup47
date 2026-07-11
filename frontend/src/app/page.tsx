@@ -614,19 +614,19 @@ export default function Home() {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "Shopping List":
-        return "bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-950/20 dark:text-amber-400 dark:ring-amber-500/10";
+        return "bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 ring-amber-500/30 dark:ring-amber-500/40";
       case "Meeting Notes":
-        return "bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-950/20 dark:text-blue-400 dark:ring-blue-500/10";
+        return "bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 ring-sky-500/30 dark:ring-sky-500/40";
       case "Lecture Notes":
-        return "bg-purple-50 text-purple-700 ring-purple-600/10 dark:bg-purple-950/20 dark:text-purple-400 dark:ring-purple-500/10";
+        return "bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 ring-purple-500/30 dark:ring-purple-500/40";
       case "Daily Plan":
-        return "bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-500/10";
+        return "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30 dark:ring-emerald-500/40";
       case "Travel List":
-        return "bg-sky-50 text-sky-700 ring-sky-600/10 dark:bg-sky-950/20 dark:text-sky-400 dark:ring-sky-500/10";
+        return "bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 ring-indigo-500/30 dark:ring-indigo-500/40";
       case "Pending AI processing":
-        return "bg-zinc-100 text-zinc-600 ring-zinc-500/10 dark:bg-zinc-800 dark:text-zinc-400 animate-pulse";
+        return "bg-slate-500/10 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 ring-slate-500/30 dark:ring-slate-500/40 animate-pulse";
       default:
-        return "bg-zinc-100 text-zinc-600 ring-zinc-500/10 dark:bg-zinc-800/50 dark:text-zinc-400";
+        return "bg-slate-500/10 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 ring-slate-500/30 dark:ring-slate-500/40";
     }
   };
 

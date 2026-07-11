@@ -5,6 +5,8 @@
 Phase 4 — Demo Readiness. We have successfully finalized Phase 3 (Hardening) by completing a comprehensive Light/Dark Mode theme audit across all pages and components, fixing all custom zinc shade typos, adding standard option background styling, enhancing the onboarding modal walkthrough with beautiful CSS mock-ups, implementing a custom and accessible Delete Confirmation Dialog, adding a conditional "Restore raw text" editor feature, and verifying full system compilation and build stability.
 
 ## Recent Changes
+* Audited and localized the theme settings panel (`frontend/src/lib/theme.tsx`), translating all remaining Turkish strings to English (Preset names, headers, labels, buttons).
+* Resolved custom theme color collisions with note category badges by switching the badge color mapping in `page.tsx` (`getCategoryColor`) to use non-overridden, high-contrast Tailwind color families (sky, purple, emerald, amber, indigo, slate) with explicit borders and semi-transparent backgrounds, guaranteeing readability across custom themes like Sepia, Cyberpunk, Forest, and Nord Ice.
 * Implemented Account Settings page (`/settings`) allowing authenticated users to update first/last name metadata or permanently delete their account. Account deletion triggers a secure backend route that wipes notes from `public.notes` first, deletes the auth user record via Supabase Admin API, clears local tokens/session details, and redirects back to `/`.
 * Added a secure profile dropdown menu in the header navbar containing links to Account Settings and Sign Out.
 * Created backend routers `PUT /api/auth/profile` and `DELETE /api/auth/account` to support user metadata updates and cascade deletions under administrator privileges.
