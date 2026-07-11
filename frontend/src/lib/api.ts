@@ -115,7 +115,12 @@ export async function migrateNotes(notes: MigrateNoteItem[]): Promise<any> {
   return data;
 }
 
-export async function createNote(raw_text: string, skip_ai: boolean = false): Promise<any> {
+export async function createNote(
+  raw_text: string, 
+  skip_ai: boolean = false,
+  prompt_type?: string,
+  custom_prompt?: string
+): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new Error("No auth token found");
 
@@ -125,7 +130,7 @@ export async function createNote(raw_text: string, skip_ai: boolean = false): Pr
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ raw_text, skip_ai }),
+    body: JSON.stringify({ raw_text, skip_ai, prompt_type, custom_prompt }),
   });
 
   const data = await response.json();
@@ -176,7 +181,9 @@ export async function updateNote(
   raw_text: string, 
   skip_ai: boolean = false,
   category?: string,
-  structured_content?: any
+  structured_content?: any,
+  prompt_type?: string,
+  custom_prompt?: string
 ): Promise<any> {
   const token = getAuthToken();
   if (!token) throw new Error("No auth token found");
@@ -187,7 +194,14 @@ export async function updateNote(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ raw_text, skip_ai, category, structured_content }),
+    body: JSON.stringify({ 
+      raw_text, 
+      skip_ai, 
+      category, 
+      structured_content,
+      prompt_type,
+      custom_prompt
+    }),
   });
 
   const data = await response.json();

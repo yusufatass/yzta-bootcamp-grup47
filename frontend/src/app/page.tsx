@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -32,6 +32,33 @@ interface Note {
   };
 }
 
+const PRESET_PROMPTS = [
+  {
+    id: "simplify",
+    icon: "🌸",
+    label: "Simplify",
+    description: "Rewrites the note into simpler terms"
+  },
+  {
+    id: "explain",
+    icon: "💡",
+    label: "Explain",
+    description: "Explains complex jargon or concepts"
+  },
+  {
+    id: "improve",
+    icon: "📝",
+    label: "Improve",
+    description: "Polishes grammar, flow, and tone"
+  },
+  {
+    id: "custom",
+    icon: "💬",
+    label: "Ask AI Assistant",
+    description: "Submit custom instructions to the AI"
+  }
+];
+
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<UserMe | null>(null);
@@ -61,6 +88,20 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
 
+  // Prompt dropdown state
+  const [isPromptDropdownOpen, setIsPromptDropdownOpen] = useState(false);
+  const [promptQuery, setPromptQuery] = useState("");
+  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [customPromptText, setCustomPromptText] = useState("");
+  const promptDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Save prompt dropdown state
+  const [isSavePromptDropdownOpen, setIsSavePromptDropdownOpen] = useState(false);
+  const [savePromptQuery, setSavePromptQuery] = useState("");
+  const [selectedSavePromptId, setSelectedSavePromptId] = useState<string | null>(null);
+  const [customSavePromptText, setCustomSavePromptText] = useState("");
+  const savePromptDropdownRef = useRef<HTMLDivElement>(null);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastVisible(true), 10);
@@ -87,6 +128,36 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Handle click outside for prompt dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (promptDropdownRef.current && !promptDropdownRef.current.contains(event.target as Node)) {
+        setIsPromptDropdownOpen(false);
+      }
+    }
+    if (isPromptDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isPromptDropdownOpen]);
+
+  // Handle click outside for save prompt dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (savePromptDropdownRef.current && !savePromptDropdownRef.current.contains(event.target as Node)) {
+        setIsSavePromptDropdownOpen(false);
+      }
+    }
+    if (isSavePromptDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSavePromptDropdownOpen]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -288,7 +359,7 @@ export default function Home() {
     }
   };
 
-  const handleSaveNoteAction = async (skipAi: boolean) => {
+  const handleSaveNoteAction = async (skipAi: boolean, promptType?: string, customPrompt?: string) => {
     setError(null);
     const trimmed = noteText.trim();
     if (!trimmed) return;
@@ -301,7 +372,7 @@ export default function Home() {
     if (user) {
       setIsOrganizing(true);
       try {
-        const savedNote = await createNote(noteText, skipAi);
+        const savedNote = await createNote(noteText, skipAi, promptType, customPrompt);
         const mappedNote: Note = {
           id: savedNote.id,
           raw_text: savedNote.raw_text,
@@ -490,7 +561,7 @@ export default function Home() {
   };
 
 
-  const handleUpdateNoteAction = async (skipAi: boolean) => {
+  const handleUpdateNoteAction = async (skipAi: boolean, promptType?: string, customPrompt?: string) => {
     setError(null);
     const trimmed = editText.trim();
     if (!trimmed) return;
@@ -500,8 +571,8 @@ export default function Home() {
       return;
     }
 
-    // If the raw text hasn't changed, skip the update entirely — no AI call, no DB write
-    if (trimmed === selectedNote!.raw_text.trim()) {
+    // If the raw text hasn't changed, skip the update entirely — unless we are requesting a prompt override
+    if (!promptType && !customPrompt && trimmed === selectedNote!.raw_text.trim()) {
       setIsEditing(false);
       return;
     }
@@ -509,7 +580,15 @@ export default function Home() {
     if (user) {
       setIsUpdating(true);
       try {
-        const updated = await updateNote(selectedNote!.id, trimmed, skipAi);
+        const updated = await updateNote(
+          selectedNote!.id,
+          trimmed,
+          skipAi,
+          undefined,
+          undefined,
+          promptType,
+          customPrompt
+        );
         const mappedNote: Note = {
           id: updated.id,
           raw_text: updated.raw_text,
@@ -1059,9 +1138,9 @@ export default function Home() {
                   {selectedNote?.id === note.id && (
                     <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
                   )}
-                  <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate pr-6">
-                    {note.structured_content?.title || note.title || "Untitled Note"}
-                  </p>
+                  <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 truncate pr-6">
+                    {note.title || "Untitled Note"}
+                  </h3>
                   <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
                     {note.raw_text}
                   </p>
@@ -1105,7 +1184,7 @@ export default function Home() {
 
         {/* Center Workspace */}
         {selectedNote ? (
-          <section className="flex-1 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 relative overflow-hidden min-h-0">
+          <section className="flex-1 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 relative overflow-visible min-h-0">
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4 mb-4">
               <div className="flex items-center gap-3">
                 <button
@@ -1212,7 +1291,7 @@ export default function Home() {
             </div>
 
             {isEditing ? (
-              <form onSubmit={handleUpdateNote} className="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
+              <form onSubmit={handleUpdateNote} className="flex-1 flex flex-col gap-4 overflow-visible min-h-0">
                 {isUpdating && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/85 flex flex-col items-center justify-center rounded-2xl backdrop-blur-[2px] z-10">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mb-4"></div>
@@ -1335,14 +1414,114 @@ export default function Home() {
                         >
                           Update as-is
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateNoteAction(false)}
-                          disabled={isUpdating || !editText.trim()}
-                          className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
-                        >
-                          Update with AI
-                        </button>
+                        <div className="relative inline-flex rounded-lg shadow-sm" ref={promptDropdownRef}>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateNoteAction(false)}
+                            disabled={isUpdating || !editText.trim()}
+                            className="bg-zinc-900 text-white rounded-l-lg px-5 py-2 text-sm font-semibold hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
+                          >
+                            Update with AI
+                          </button>
+                          <div className="w-[1px] bg-zinc-800 dark:bg-zinc-200/20 self-stretch" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsPromptDropdownOpen(!isPromptDropdownOpen);
+                              setPromptQuery("");
+                              setSelectedPromptId(null);
+                              setCustomPromptText("");
+                            }}
+                            disabled={isUpdating || !editText.trim()}
+                            className="bg-zinc-900 text-white rounded-r-lg px-2.5 py-2 text-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors flex items-center justify-center"
+                            title="AI prompt options"
+                          >
+                            <svg className={`h-4 w-4 transform transition-transform ${isPromptDropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                          </button>
+
+                          {isPromptDropdownOpen && (
+                            <div className="absolute right-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-zinc-200 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 text-left">
+                              {selectedPromptId !== "custom" ? (
+                                <>
+                                  <div className="relative mb-2">
+                                    <input
+                                      type="text"
+                                      value={promptQuery}
+                                      onChange={(e) => setPromptQuery(e.target.value)}
+                                      placeholder="Search prompts..."
+                                      className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                                    />
+                                  </div>
+                                  <div className="space-y-0.5 max-h-48 overflow-y-auto">
+                                    {PRESET_PROMPTS.filter(p => 
+                                      p.label.toLowerCase().includes(promptQuery.toLowerCase()) || 
+                                      p.description.toLowerCase().includes(promptQuery.toLowerCase())
+                                    ).map((prompt) => (
+                                      <button
+                                        key={prompt.id}
+                                        type="button"
+                                        onClick={() => {
+                                          if (prompt.id === "custom") {
+                                            setSelectedPromptId("custom");
+                                          } else {
+                                            setIsPromptDropdownOpen(false);
+                                            handleUpdateNoteAction(false, prompt.id);
+                                          }
+                                        }}
+                                        className="w-full text-left flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                                      >
+                                        <span className="text-sm select-none">{prompt.icon}</span>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{prompt.label}</p>
+                                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{prompt.description}</p>
+                                        </div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between pb-1 border-b border-zinc-100 dark:border-zinc-900">
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Custom Instruction</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedPromptId(null)}
+                                      className="text-[10px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 font-semibold"
+                                    >
+                                      Back
+                                    </button>
+                                  </div>
+                                  <textarea
+                                    value={customPromptText}
+                                    onChange={(e) => setCustomPromptText(e.target.value)}
+                                    placeholder="e.g. rewrite as a professional email..."
+                                    rows={3}
+                                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 resize-none"
+                                  />
+                                  <div className="flex justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (customPromptText.trim()) {
+                                          setIsPromptDropdownOpen(false);
+                                          handleUpdateNoteAction(false, undefined, customPromptText);
+                                          setCustomPromptText("");
+                                          setSelectedPromptId(null);
+                                        }
+                                      }}
+                                      disabled={!customPromptText.trim() || isUpdating}
+                                      className="bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                                    >
+                                      Submit
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )
                   ) : (
@@ -1383,7 +1562,7 @@ export default function Home() {
             )}
           </section>
         ) : (
-          <section className="flex-1 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 relative overflow-hidden min-h-0">
+          <section className="flex-1 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 relative overflow-visible min-h-0">
             {isOrganizing && (
               <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/85 flex flex-col items-center justify-center rounded-2xl backdrop-blur-[2px] z-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mb-4"></div>
@@ -1392,7 +1571,7 @@ export default function Home() {
                 </p>
               </div>
             )}
-            <form onSubmit={handleSaveNote} className="flex-1 flex flex-col gap-4 overflow-hidden min-h-0">
+            <form onSubmit={handleSaveNote} className="flex-1 flex flex-col gap-4 overflow-visible min-h-0">
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between mb-2">
                   <label
@@ -1520,14 +1699,114 @@ export default function Home() {
                       >
                         Save as-is
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSaveNoteAction(false)}
-                        disabled={!noteText.trim()}
-                        className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
-                      >
-                        Save with AI
-                      </button>
+                      <div className="relative inline-flex rounded-lg shadow-sm" ref={savePromptDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveNoteAction(false)}
+                          disabled={!noteText.trim()}
+                          className="bg-zinc-900 text-white rounded-l-lg px-5 py-2 text-sm font-semibold hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
+                        >
+                          Save with AI
+                        </button>
+                        <div className="w-[1px] bg-zinc-800 dark:bg-zinc-200/20 self-stretch" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsSavePromptDropdownOpen(!isSavePromptDropdownOpen);
+                            setSavePromptQuery("");
+                            setSelectedSavePromptId(null);
+                            setCustomSavePromptText("");
+                          }}
+                          disabled={!noteText.trim()}
+                          className="bg-zinc-900 text-white rounded-r-lg px-2.5 py-2 text-sm hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors flex items-center justify-center"
+                          title="AI prompt options"
+                        >
+                          <svg className={`h-4 w-4 transform transition-transform ${isSavePromptDropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                          </svg>
+                        </button>
+
+                        {isSavePromptDropdownOpen && (
+                          <div className="absolute right-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-zinc-200 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 text-left">
+                            {selectedSavePromptId !== "custom" ? (
+                              <>
+                                <div className="relative mb-2">
+                                  <input
+                                    type="text"
+                                    value={savePromptQuery}
+                                    onChange={(e) => setSavePromptQuery(e.target.value)}
+                                    placeholder="Search prompts..."
+                                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                                  />
+                                </div>
+                                <div className="space-y-0.5 max-h-48 overflow-y-auto">
+                                  {PRESET_PROMPTS.filter(p => 
+                                    p.label.toLowerCase().includes(savePromptQuery.toLowerCase()) || 
+                                    p.description.toLowerCase().includes(savePromptQuery.toLowerCase())
+                                  ).map((prompt) => (
+                                    <button
+                                      key={prompt.id}
+                                      type="button"
+                                      onClick={() => {
+                                        if (prompt.id === "custom") {
+                                          setSelectedSavePromptId("custom");
+                                        } else {
+                                          setIsSavePromptDropdownOpen(false);
+                                          handleSaveNoteAction(false, prompt.id);
+                                        }
+                                      }}
+                                      className="w-full text-left flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                                    >
+                                      <span className="text-sm select-none">{prompt.icon}</span>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{prompt.label}</p>
+                                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{prompt.description}</p>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between pb-1 border-b border-zinc-100 dark:border-zinc-900">
+                                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Custom Instruction</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedSavePromptId(null)}
+                                    className="text-[10px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 font-semibold"
+                                  >
+                                    Back
+                                  </button>
+                                </div>
+                                <textarea
+                                  value={customSavePromptText}
+                                  onChange={(e) => setCustomSavePromptText(e.target.value)}
+                                  placeholder="e.g. rewrite as a professional email..."
+                                  rows={3}
+                                  className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 resize-none"
+                                />
+                                <div className="flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (customSavePromptText.trim()) {
+                                        setIsSavePromptDropdownOpen(false);
+                                        handleSaveNoteAction(false, undefined, customSavePromptText);
+                                        setCustomSavePromptText("");
+                                        setSelectedSavePromptId(null);
+                                      }
+                                    }}
+                                    disabled={!customSavePromptText.trim()}
+                                    className="bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                                  >
+                                    Submit
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )
                 ) : (
