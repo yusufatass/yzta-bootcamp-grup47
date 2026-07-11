@@ -249,3 +249,41 @@ export async function renameNoteTitle(noteId: string, title: string): Promise<an
   }
   return data;
 }
+
+export async function updateProfile(first_name: string, last_name: string): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new Error("No auth token found");
+
+  const response = await fetch(`${BACKEND_URL}/api/auth/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ first_name, last_name }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.detail || "Failed to update profile info");
+  }
+  return data;
+}
+
+export async function deleteAccount(): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new Error("No auth token found");
+
+  const response = await fetch(`${BACKEND_URL}/api/auth/account`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || data.detail || "Failed to delete account");
+  }
+  return data;
+}

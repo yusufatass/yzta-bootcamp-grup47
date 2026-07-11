@@ -58,6 +58,10 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     password: str
 
+class ProfileUpdateRequest(BaseModel):
+    first_name: str
+    last_name: str
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
@@ -186,4 +190,75 @@ async def reset_password(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to reset password: {str(e)}"
+        )
+
+@router.put("/profile")
+async def update_profile(
+    payload: ProfileUpdateRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    try:
+        from supabase import create_client
+        from app.config import settings
+        
+        # Create an independent request-scoped client to avoid session leaks
+        client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+        
+        # Initialize session with the access token
+        client.auth.set_session(token, "")
+        
+        # Update user's metadata in Supabase Auth
+        response = client.auth.update_user({
+            "data": {
+                "first_name": payload.first_name,
+                "last_name": payload.last_name
+            }
+        })
+        
+        if not response or not response.user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to update profile info"
+            )
+            
+        return {"status": "success", "message": "Profile updated successfully."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to update profile: {str(e)}"
+        )
+
+@router.delete("/account")
+async def delete_account(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    try:
+        from supabase import create_client
+        from app.config import settings
+        
+        # 1. Get the current user first to obtain their ID
+        user_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+        user_client.auth.set_session(token, "")
+        user_resp = user_client.auth.get_user(token)
+        if not user_resp or not user_resp.user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials"
+            )
+        user_id = user_resp.user.id
+
+        # 2. Wipe user's notes from public.notes table
+        admin_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+        admin_client.table("notes").delete().eq("user_id", user_id).execute()
+
+        # 3. Delete the auth user record
+        admin_client.auth.admin.delete_user(user_id)
+
+        return {"status": "success", "message": "Account and all associated notes deleted successfully."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to delete account: {str(e)}"
         )

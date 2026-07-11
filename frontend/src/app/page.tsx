@@ -56,6 +56,7 @@ export default function Home() {
   // Delete confirmation & toast state
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
@@ -845,15 +846,60 @@ export default function Home() {
                     AI Active ({user.trial_days_left}d left)
                   </span>
                 )}
-                <span className="text-sm text-zinc-600 dark:text-zinc-400 hidden sm:inline">
-                  {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : user.email}
-                </span>
-                <button
-                  onClick={handleLogoutClick}
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                >
-                  Sign Out
-                </button>
+                
+                {/* Profile Dropdown Container */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 focus:outline-none transition-colors cursor-pointer"
+                  >
+                    <span className="h-4 w-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 flex items-center justify-center font-bold text-[10px]">
+                      {user.first_name ? user.first_name[0].toUpperCase() : (user.email ? user.email[0].toUpperCase() : "U")}
+                    </span>
+                    <span className="max-w-[120px] truncate hidden sm:inline">
+                      {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : user.email}
+                    </span>
+                    <svg className="w-3 h-3 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isProfileDropdownOpen && (
+                    <>
+                      {/* Invisible backdrop to close the dropdown */}
+                      <div 
+                        className="fixed inset-0 z-30" 
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg py-1.5 z-40 animate-in fade-in slide-in-from-top-1 duration-100">
+                        <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800 text-left">
+                          <p className="text-[11px] font-bold text-zinc-900 dark:text-white truncate">
+                            {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "Welcome"}
+                          </p>
+                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                            {user.email}
+                          </p>
+                        </div>
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="flex w-full items-center px-3 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors text-left"
+                        >
+                          Account Settings
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            handleLogoutClick();
+                          }}
+                          className="flex w-full items-center px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors text-left cursor-pointer"
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2">
