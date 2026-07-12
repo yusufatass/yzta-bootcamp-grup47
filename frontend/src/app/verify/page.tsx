@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser, clearAuthToken, getAuthToken } from "@/lib/api";
 import { ThemeToggle } from "@/lib/theme";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/lib/i18n";
 
 export default function VerifyPage() {
+  const t = useTranslations("Verify");
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const router = useRouter();
@@ -34,7 +37,7 @@ export default function VerifyPage() {
   const checkStatusManually = async () => {
     const token = getAuthToken();
     if (!token) {
-      setError("No session found. Please try logging in again.");
+      setError(t("noSession"));
       return;
     }
 
@@ -46,10 +49,10 @@ export default function VerifyPage() {
       if (user.email_confirmed) {
         router.push("/");
       } else {
-        setError("Email is not verified yet. Please check your inbox and click the link.");
+        setError(t("notVerified"));
       }
     } catch (err: any) {
-      setError(err.message || "Failed to check status.");
+      setError(err.message || t("checkFailed"));
     } finally {
       setChecking(false);
     }
@@ -62,7 +65,8 @@ export default function VerifyPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-6 dark:bg-zinc-950">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <LanguageSwitcher />
         <ThemeToggle />
       </div>
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-sm border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800 text-center">
@@ -84,10 +88,10 @@ export default function VerifyPage() {
 
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Verify your email
+            {t("title")}
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            We've sent a verification link to your email address. Please click the link in that email to confirm your account.
+            {t("body")}
           </p>
         </div>
 
@@ -103,14 +107,14 @@ export default function VerifyPage() {
             disabled={checking}
             className="flex w-full justify-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-700"
           >
-            {checking ? "Checking status..." : "I've verified my email"}
+            {checking ? t("checking") : t("verifiedButton")}
           </button>
 
           <button
             onClick={handleLogout}
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
           >
-            Back to login
+            {t("backToLogin")}
           </button>
         </div>
       </div>

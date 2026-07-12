@@ -13,8 +13,11 @@ import {
   UserMe 
 } from "@/lib/api";
 import { ThemeToggle } from "@/lib/theme";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/lib/i18n";
 
 export default function SettingsPage() {
+  const t = useTranslations("Settings");
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<UserMe | null>(null);
@@ -78,9 +81,9 @@ export default function SettingsPage() {
 
     try {
       await updateProfile(firstName, lastName);
-      showToast("Profile updated successfully!");
+      showToast(t("successProfileUpdate"));
     } catch (err: any) {
-      setError(err.message || "Failed to update profile.");
+      setError(err.message || t("errorProfileUpdate"));
     } finally {
       setIsSaving(false);
     }
@@ -97,7 +100,7 @@ export default function SettingsPage() {
       sessionStorage.clear();
       router.push("/");
     } catch (err: any) {
-      setError(err.message || "Failed to delete account.");
+      setError(err.message || t("errorDeleteAccount"));
       setIsDeleting(false);
     }
   };
@@ -125,7 +128,7 @@ export default function SettingsPage() {
         <main className="flex-grow flex items-center justify-center p-6">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-4 border-zinc-300 dark:border-zinc-700 border-t-zinc-900 dark:border-t-white rounded-full animate-spin"></div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">Loading settings...</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold">{t("loading")}</p>
           </div>
         </main>
       </div>
@@ -151,12 +154,13 @@ export default function SettingsPage() {
           </Link>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <ThemeToggle />
             <Link
               href="/"
               className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             >
-              Go to Workspace
+              {t("goToWorkspace")}
             </Link>
           </div>
         </div>
@@ -165,9 +169,9 @@ export default function SettingsPage() {
       {/* Main Settings Grid */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-6 md:py-12 space-y-8">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Account Settings</h1>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t("title")}</h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Manage your profile details and privacy preferences.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -181,13 +185,13 @@ export default function SettingsPage() {
           {/* Card 1: Profile Information */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
             <h2 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-4">
-              Profile Information
+              {t("profileInfo")}
             </h2>
             <form onSubmit={handleSaveProfile} className="space-y-4 max-w-lg">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="first_name" className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    First Name
+                    {t("firstName")}
                   </label>
                   <input
                     id="first_name"
@@ -200,7 +204,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="last_name" className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Last Name
+                    {t("lastName")}
                   </label>
                   <input
                     id="last_name"
@@ -215,7 +219,7 @@ export default function SettingsPage() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500">
-                  Email Address
+                  {t("email")}
                 </label>
                 <input
                   type="email"
@@ -224,7 +228,7 @@ export default function SettingsPage() {
                   className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-450 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-600 cursor-not-allowed"
                 />
                 <p className="text-[10px] text-zinc-450 dark:text-zinc-500">
-                  Email address updates are disabled. Please contact support to change your account email.
+                  {t("emailDisabledNotice")}
                 </p>
               </div>
 
@@ -234,7 +238,7 @@ export default function SettingsPage() {
                   disabled={isSaving}
                   className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2 text-xs font-bold text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {isSaving ? "Saving..." : "Save Changes"}
+                  {isSaving ? t("saving") : t("saveChanges")}
                 </button>
               </div>
             </form>
@@ -244,18 +248,18 @@ export default function SettingsPage() {
           <div className="bg-white dark:bg-zinc-900 border border-red-200/50 dark:border-red-900/30 rounded-2xl p-6 shadow-sm space-y-4">
             <div>
               <h2 className="text-sm font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">
-                Danger Zone
+                {t("dangerZone")}
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Irreversible actions related to your account.
+                {t("dangerZoneDesc")}
               </p>
             </div>
             
             <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-zinc-900 dark:text-white">Delete Account</p>
+                <p className="text-xs font-bold text-zinc-900 dark:text-white">{t("deleteAccount")}</p>
                 <p className="text-[11px] text-zinc-550 dark:text-zinc-400 max-w-xl leading-relaxed">
-                  Permanently delete your profile and wipe all associated notes from the database. This action is irreversible.
+                  {t("deleteAccountDesc")}
                 </p>
               </div>
               <div>
@@ -265,7 +269,7 @@ export default function SettingsPage() {
                   onClick={() => setIsDeleteModalOpen(true)}
                   className="w-full sm:w-auto rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-xs font-bold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none cursor-pointer disabled:opacity-50"
                 >
-                  {isDeleting ? "Deleting..." : "Delete Account"}
+                  {isDeleting ? t("deleting") : t("deleteAccount")}
                 </button>
               </div>
             </div>
@@ -278,6 +282,7 @@ export default function SettingsPage() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
+        t={t}
       />
 
       {/* Toast Notification */}
@@ -299,9 +304,10 @@ interface DeleteAccountConfirmationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  t: any;
 }
 
-function DeleteAccountConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteAccountConfirmationDialogProps) {
+function DeleteAccountConfirmationDialog({ isOpen, onClose, onConfirm, t }: DeleteAccountConfirmationDialogProps) {
   const [animateShow, setAnimateShow] = useState(false);
 
   useEffect(() => {
@@ -353,9 +359,9 @@ function DeleteAccountConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteA
             priority
           />
         </div>
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Delete Account</h3>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{t("deleteAccount")}</h3>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          Are you absolutely sure? This action is permanent and will immediately delete your profile along with all your saved unstructured notes.
+          {t("dialogBody")}
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <button
@@ -364,14 +370,14 @@ function DeleteAccountConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteA
             onClick={onClose}
             className="flex-1 sm:flex-initial rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors focus:ring-2 focus:ring-zinc-500 focus:outline-none cursor-pointer"
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="flex-1 sm:flex-initial rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none cursor-pointer"
           >
-            Delete Account
+            {t("deleteAccount")}
           </button>
         </div>
       </div>

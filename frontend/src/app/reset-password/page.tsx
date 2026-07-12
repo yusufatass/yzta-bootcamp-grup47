@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { resetPassword } from "@/lib/api";
 import { ThemeToggle } from "@/lib/theme";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/lib/i18n";
 
 export default function ResetPasswordPage() {
+  const t = useTranslations("ResetPassword");
   const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,27 +41,27 @@ export default function ResetPasswordPage() {
       // Clean up the URL for security/cleanliness
       window.history.replaceState(null, "", window.location.pathname);
     } else {
-      setError("Invalid, missing, or expired password reset link. Please request a new link.");
+      setError(t("invalidLink"));
     }
     setChecking(false);
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      setError("Reset token is missing. Please request a new password reset link.");
+      setError(t("tokenMissing"));
       return;
     }
     if (!password || !confirmPassword) {
-      setError("Please fill in all fields.");
+      setError(t("errorFillFields"));
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      setError(t("errorPasswordLength"));
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("errorPasswordsMismatch"));
       return;
     }
 
@@ -68,12 +71,12 @@ export default function ResetPasswordPage() {
 
     try {
       await resetPassword(token, password);
-      setSuccess("Password reset successful! You will be redirected to the sign-in page in a few seconds.");
+      setSuccess(t("successMessage"));
       setTimeout(() => {
         router.push("/login");
       }, 3000);
     } catch (err: any) {
-      setError(err.message || "Failed to reset password.");
+      setError(err.message || t("failedMessage"));
     } finally {
       setLoading(false);
     }
@@ -90,16 +93,17 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-6 dark:bg-zinc-950">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <LanguageSwitcher />
         <ThemeToggle />
       </div>
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-sm border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800">
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Set New Password
+            {t("title")}
           </h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Enter and confirm your new account password
+            {t("subtitle")}
           </p>
         </div>
 
@@ -123,7 +127,7 @@ export default function ResetPasswordPage() {
                   htmlFor="password"
                   className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
                 >
-                  New Password
+                  {t("newPasswordLabel")}
                 </label>
                 <div className="relative">
                   <input
@@ -160,7 +164,7 @@ export default function ResetPasswordPage() {
                   htmlFor="confirmPassword"
                   className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
                 >
-                  Confirm New Password
+                  {t("confirmPasswordLabel")}
                 </label>
                 <div className="relative">
                   <input
@@ -198,7 +202,7 @@ export default function ResetPasswordPage() {
                   disabled={loading}
                   className="flex w-full justify-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-700 dark:disabled:text-zinc-500"
                 >
-                  {loading ? "Updating..." : "Update Password"}
+                  {loading ? t("updating") : t("updateButton")}
                 </button>
               </div>
             </div>
@@ -210,7 +214,7 @@ export default function ResetPasswordPage() {
             href="/login"
             className="font-medium text-zinc-900 hover:underline dark:text-zinc-50"
           >
-            Back to Sign In
+            {t("backToSignIn")}
           </Link>
         </div>
       </div>

@@ -1,0 +1,259 @@
+{
+  "Header": {
+    "title": "Unstructured Notes",
+    "premium": "Premium",
+    "trialEnded": "Trial Ended",
+    "aiActive": "AI Active ({days}d left)",
+    "accountSettings": "Account Settings",
+    "signOut": "Sign Out",
+    "signIn": "Sign In",
+    "register": "Register"
+  },
+  "Sidebar": {
+    "noteHistory": "Note History",
+    "notesCount": "{count} {count, plural, =1 {note} other {notes}}",
+    "newNote": "New Note",
+    "searchPlaceholder": "Search notes...",
+    "categories": {
+      "All": "All Categories",
+      "Shopping List": "Shopping List",
+      "Meeting Notes": "Meeting Notes",
+      "Lecture Notes": "Lecture Notes",
+      "Daily Plan": "Daily Plan",
+      "Travel List": "Travel List",
+      "General / Other": "General / Other",
+      "Plain Text": "Plain Text"
+    },
+    "emptyState": {
+      "title": "Your space is empty",
+      "body": "Type your thoughts freely. Our AI will group, clean, and structure them for you."
+    },
+    "noNotesFound": {
+      "title": "No notes found",
+      "body": "Try adjusting your search query or category filter."
+    },
+    "untitledNote": "Untitled Note",
+    "deleteNote": "Delete note"
+  },
+  "Workspace": {
+    "writePlaceholder": "Type your notes here exactly as you think them. Write down shopping lists, todo tasks, and meeting summaries mixed up together. No formatting required...",
+    "editPlaceholder": "Type your notes here...",
+    "writeLabel": "Write your thoughts freely...",
+    "editLabel": "Edit note content",
+    "saveNote": "Save Note",
+    "saveAsIs": "Save as-is",
+    "saveWithAi": "Save with AI",
+    "update": "Update",
+    "updateAsIs": "Update as-is",
+    "updateWithAi": "Update with AI",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "deleteNote": "Delete Note",
+    "anonymousNotice": "Anonymous Mode: notes saved to this tab only.",
+    "anonymousNoticeLink": "Sign in",
+    "anonymousNoticeSuffix": "to unlock AI features.",
+    "trialEndedNotice": "Free trial ended. AI organization is disabled. Notes will be saved as plain text.",
+    "trialEndedHeaderNotice": "⚠️ Your 30-day free trial has ended. AI note organization is no longer available. Notes will be saved as Plain Text.",
+    "trialActiveNotice": "AI formatting is active. Notes will be structured and saved permanently.",
+    "showRawText": "Show Raw Unstructured Text",
+    "restoreRawText": "Restore raw text",
+    "restoreAiVersion": "Restore AI version",
+    "saving": "Saving your note...",
+    "organizing": "Organizing your note...",
+    "backToInput": "Back to Note Input",
+    "renameTitle": "Rename title",
+    "saveTitle": "Save title",
+    "customTitleTooltip": "Custom title — AI won't overwrite this",
+    "charsLeft": "{count} chars left",
+    "submit": "Submit",
+    "markAsUnchecked": "Mark as unchecked",
+    "markAsChecked": "Mark as checked"
+  },
+  "Toolbars": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "heading": "Add Heading",
+    "bulletList": "Bullet List",
+    "checklist": "Checklist"
+  },
+  "Presets": {
+    "simplify": {
+      "label": "Simplify",
+      "description": "Rewrites the note into simpler terms"
+    },
+    "explain": {
+      "label": "Explain",
+      "description": "Explains complex jargon or concepts"
+    },
+    "improve": {
+      "label": "Improve",
+      "description": "Polishes grammar, flow, and tone"
+    },
+    "custom": {
+      "label": "Ask AI Assistant",
+      "description": "Submit custom instructions to the AI"
+    },
+    "searchPlaceholder": "Search prompts...",
+    "customInstruction": "Custom Instruction",
+    "back": "Back",
+    "customPlaceholder": "e.g. rewrite as a professional email..."
+  },
+  "Errors": {
+    "minLength": "Note must be at least 10 characters long.",
+    "saveFailed": "Failed to save note to backend",
+    "updateFailed": "Failed to update note",
+    "renameFailed": "Failed to rename title",
+    "deleteFailed": "Failed to delete note"
+  },
+  "Login": {
+    "backToApp": "Back to App",
+    "title": "Sign In",
+    "subtitle": "Access your notes and let AI organize them",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "errorFillFields": "Please fill in all fields.",
+    "errorInvalidAuth": "Invalid email or password."
+  },
+  "Register": {
+    "backToApp": "Back to App",
+    "title": "Create an Account",
+    "subtitle": "Join us to organize your messy notes using AI",
+    "firstNameLabel": "First Name",
+    "firstNamePlaceholder": "Jane",
+    "lastNameLabel": "Last Name",
+    "lastNamePlaceholder": "Doe",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "••••••••",
+    "signUpButton": "Sign Up",
+    "creatingAccount": "Creating account...",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log In",
+    "errorFillFields": "Please fill in all fields.",
+    "errorPasswordLength": "Password must be at least 6 characters long.",
+    "errorPasswordsMismatch": "Passwords do not match.",
+    "errorUnexpected": "An unexpected error occurred."
+  },
+  "Dialogs": {
+    "deleteNote": {
+      "title": "Delete Note?",
+      "body": "Are you sure you want to delete this note? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "toastSuccess": "Note deleted successfully."
+    },
+    "signOut": {
+      "title": "Sign Out",
+      "body": "Are you sure you want to sign out? Any unsaved local changes might be lost.",
+      "cancel": "Cancel",
+      "confirm": "Sign Out"
+    }
+  },
+  "Onboarding": {
+    "maybeLater": "Maybe later",
+    "back": "Back",
+    "next": "Next",
+    "signUp": "Sign Up",
+    "step1": {
+      "title": "Your notes are messy? Let AI organize them for you.",
+      "body": "Instantly turn scattered thoughts, lecture records, or meetings into clean, categorized markdown lists."
+    },
+    "step2": {
+      "title": "Try it free for 30 days — no card required.",
+      "body": "Unlock full access to AI note organization for a month. Save notes and access templates with zero commitments."
+    },
+    "step3": {
+      "title": "Get Started Now",
+      "body": "Create a secure account in seconds to save your progress, edit notes, and keep AI organizing them."
+    }
+  },
+  "Verify": {
+    "title": "Verify your email",
+    "body": "We've sent a verification link to your email address. Please click the link in that email to confirm your account.",
+    "noSession": "No session found. Please try logging in again.",
+    "notVerified": "Email is not verified yet. Please check your inbox and click the link.",
+    "checkFailed": "Failed to check status.",
+    "checking": "Checking status...",
+    "verifiedButton": "I've verified my email",
+    "backToLogin": "Back to login"
+  },
+  "ForgotPassword": {
+    "title": "Reset Password",
+    "subtitle": "Enter your email to receive a password reset link",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "errorEnterEmail": "Please enter your email address.",
+    "successMessage": "If the email is registered, you will receive a password reset link shortly.",
+    "failedMessage": "Failed to request password reset.",
+    "sending": "Sending...",
+    "sendButton": "Send Reset Link",
+    "backToSignIn": "Back to Sign In"
+  },
+  "ResetPassword": {
+    "invalidLink": "Invalid, missing, or expired password reset link. Please request a new link.",
+    "tokenMissing": "Reset token is missing. Please request a new password reset link.",
+    "errorFillFields": "Please fill in all fields.",
+    "errorPasswordLength": "Password must be at least 6 characters long.",
+    "errorPasswordsMismatch": "Passwords do not match.",
+    "successMessage": "Password reset successful! You will be redirected to the sign-in page in a few seconds.",
+    "failedMessage": "Failed to reset password.",
+    "title": "Set New Password",
+    "subtitle": "Enter and confirm your new account password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm New Password",
+    "updating": "Updating...",
+    "updateButton": "Update Password",
+    "backToSignIn": "Back to Sign In"
+  },
+  "Settings": {
+    "loading": "Loading settings...",
+    "goToWorkspace": "Go to Workspace",
+    "title": "Account Settings",
+    "subtitle": "Manage your profile details and privacy preferences.",
+    "profileInfo": "Profile Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "emailDisabledNotice": "Email address updates are disabled. Please contact support to change your account email.",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "successProfileUpdate": "Profile updated successfully!",
+    "errorProfileUpdate": "Failed to update profile.",
+    "errorDeleteAccount": "Failed to delete account.",
+    "dangerZone": "Danger Zone",
+    "dangerZoneDesc": "Irreversible actions related to your account.",
+    "deleteAccountDesc": "Permanently delete your profile and wipe all associated notes from the database. This action is irreversible.",
+    "deleteAccount": "Delete Account",
+    "deleting": "Deleting...",
+    "dialogBody": "Are you absolutely sure? This action is permanent and will immediately delete your profile along with all your saved unstructured notes.",
+    "cancel": "Cancel"
+  },
+  "Premium": {
+    "goToWorkspace": "Go to Workspace",
+    "shieldActive": "PREMIUM SHIELD ACTIVE",
+    "titlePart1": "Supercharge Your Focus with ",
+    "titleHighlight": "AI Magic",
+    "titlePart2": "",
+    "subtitle": "Experience frictionless note-taking. Dump your raw thoughts and let our dual-LLM structure clean, organize, and format them instantly.",
+    "feature1Title": "Unstructured Input",
+    "feature1Desc": "Simply dump raw meeting recordings, lecture highlights, voice transcripts, or chaotic thoughts. Don't worry about spelling, ordering, or structure—we handle the mess.",
+    "feature2Title": "AI Magic Formatting",
+    "feature2Desc": "Powered by a dual-LLM pipeline that cleans up your input. It creates elegant structured markdown with tags, titles, checkable lists, and headers automatically.",
+    "feature3Title": "Smart Organization",
+    "feature3Desc": "Easily search, retrieve, and filter note categories. No manual folders needed. Keep your personal workspace beautifully tidy, readable, and lightning fast.",
+    "ctaTitle": "Ready to experience frictionless clarity?",
+    "ctaSubtitle": "Join thousands of users turning raw information into actionable, structured notes instantly.",
+    "ctaButton": "Start Free 30-Day Trial"
+  }
+}

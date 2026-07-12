@@ -1,0 +1,259 @@
+{
+  "Header": {
+    "title": "Dağınık Notlar",
+    "premium": "Premium",
+    "trialEnded": "Deneme Süresi Bitti",
+    "aiActive": "Yapay Zeka Aktif ({days} gün kaldı)",
+    "accountSettings": "Hesap Ayarları",
+    "signOut": "Çıkış Yap",
+    "signIn": "Giriş Yap",
+    "register": "Kayıt Ol"
+  },
+  "Sidebar": {
+    "noteHistory": "Not Geçmişi",
+    "notesCount": "{count} not",
+    "newNote": "Yeni Not",
+    "searchPlaceholder": "Notlarda ara...",
+    "categories": {
+      "All": "Tüm Kategoriler",
+      "Shopping List": "Alışveriş Listesi",
+      "Meeting Notes": "Toplantı Notları",
+      "Lecture Notes": "Ders Notları",
+      "Daily Plan": "Günlük Plan",
+      "Travel List": "Seyahat Listesi",
+      "General / Other": "Genel / Diğer",
+      "Plain Text": "Düz Metin"
+    },
+    "emptyState": {
+      "title": "Burası henüz boş",
+      "body": "Düşüncelerinizi serbestçe yazın. Yapay zekamız onları sizin için gruplandıracak, temizleyecek ve düzenleyecektir."
+    },
+    "noNotesFound": {
+      "title": "Not bulunamadı",
+      "body": "Arama teriminizi veya kategori filtresini değiştirmeyi deneyin."
+    },
+    "untitledNote": "Başlıksız Not",
+    "deleteNote": "Notu sil"
+  },
+  "Workspace": {
+    "writePlaceholder": "Notlarınızı aklınıza geldiği gibi yazın. Alışveriş listelerini, yapılacak işleri ve toplantı özetlerini birbirine karıştırarak yazabilirsiniz. Biçimlendirme yapmanıza gerek yoktur...",
+    "editPlaceholder": "Notlarınızı buraya yazın...",
+    "writeLabel": "Düşüncelerinizi özgürce yazın...",
+    "editLabel": "Not içeriğini düzenle",
+    "saveNote": "Notu Kaydet",
+    "saveAsIs": "Olduğu gibi kaydet",
+    "saveWithAi": "Yapay Zeka ile Kaydet",
+    "update": "Güncelle",
+    "updateAsIs": "Olduğu gibi güncelle",
+    "updateWithAi": "Yapay Zeka ile Güncelle",
+    "cancel": "İptal",
+    "edit": "Düzenle",
+    "deleteNote": "Notu Sil",
+    "anonymousNotice": "Misafir Modu: Notlar yalnızca bu tarayıcı sekmesine kaydedilir.",
+    "anonymousNoticeLink": "Giriş yapın",
+    "anonymousNoticeSuffix": "ve yapay zeka özelliklerini kullanmaya başlayın.",
+    "trialEndedNotice": "Ücretsiz deneme süreniz bitti. Yapay zeka ile düzenleme devre dışı. Notlar düz metin olarak kaydedilecek.",
+    "trialEndedHeaderNotice": "⚠️ 30 günlük ücretsiz deneme süreniz sona erdi. Yapay zeka ile not düzenleme artık kullanılamıyor. Notlar Düz Metin olarak kaydedilecektir.",
+    "trialActiveNotice": "Yapay zeka biçimlendirmesi aktif. Notlarınız düzenlenecek ve kalıcı olarak kaydedilecektir.",
+    "showRawText": "Ham/Biçimlendirilmemiş Metni Göster",
+    "restoreRawText": "Ham metne dön",
+    "restoreAiVersion": "Yapay zeka sürümüne dön",
+    "saving": "Notunuz kaydediliyor...",
+    "organizing": "Notunuz yapay zeka ile düzenleniyor...",
+    "backToInput": "Not Yazma Alanına Dön",
+    "renameTitle": "Başlığı yeniden adlandır",
+    "saveTitle": "Başlığı kaydet",
+    "customTitleTooltip": "Özel başlık — Yapay zeka bunu değiştirmeyecektir",
+    "charsLeft": "{count} karakter kaldı",
+    "submit": "Gönder",
+    "markAsUnchecked": "İşareti kaldır",
+    "markAsChecked": "İşaretle"
+  },
+  "Toolbars": {
+    "bold": "Kalın",
+    "italic": "Eğik",
+    "underline": "Altı Çizili",
+    "heading": "Başlık Ekle",
+    "bulletList": "Maddeli Liste",
+    "checklist": "Kontrol Listesi"
+  },
+  "Presets": {
+    "simplify": {
+      "label": "Sadeleştir",
+      "description": "Notu daha basit ve anlaşılır kelimelerle yeniden yazar"
+    },
+    "explain": {
+      "label": "Açıkla",
+      "description": "Karmaşık terimleri veya kavramları açıklar"
+    },
+    "improve": {
+      "label": "Geliştir",
+      "description": "Dil bilgisini, akışı ve üslubu iyileştirir"
+    },
+    "custom": {
+      "label": "Yapay Zekaya Sor",
+      "description": "Yapay zekaya özel talimatlar gönderin"
+    },
+    "searchPlaceholder": "Talimatlarda ara...",
+    "customInstruction": "Özel Talimat",
+    "back": "Geri",
+    "customPlaceholder": "Örn. profesyonel bir e-posta olarak yeniden yaz..."
+  },
+  "Errors": {
+    "minLength": "Not en az 10 karakter uzunluğunda olmalıdır.",
+    "saveFailed": "Not kaydedilirken bir hata oluştu",
+    "updateFailed": "Not güncellenirken bir hata oluştu",
+    "renameFailed": "Başlık güncellenirken bir hata oluştu",
+    "deleteFailed": "Not silinirken bir hata oluştu"
+  },
+  "Login": {
+    "backToApp": "Uygulamaya Dön",
+    "title": "Giriş Yap",
+    "subtitle": "Notlarınıza erişin ve yapay zekanın onları düzenlemesine izin verin",
+    "emailLabel": "E-posta Adresi",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Şifre",
+    "passwordPlaceholder": "••••••••",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
+    "signInButton": "Giriş Yap",
+    "signingIn": "Giriş yapılıyor...",
+    "noAccount": "Hesabınız yok mu?",
+    "register": "Kayıt Ol",
+    "errorFillFields": "Lütfen tüm alanları doldurun.",
+    "errorInvalidAuth": "Geçersiz e-posta adresi veya şifre."
+  },
+  "Register": {
+    "backToApp": "Uygulamaya Dön",
+    "title": "Hesap Oluştur",
+    "subtitle": "Dağınık notlarınızı yapay zeka ile düzenlemek için bize katılın",
+    "firstNameLabel": "Ad",
+    "firstNamePlaceholder": "Jane",
+    "lastNameLabel": "Soyad",
+    "lastNamePlaceholder": "Doe",
+    "emailLabel": "E-posta Adresi",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Şifre",
+    "passwordPlaceholder": "••••••••",
+    "confirmPasswordLabel": "Şifreyi Onayla",
+    "confirmPasswordPlaceholder": "••••••••",
+    "signUpButton": "Kayıt Ol",
+    "creatingAccount": "Hesap oluşturuluyor...",
+    "haveAccount": "Zaten hesabınız var mı?",
+    "logIn": "Giriş Yap",
+    "errorFillFields": "Lütfen tüm alanları doldurun.",
+    "errorPasswordLength": "Şifre en az 6 karakter uzunluğunda olmalıdır.",
+    "errorPasswordsMismatch": "Şifreler uyuşmuyor.",
+    "errorUnexpected": "Beklenmedik bir hata oluştu."
+  },
+  "Dialogs": {
+    "deleteNote": {
+      "title": "Not Silinsin mi?",
+      "body": "Bu notu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      "cancel": "İptal",
+      "confirm": "Sil",
+      "toastSuccess": "Not başarıyla silindi."
+    },
+    "signOut": {
+      "title": "Çıkış Yap",
+      "body": "Çıkış yapmak istediğinize emin misiniz? Kaydedilmemiş yerel değişiklikler kaybolabilir.",
+      "cancel": "İptal",
+      "confirm": "Çıkış Yap"
+    }
+  },
+  "Onboarding": {
+    "maybeLater": "Belki daha sonra",
+    "back": "Geri",
+    "next": "İleri",
+    "signUp": "Kayıt Ol",
+    "step1": {
+      "title": "Notlarınız dağınık mı? Yapay zeka sizin yerinize düzenlesin.",
+      "body": "Karman çorman düşünceleri, ders kayıtlarını veya toplantı notlarını anında temiz ve kategorize edilmiş markdown listelerine dönüştürün."
+    },
+    "step2": {
+      "title": "30 gün boyunca ücretsiz deneyin — kart bilgisi gerekmez.",
+      "body": "Yapay zeka ile not düzenlemeye bir ay boyunca tam erişim sağlayın. Notları kaydedin ve sıfır taahhütle şablonlara erişin."
+    },
+    "step3": {
+      "title": "Hemen Başlayın",
+      "body": "İlerlemenizi kaydetmek, notları düzenlemek ve yapay zekanın onları düzenlemeye devam etmesini sağlamak için saniyeler içinde güvenli bir hesap oluşturun."
+    }
+  },
+  "Verify": {
+    "title": "E-postanızı doğrulayın",
+    "body": "E-posta adresinize bir doğrulama bağlantısı gönderdik. Hesabınızı onaylamak için lütfen o e-postadaki bağlantıya tıklayın.",
+    "noSession": "Oturum bulunamadı. Lütfen tekrar giriş yapmayı deneyin.",
+    "notVerified": "E-posta henüz doğrulanmadı. Lütfen gelen kutunuzu kontrol edin ve bağlantıya tıklayın.",
+    "checkFailed": "Durum kontrolü başarısız oldu.",
+    "checking": "Durum kontrol ediliyor...",
+    "verifiedButton": "E-postamı doğruladım",
+    "backToLogin": "Giriş sayfasına dön"
+  },
+  "ForgotPassword": {
+    "title": "Şifreyi Sıfırla",
+    "subtitle": "Şifre sıfırlama bağlantısı almak için e-posta adresinizi girin",
+    "emailLabel": "E-posta Adresi",
+    "emailPlaceholder": "you@example.com",
+    "errorEnterEmail": "Lütfen e-posta adresinizi girin.",
+    "successMessage": "E-posta adresi kayıtlı ise, kısa süre içinde bir şifre sıfırlama bağlantısı alacaksınız.",
+    "failedMessage": "Şifre sıfırlama talebi başarısız oldu.",
+    "sending": "Gönderiliyor...",
+    "sendButton": "Sıfırlama Bağlantısı Gönder",
+    "backToSignIn": "Giriş Yap Sayfasına Dön"
+  },
+  "ResetPassword": {
+    "invalidLink": "Geçersiz, eksik veya süresi dolmuş şifre sıfırlama bağlantısı. Lütfen yeni bir bağlantı talep edin.",
+    "tokenMissing": "Sıfırlama belirteci eksik. Lütfen yeni bir şifre sıfırlama bağlantısı talep edin.",
+    "errorFillFields": "Lütfen tüm alanları doldurun.",
+    "errorPasswordLength": "Şifre en az 6 karakter uzunluğunda olmalıdır.",
+    "errorPasswordsMismatch": "Şifreler uyuşmuyor.",
+    "successMessage": "Şifre sıfırlama başarılı! Birkaç saniye içinde giriş sayfasına yönlendirileceksiniz.",
+    "failedMessage": "Şifre sıfırlanamadı.",
+    "title": "Yeni Şifre Belirle",
+    "subtitle": "Yeni hesap şifrenizi girin ve onaylayın",
+    "newPasswordLabel": "Yeni Şifre",
+    "confirmPasswordLabel": "Yeni Şifreyi Onayla",
+    "updating": "Güncelleniyor...",
+    "updateButton": "Şifreyi Güncelle",
+    "backToSignIn": "Giriş Yap Sayfasına Dön"
+  },
+  "Settings": {
+    "loading": "Ayarlar yükleniyor...",
+    "goToWorkspace": "Çalışma Alanına Git",
+    "title": "Hesap Ayarları",
+    "subtitle": "Profil bilgilerinizi ve gizlilik tercihlerinizi yönetin.",
+    "profileInfo": "Profil Bilgileri",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "email": "E-posta Adresi",
+    "emailDisabledNotice": "E-posta adresi değişiklikleri devre dışıdır. Lütfen e-posta adresinizi değiştirmek için destekle iletişime geçin.",
+    "saving": "Kaydediliyor...",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "successProfileUpdate": "Profil başarıyla güncellendi!",
+    "errorProfileUpdate": "Profil güncellenirken bir hata oluştu.",
+    "errorDeleteAccount": "Hesap silinirken bir hata oluştu.",
+    "dangerZone": "Tehlikeli Bölge",
+    "dangerZoneDesc": "Hesabınızla ilgili geri alınamaz işlemler.",
+    "deleteAccountDesc": "Profilinizi kalıcı olarak silin ve veritabanındaki tüm ilişkili notları temizleyin. Bu işlem geri alınamaz.",
+    "deleteAccount": "Hesabı Sil",
+    "deleting": "Siliniyor...",
+    "dialogBody": "Kesinlikle emin misiniz? Bu işlem kalıcıdır ve profilinizle birlikte tüm kayıtlı dağınık notlarınızı hemen silecektir.",
+    "cancel": "İptal"
+  },
+  "Premium": {
+    "goToWorkspace": "Çalışma Alanına Git",
+    "shieldActive": "PREMIUM KALKAN AKTİF",
+    "titlePart1": "Odaklanmanızı ",
+    "titleHighlight": "Yapay Zeka Sihri",
+    "titlePart2": " ile En Üst Seviyeye Çıkarın",
+    "subtitle": "Sorunsuz not almanın keyfini çıkarın. Dağınık düşüncelerinizi dökün ve çift LLM yapımızın onları anında temizlemesine, düzenlemesine ve biçimlendirmesine izin verin.",
+    "feature1Title": "Dağınık Giriş",
+    "feature1Desc": "Toplantı kayıtlarını, ders notlarını, ses dökümlerini veya karmaşık düşüncelerinizi doğrudan dökün. Yazım hataları, sıralama veya yapı konusunda endişelenmeyin—tüm karmaşayı biz hallederiz.",
+    "feature2Title": "Yapay Zeka ile Biçimlendirme",
+    "feature2Desc": "Girdinizi temizleyen çift LLM işlem hattı ile güçlendirilmiştir. Etiketler, başlıklar, kontrol edilebilir listeler ve başlıklar içeren şık biçimlendirilmiş markdown'ları otomatik olarak oluşturur.",
+    "feature3Title": "Akıllı Düzenleme",
+    "feature3Desc": "Not kategorilerini kolayca arayın, bulun ve filtreleyin. Manuel klasörlere gerek yok. Kişisel çalışma alanınızı son derece düzenli, okunabilir ve hızlı tutun.",
+    "ctaTitle": "Sorunsuz netliği deneyimlemeye hazır mısınız?",
+    "ctaSubtitle": "Dağınık bilgileri anında eyleme geçirilebilir, düzenli notlara dönüştüren binlerce kullanıcıya katılın.",
+    "ctaButton": "30 Günlük Ücretsiz Denemeyi Başlat"
+  }
+}

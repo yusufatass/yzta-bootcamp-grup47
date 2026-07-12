@@ -18,6 +18,8 @@ import {
   renameNoteTitle
 } from "@/lib/api";
 import { ThemeToggle } from "@/lib/theme";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/lib/i18n";
 
 interface Note {
   id: string;
@@ -61,6 +63,15 @@ const PRESET_PROMPTS = [
 ];
 
 export default function Home() {
+  const tHeader = useTranslations("Header");
+  const tSidebar = useTranslations("Sidebar");
+  const tWorkspace = useTranslations("Workspace");
+  const tToolbars = useTranslations("Toolbars");
+  const tPresets = useTranslations("Presets");
+  const tErrors = useTranslations("Errors");
+  const tDialogs = useTranslations("Dialogs");
+  const tOnboarding = useTranslations("Onboarding");
+
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<UserMe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -402,7 +413,7 @@ export default function Home() {
     if (!trimmed) return;
 
     if (trimmed.length < 10) {
-      setError("Note must be at least 10 characters long.");
+      setError(tErrors("minLength"));
       return;
     }
 
@@ -425,7 +436,7 @@ export default function Home() {
         // Automatically select the saved structured note to show organized content
         setSelectedNote(mappedNote);
       } catch (err: any) {
-        setError(err.message || "Failed to save note to backend");
+        setError(err.message || tErrors("saveFailed"));
       } finally {
         setIsOrganizing(false);
       }
@@ -523,7 +534,7 @@ export default function Home() {
       ...selectedNote,
       raw_text: newRawText,
       structured_content: {
-        title: selectedNote.structured_content?.title || selectedNote.raw_text.split("\n")[0].substring(0, 30) || "Untitled Note",
+        title: selectedNote.structured_content?.title || selectedNote.raw_text.split("\n")[0].substring(0, 30) || tSidebar("untitledNote"),
         markdown: newMarkdown
       }
     };
@@ -542,7 +553,7 @@ export default function Home() {
         );
       } catch (err: any) {
         console.error("Failed to persist checkbox toggle to backend:", err);
-        setError(err.message || "Failed to save checkbox update to backend");
+        setError(err.message || tErrors("updateFailed"));
       }
     } else {
       const storedNotes = sessionStorage.getItem("anonymous_notes");
@@ -584,9 +595,9 @@ export default function Home() {
         try {
           await deleteNote(targetId);
           setNotes((prevNotes) => prevNotes.filter((n) => n.id !== targetId));
-          showToast("Note deleted successfully.");
+          showToast(tDialogs("deleteNote.toastSuccess"));
         } catch (err: any) {
-          setError(err.message || "Failed to delete note");
+          setError(err.message || tErrors("deleteFailed"));
         } finally {
           setDeletingNoteId(null);
         }
@@ -595,11 +606,10 @@ export default function Home() {
         setNotes(updatedNotes);
         sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
         setDeletingNoteId(null);
-        showToast("Note deleted successfully.");
+        showToast(tDialogs("deleteNote.toastSuccess"));
       }
     }, 300);
   };
-
 
   const handleUpdateNoteAction = async (skipAi: boolean, promptType?: string, customPrompt?: string) => {
     setError(null);
@@ -607,7 +617,7 @@ export default function Home() {
     if (!trimmed) return;
 
     if (trimmed.length < 10) {
-      setError("Note must be at least 10 characters long.");
+      setError(tErrors("minLength"));
       return;
     }
 
@@ -674,7 +684,7 @@ export default function Home() {
         setSelectedNote(mappedNote);
         setIsEditing(false);
       } catch (err: any) {
-        setError(err.message || "Failed to update note");
+        setError(err.message || tErrors("updateFailed"));
       } finally {
         setIsUpdating(false);
       }
@@ -740,7 +750,7 @@ export default function Home() {
         setSelectedNote(synced);
         setNotes((prev) => prev.map(n => n.id === synced.id ? synced : n));
       } catch (err: any) {
-        setError(err.message || "Failed to rename title");
+        setError(err.message || tErrors("renameFailed"));
         // Roll back optimistic update
         setSelectedNote(selectedNote);
         setNotes((prev) => prev.map(n => n.id === selectedNote.id ? selectedNote : n));
@@ -874,7 +884,7 @@ export default function Home() {
                   ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-950"
                   : "border-zinc-300 bg-white text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900"
                 }`}
-              title={isChecked ? "Mark as unchecked" : "Mark as checked"}
+              title={isChecked ? tWorkspace("markAsUnchecked") : tWorkspace("markAsChecked")}
             >
               {isChecked && (
                 <svg className="h-2.5 w-2.5 fill-current" viewBox="0 0 20 20">
@@ -972,7 +982,7 @@ export default function Home() {
               style={{ width: 'auto', height: 'auto' }}
               priority
             />
-            <span>Unstructured Notes</span>
+            <span>{tHeader("title")}</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -988,9 +998,10 @@ export default function Home() {
                 >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                <span>Premium</span>
+                <span>{tHeader("premium")}</span>
               </Link>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
             {loading ? (
               <div className="w-24 h-8 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
@@ -999,12 +1010,12 @@ export default function Home() {
                 {user.trial_ended ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 ring-1 ring-inset ring-zinc-600/20 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-500/20">
                     <span className="h-1.5 w-1.5 rounded-full bg-zinc-400"></span>
-                    Trial Ended
+                    {tHeader("trialEnded")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-950/30 dark:text-green-400 dark:ring-green-500/20">
                     <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                    AI Active ({user.trial_days_left}d left)
+                    {tHeader("aiActive", { days: user.trial_days_left })}
                   </span>
                 )}
 
@@ -1046,7 +1057,7 @@ export default function Home() {
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="flex w-full items-center px-3 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors text-left"
                         >
-                          Account Settings
+                          {tHeader("accountSettings")}
                         </Link>
                         <button
                           onClick={() => {
@@ -1055,7 +1066,7 @@ export default function Home() {
                           }}
                           className="flex w-full items-center px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors text-left cursor-pointer"
                         >
-                          Sign Out
+                          {tHeader("signOut")}
                         </button>
                       </div>
                     </>
@@ -1068,13 +1079,13 @@ export default function Home() {
                   href="/login"
                   className="rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
                 >
-                  Sign In
+                  {tHeader("signIn")}
                 </Link>
                 <Link
                   href="/register"
                   className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
                 >
-                  Register
+                  {tHeader("register")}
                 </Link>
               </div>
             )}
@@ -1083,7 +1094,7 @@ export default function Home() {
       </header>
       {user && user.trial_ended && (
         <div className="bg-amber-50 border-b border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/30 px-6 py-2.5 text-center text-xs font-semibold text-amber-800 dark:text-amber-400">
-          ⚠️ Your 30-day free trial has ended. AI note organization is no longer available. Notes will be saved as Plain Text.
+          {tWorkspace("trialEndedHeaderNotice")}
         </div>
       )}
 
@@ -1092,9 +1103,9 @@ export default function Home() {
         <section className="w-full md:w-80 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 max-h-[300px] md:max-h-none min-h-0">
           <div className="flex items-center justify-between mb-3 shrink-0">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center justify-between w-full">
-              <span>Note History</span>
+              <span>{tSidebar("noteHistory")}</span>
               <span className="text-xs font-normal text-zinc-500">
-                {user ? `${filteredNotes.length} notes` : `${notes.length} notes`}
+                {tSidebar("notesCount", { count: user ? filteredNotes.length : notes.length })}
               </span>
             </h2>
             {selectedNote && (
@@ -1108,7 +1119,7 @@ export default function Home() {
                 }}
                 className="ml-2 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
               >
-                <span>+</span> New Note
+                <span>+</span> {tSidebar("newNote")}
               </button>
             )}
           </div>
@@ -1119,7 +1130,7 @@ export default function Home() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search notes..."
+                  placeholder={tSidebar("searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl pl-8 pr-8 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
@@ -1147,14 +1158,14 @@ export default function Home() {
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl px-3 py-1.5 pr-8 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-500 cursor-pointer appearance-none"
                 >
-                  <option value="All" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">All Categories</option>
-                  <option value="Shopping List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Shopping List</option>
-                  <option value="Meeting Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Meeting Notes</option>
-                  <option value="Lecture Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Lecture Notes</option>
-                  <option value="Daily Plan" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Daily Plan</option>
-                  <option value="Travel List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Travel List</option>
-                  <option value="General / Other" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">General / Other</option>
-                  <option value="Plain Text" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">Plain Text</option>
+                  <option value="All" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.All")}</option>
+                  <option value="Shopping List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Shopping List")}</option>
+                  <option value="Meeting Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Meeting Notes")}</option>
+                  <option value="Lecture Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Lecture Notes")}</option>
+                  <option value="Daily Plan" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Daily Plan")}</option>
+                  <option value="Travel List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Travel List")}</option>
+                  <option value="General / Other" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.General / Other")}</option>
+                  <option value="Plain Text" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Plain Text")}</option>
                 </select>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 dark:text-zinc-500">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -1179,17 +1190,17 @@ export default function Home() {
                     style={{ width: 'auto', height: 'auto' }}
                   />
                 </div>
-                <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Your space is empty</h3>
+                <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{tSidebar("emptyState.title")}</h3>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 max-w-[180px] mx-auto leading-relaxed">
-                  Type your thoughts freely. Our AI will group, clean, and structure them for you.
+                  {tSidebar("emptyState.body")}
                 </p>
               </div>
             ) : user && filteredNotes.length === 0 ? (
               <div className="flex-grow flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
                 <span className="text-2xl mb-2">🔍</span>
-                <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">No notes found</h3>
+                <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{tSidebar("noNotesFound.title")}</h3>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 max-w-[180px] mx-auto leading-relaxed">
-                  Try adjusting your search query or category filter.
+                  {tSidebar("noNotesFound.body")}
                 </p>
               </div>
             ) : (
@@ -1213,7 +1224,7 @@ export default function Home() {
                     <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
                   )}
                   <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 truncate pr-6">
-                    {note.title || "Untitled Note"}
+                    {note.title || tSidebar("untitledNote")}
                   </h3>
                   <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
                     {getNotePreview(note)}
@@ -1223,7 +1234,7 @@ export default function Home() {
                       {new Date(note.created_at).toLocaleDateString()}
                     </span>
                     <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ring-1 ring-inset ${getCategoryColor(note.category)}`}>
-                      {note.category}
+                      {tSidebar(`categories.${note.category}` as any)}
                     </span>
                   </div>
 
@@ -1234,7 +1245,7 @@ export default function Home() {
                       handleDeleteNote(note.id);
                     }}
                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    title="Delete note"
+                    title={tSidebar("deleteNote")}
                   >
                     <svg
                       className="h-3.5 w-3.5"
@@ -1270,7 +1281,7 @@ export default function Home() {
                     setEditText("");
                   }}
                   className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
-                  title="Back to Note Input"
+                  title={tWorkspace("backToInput")}
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -1297,7 +1308,7 @@ export default function Home() {
                         type="button"
                         onMouseDown={(e) => { e.preventDefault(); handleRenameTitle(); }}
                         className="shrink-0 p-1 rounded text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                        title="Save title"
+                        title={tWorkspace("saveTitle")}
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -1307,10 +1318,10 @@ export default function Home() {
                   ) : (
                     <div className="flex items-center gap-1.5 group/title">
                       <h2 className={`text-base font-bold text-zinc-900 dark:text-zinc-50 ${isTitleSaving ? "opacity-60" : ""}`}>
-                        {selectedNote.structured_content?.title || selectedNote.title || "Untitled Note"}
+                        {selectedNote.structured_content?.title || selectedNote.title || tSidebar("untitledNote")}
                       </h2>
                       {selectedNote.title_is_custom && (
-                        <span title="Custom title — AI won't overwrite this" className="text-zinc-400 dark:text-zinc-500 shrink-0">
+                        <span title={tWorkspace("customTitleTooltip")} className="text-zinc-400 dark:text-zinc-500 shrink-0">
                           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                           </svg>
@@ -1323,7 +1334,7 @@ export default function Home() {
                           setIsTitleEditing(true);
                         }}
                         className="opacity-0 group-hover/title:opacity-100 shrink-0 p-0.5 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all"
-                        title="Rename title"
+                        title={tWorkspace("renameTitle")}
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
@@ -1333,7 +1344,7 @@ export default function Home() {
                   )}
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getCategoryColor(selectedNote.category)}`}>
-                      {selectedNote.category}
+                      {tSidebar(`categories.${selectedNote.category}` as any)}
                     </span>
                     <span className="text-[10px] text-zinc-500">
                       {new Date(selectedNote.created_at).toLocaleString()}
@@ -1352,14 +1363,14 @@ export default function Home() {
                     }}
                     className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                   >
-                    Edit
+                    {tWorkspace("edit")}
                   </button>
                 )}
                 <button
                   onClick={() => handleDeleteNote(selectedNote.id)}
                   className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-950/30 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40"
                 >
-                  Delete Note
+                  {tWorkspace("deleteNote")}
                 </button>
               </div>
             </div>
@@ -1370,7 +1381,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/85 flex flex-col items-center justify-center rounded-2xl backdrop-blur-[2px] z-10">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mb-4"></div>
                     <p className="text-sm font-semibold text-zinc-900 dark:text-white animate-pulse">
-                      {user?.trial_ended ? "Saving your note..." : "Organizing your note..."}
+                      {user?.trial_ended ? tWorkspace("saving") : tWorkspace("organizing")}
                     </p>
                   </div>
                 )}
@@ -1381,7 +1392,7 @@ export default function Home() {
                       htmlFor="edit_raw_text"
                       className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 text-left shrink-0"
                     >
-                      Edit note content
+                      {tWorkspace("editLabel")}
                     </label>
 
                     <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -1406,8 +1417,8 @@ export default function Home() {
                               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
                             {editText.trim() === (selectedNote.original_raw_text || selectedNote.raw_text).trim()
-                              ? "Restore AI version"
-                              : "Restore raw text"}
+                              ? tWorkspace("restoreAiVersion")
+                              : tWorkspace("restoreRawText")}
                           </button>
                         )}
 
@@ -1417,7 +1428,7 @@ export default function Home() {
                           type="button"
                           onClick={() => applyFormat("bold", true)}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs font-bold transition-colors"
-                          title="Bold"
+                          title={tToolbars("bold")}
                         >
                           B
                         </button>
@@ -1425,7 +1436,7 @@ export default function Home() {
                           type="button"
                           onClick={() => applyFormat("italic", true)}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs italic font-serif transition-colors"
-                          title="Italic"
+                          title={tToolbars("italic")}
                         >
                           I
                         </button>
@@ -1433,7 +1444,7 @@ export default function Home() {
                           type="button"
                           onClick={() => applyFormat("underline", true)}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs underline transition-colors"
-                          title="Underline"
+                          title={tToolbars("underline")}
                         >
                           U
                         </button>
@@ -1442,7 +1453,7 @@ export default function Home() {
                           type="button"
                           onClick={() => applyFormat("heading", true)}
                           className="h-7 px-2 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[10px] font-extrabold tracking-wider transition-colors"
-                          title="Add Heading"
+                          title={tToolbars("heading")}
                         >
                           H1/H2
                         </button>
@@ -1451,7 +1462,7 @@ export default function Home() {
                           type="button"
                           onClick={() => applyFormat("bullet", true)}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
-                          title="Bullet List"
+                          title={tToolbars("bulletList")}
                         >
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -1461,7 +1472,7 @@ export default function Home() {
                           type="button"
                           onClick={() => applyFormat("checklist", true)}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
-                          title="Checklist"
+                          title={tToolbars("checklist")}
                         >
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1474,7 +1485,7 @@ export default function Home() {
                     id="edit_raw_text"
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    placeholder="Type your notes here..."
+                    placeholder={tWorkspace("editPlaceholder")}
                     className="flex-1 w-full rounded-xl border border-zinc-200 bg-zinc-50/30 p-4 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/30 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400 dark:focus:bg-zinc-950 resize-none min-h-0"
                   />
                 </div>
@@ -1495,7 +1506,7 @@ export default function Home() {
                     }}
                     className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
                   >
-                    Cancel
+                    {tWorkspace("cancel")}
                   </button>
                   {user ? (
                     user.trial_ended ? (
@@ -1505,7 +1516,7 @@ export default function Home() {
                         disabled={isUpdating || !editText.trim()}
                         className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                       >
-                        Update
+                        {tWorkspace("update")}
                       </button>
                     ) : (
                       <div className="flex gap-2">
@@ -1515,7 +1526,7 @@ export default function Home() {
                           disabled={isUpdating || !editText.trim()}
                           className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
                         >
-                          Update as-is
+                          {tWorkspace("updateAsIs")}
                         </button>
                         <div className="relative inline-flex rounded-lg shadow-sm" ref={promptDropdownRef}>
                           <button
@@ -1524,7 +1535,7 @@ export default function Home() {
                             disabled={isUpdating || !editText.trim()}
                             className="bg-zinc-900 text-white rounded-l-lg px-5 py-2 text-sm font-semibold hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                           >
-                            Update with AI
+                            {tWorkspace("updateWithAi")}
                           </button>
                           <div className="w-[1px] bg-zinc-800 dark:bg-zinc-200/20 self-stretch" />
                           <button
@@ -1553,60 +1564,68 @@ export default function Home() {
                                       type="text"
                                       value={promptQuery}
                                       onChange={(e) => setPromptQuery(e.target.value)}
-                                      placeholder="Search prompts..."
+                                      placeholder={tPresets("searchPlaceholder")}
                                       className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
                                     />
                                   </div>
                                   <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                                    {PRESET_PROMPTS.filter(p =>
-                                      p.label.toLowerCase().includes(promptQuery.toLowerCase()) ||
-                                      p.description.toLowerCase().includes(promptQuery.toLowerCase())
-                                    ).map((prompt) => (
-                                      <button
-                                        key={prompt.id}
-                                        type="button"
-                                        onClick={() => {
-                                          if (prompt.id === "custom") {
-                                            setSelectedPromptId("custom");
-                                          } else {
-                                            setIsPromptDropdownOpen(false);
-                                            handleUpdateNoteAction(false, prompt.id);
-                                          }
-                                        }}
-                                        className="w-full text-left flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-                                      >
-                                        <span className="text-sm select-none">{prompt.icon}</span>
-                                        <div className="flex-1 min-w-0">
-                                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{prompt.label}</p>
-                                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{prompt.description}</p>
-                                        </div>
-                                      </button>
-                                    ))}
+                                    {PRESET_PROMPTS.filter(p => {
+                                      const label = tPresets(`${p.id}.label`);
+                                      const desc = tPresets(`${p.id}.description`);
+                                      return (
+                                        label.toLowerCase().includes(promptQuery.toLowerCase()) ||
+                                        desc.toLowerCase().includes(promptQuery.toLowerCase())
+                                      );
+                                    }).map((prompt) => {
+                                      const label = tPresets(`${prompt.id}.label`);
+                                      const desc = tPresets(`${prompt.id}.description`);
+                                      return (
+                                        <button
+                                          key={prompt.id}
+                                          type="button"
+                                          onClick={() => {
+                                            if (prompt.id === "custom") {
+                                              setSelectedPromptId("custom");
+                                            } else {
+                                              setIsPromptDropdownOpen(false);
+                                              handleUpdateNoteAction(false, prompt.id);
+                                            }
+                                          }}
+                                          className="w-full text-left flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                                        >
+                                          <span className="text-sm select-none">{prompt.icon}</span>
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>
+                                            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{desc}</p>
+                                          </div>
+                                        </button>
+                                      );
+                                    })}
                                   </div>
                                 </>
-                                ) : (
+                              ) : (
                                 <div className="space-y-2">
                                   <div className="flex items-center justify-between pb-1 border-b border-zinc-100 dark:border-zinc-900">
-                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Custom Instruction</span>
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{tPresets("customInstruction")}</span>
                                     <button
                                       type="button"
                                       onClick={() => setSelectedPromptId(null)}
                                       className="text-[10px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 font-semibold"
                                     >
-                                      Back
+                                      {tPresets("back")}
                                     </button>
                                   </div>
                                   <textarea
                                     value={customPromptText}
                                     onChange={(e) => setCustomPromptText(e.target.value)}
-                                    placeholder="e.g. rewrite as a professional email..."
+                                    placeholder={tPresets("customPlaceholder")}
                                     rows={3}
                                     maxLength={500}
                                     className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 resize-none"
                                   />
                                   <div className="flex items-center justify-between">
                                     <span className={`text-[10px] ${500 - customPromptText.length < 50 ? "text-red-500" : "text-zinc-400 dark:text-zinc-500"}`}>
-                                      {500 - customPromptText.length} chars left
+                                      {tWorkspace("charsLeft", { count: 500 - customPromptText.length })}
                                     </span>
                                     <button
                                       type="button"
@@ -1621,7 +1640,7 @@ export default function Home() {
                                       disabled={!customPromptText.trim() || isUpdating}
                                       className="bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
                                     >
-                                      Submit
+                                      {tWorkspace("submit")}
                                     </button>
                                   </div>
                                 </div>
@@ -1638,7 +1657,7 @@ export default function Home() {
                       disabled={isUpdating || !editText.trim()}
                       className="bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                     >
-                      Update
+                      {tWorkspace("update")}
                     </button>
                   )}
                 </div>
@@ -1658,7 +1677,7 @@ export default function Home() {
                 {selectedNote.structured_content?.markdown && (
                   <details className="mt-8 border-t border-zinc-100 dark:border-zinc-800 pt-4">
                     <summary className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 cursor-pointer font-semibold outline-none select-none">
-                      Show Raw Unstructured Text
+                      {tWorkspace("showRawText")}
                     </summary>
                     <div className="mt-3 text-left whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 font-mono">
                       {selectedNote.raw_text}
@@ -1674,7 +1693,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/85 flex flex-col items-center justify-center rounded-2xl backdrop-blur-[2px] z-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mb-4"></div>
                 <p className="text-sm font-semibold text-zinc-900 dark:text-white animate-pulse">
-                  {user?.trial_ended ? "Saving your note..." : "Organizing your note..."}
+                  {user?.trial_ended ? tWorkspace("saving") : tWorkspace("organizing")}
                 </p>
               </div>
             )}
@@ -1685,7 +1704,7 @@ export default function Home() {
                     htmlFor="raw_text"
                     className="text-sm font-semibold text-zinc-900 dark:text-zinc-50"
                   >
-                    Write your thoughts freely...
+                    {tWorkspace("writeLabel")}
                   </label>
 
                   {/* Formatting Toolbar */}
@@ -1694,7 +1713,7 @@ export default function Home() {
                       type="button"
                       onClick={() => applyFormat("bold", false)}
                       className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs font-bold transition-colors"
-                      title="Bold"
+                      title={tToolbars("bold")}
                     >
                       B
                     </button>
@@ -1702,7 +1721,7 @@ export default function Home() {
                       type="button"
                       onClick={() => applyFormat("italic", false)}
                       className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs italic font-serif transition-colors"
-                      title="Italic"
+                      title={tToolbars("italic")}
                     >
                       I
                     </button>
@@ -1710,7 +1729,7 @@ export default function Home() {
                       type="button"
                       onClick={() => applyFormat("underline", false)}
                       className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-xs underline transition-colors"
-                      title="Underline"
+                      title={tToolbars("underline")}
                     >
                       U
                     </button>
@@ -1719,7 +1738,7 @@ export default function Home() {
                       type="button"
                       onClick={() => applyFormat("heading", false)}
                       className="h-7 px-2 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[10px] font-extrabold tracking-wider transition-colors"
-                      title="Add Heading"
+                      title={tToolbars("heading")}
                     >
                       H1/H2
                     </button>
@@ -1728,7 +1747,7 @@ export default function Home() {
                       type="button"
                       onClick={() => applyFormat("bullet", false)}
                       className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
-                      title="Bullet List"
+                      title={tToolbars("bulletList")}
                     >
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -1738,7 +1757,7 @@ export default function Home() {
                       type="button"
                       onClick={() => applyFormat("checklist", false)}
                       className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 transition-colors"
-                      title="Checklist"
+                      title={tToolbars("checklist")}
                     >
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1750,7 +1769,7 @@ export default function Home() {
                   id="raw_text"
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
-                  placeholder="Type your notes here exactly as you think them. Write down shopping lists, todo tasks, and meeting summaries mixed up together. No formatting required..."
+                  placeholder={tWorkspace("writePlaceholder")}
                   className="flex-1 w-full rounded-xl border border-zinc-200 bg-zinc-50/30 p-4 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/30 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400 dark:focus:bg-zinc-950 resize-none min-h-0"
                 />
               </div>
@@ -1767,22 +1786,22 @@ export default function Home() {
                     user.trial_ended ? (
                       <p className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                         <span>⚠️</span>
-                        <span>Free trial ended. AI organization is disabled. Notes will be saved as plain text.</span>
+                        <span>{tWorkspace("trialEndedNotice")}</span>
                       </p>
                     ) : (
                       <p className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
                         <span>✨</span>
-                        <span>AI formatting is active. Notes will be structured and saved permanently.</span>
+                        <span>{tWorkspace("trialActiveNotice")}</span>
                       </p>
                     )
                   ) : (
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 flex-wrap">
                       <span>🔒</span>
-                      <span>Anonymous Mode: notes saved to this tab only.</span>
+                      <span>{tWorkspace("anonymousNotice")}</span>
                       <Link href="/login" className="font-semibold underline hover:text-zinc-900 dark:hover:text-zinc-50">
-                        Sign in
+                        {tWorkspace("anonymousNoticeLink")}
                       </Link>
-                      <span>to unlock AI features.</span>
+                      <span>{tWorkspace("anonymousNoticeSuffix")}</span>
                     </p>
                   )}
                 </div>
@@ -1794,7 +1813,7 @@ export default function Home() {
                       disabled={!noteText.trim()}
                       className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                     >
-                      Save Note
+                      {tWorkspace("saveNote")}
                     </button>
                   ) : (
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -1804,7 +1823,7 @@ export default function Home() {
                         disabled={!noteText.trim()}
                         className="w-full sm:w-auto rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
                       >
-                        Save as-is
+                        {tWorkspace("saveAsIs")}
                       </button>
                       <div className="relative inline-flex rounded-lg shadow-sm" ref={savePromptDropdownRef}>
                         <button
@@ -1813,7 +1832,7 @@ export default function Home() {
                           disabled={!noteText.trim()}
                           className="bg-zinc-900 text-white rounded-l-lg px-5 py-2 text-sm font-semibold hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                         >
-                          Save with AI
+                          {tWorkspace("saveWithAi")}
                         </button>
                         <div className="w-[1px] bg-zinc-800 dark:bg-zinc-200/20 self-stretch" />
                         <button
@@ -1842,60 +1861,68 @@ export default function Home() {
                                     type="text"
                                     value={savePromptQuery}
                                     onChange={(e) => setSavePromptQuery(e.target.value)}
-                                    placeholder="Search prompts..."
+                                    placeholder={tPresets("searchPlaceholder")}
                                     className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
                                   />
                                 </div>
                                 <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                                  {PRESET_PROMPTS.filter(p =>
-                                    p.label.toLowerCase().includes(savePromptQuery.toLowerCase()) ||
-                                    p.description.toLowerCase().includes(savePromptQuery.toLowerCase())
-                                  ).map((prompt) => (
-                                    <button
-                                      key={prompt.id}
-                                      type="button"
-                                      onClick={() => {
-                                        if (prompt.id === "custom") {
-                                          setSelectedSavePromptId("custom");
-                                        } else {
-                                          setIsSavePromptDropdownOpen(false);
-                                          handleSaveNoteAction(false, prompt.id);
-                                        }
-                                      }}
-                                      className="w-full text-left flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-                                    >
-                                      <span className="text-sm select-none">{prompt.icon}</span>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{prompt.label}</p>
-                                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{prompt.description}</p>
-                                      </div>
-                                    </button>
-                                  ))}
+                                  {PRESET_PROMPTS.filter(p => {
+                                    const label = tPresets(`${p.id}.label`);
+                                    const desc = tPresets(`${p.id}.description`);
+                                    return (
+                                      label.toLowerCase().includes(savePromptQuery.toLowerCase()) ||
+                                      desc.toLowerCase().includes(savePromptQuery.toLowerCase())
+                                    );
+                                  }).map((prompt) => {
+                                    const label = tPresets(`${prompt.id}.label`);
+                                    const desc = tPresets(`${prompt.id}.description`);
+                                    return (
+                                      <button
+                                        key={prompt.id}
+                                        type="button"
+                                        onClick={() => {
+                                          if (prompt.id === "custom") {
+                                            setSelectedSavePromptId("custom");
+                                          } else {
+                                            setIsSavePromptDropdownOpen(false);
+                                            handleSaveNoteAction(false, prompt.id);
+                                          }
+                                        }}
+                                        className="w-full text-left flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                                      >
+                                        <span className="text-sm select-none">{prompt.icon}</span>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>
+                                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{desc}</p>
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </>
                             ) : (
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between pb-1 border-b border-zinc-100 dark:border-zinc-900">
-                                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Custom Instruction</span>
+                                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{tPresets("customInstruction")}</span>
                                   <button
                                     type="button"
                                     onClick={() => setSelectedSavePromptId(null)}
                                     className="text-[10px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 font-semibold"
                                   >
-                                    Back
+                                    {tPresets("back")}
                                   </button>
                                 </div>
                                 <textarea
                                   value={customSavePromptText}
                                   onChange={(e) => setCustomSavePromptText(e.target.value)}
-                                  placeholder="e.g. rewrite as a professional email..."
+                                  placeholder={tPresets("customPlaceholder")}
                                   rows={3}
                                   maxLength={500}
                                   className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 resize-none"
                                 />
                                 <div className="flex items-center justify-between">
                                   <span className={`text-[10px] ${500 - customSavePromptText.length < 50 ? "text-red-500" : "text-zinc-400 dark:text-zinc-500"}`}>
-                                    {500 - customSavePromptText.length} chars left
+                                    {tWorkspace("charsLeft", { count: 500 - customSavePromptText.length })}
                                   </span>
                                   <button
                                     type="button"
@@ -1910,7 +1937,7 @@ export default function Home() {
                                     disabled={!customSavePromptText.trim()}
                                     className="bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
                                   >
-                                    Submit
+                                    {tWorkspace("submit")}
                                   </button>
                                 </div>
                               </div>
@@ -1927,7 +1954,7 @@ export default function Home() {
                     disabled={!noteText.trim()}
                     className="w-full sm:w-auto bg-zinc-900 text-white rounded-lg px-6 py-2 text-sm font-semibold shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:bg-zinc-200 disabled:text-zinc-400 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500 transition-colors"
                   >
-                    Save Note
+                    {tWorkspace("saveNote")}
                   </button>
                 )}
               </div>
@@ -1969,6 +1996,7 @@ interface OnboardingModalProps {
 }
 
 function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
+  const t = useTranslations("Onboarding");
   const [step, setStep] = useState(1);
   const router = useRouter();
 
@@ -2011,10 +2039,10 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 />
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
-                Your notes are messy? Let AI organize them for you.
+                {t("step1.title")}
               </h3>
-              <p className="text-sm text-zinc-650 dark:text-zinc-400">
-                Instantly turn scattered thoughts, lecture records, or meetings into clean, categorized markdown lists.
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t("step1.body")}
               </p>
             </div>
           )}
@@ -2031,10 +2059,10 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 />
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
-                Try it free for 30 days — no card required.
+                {t("step2.title")}
               </h3>
-              <p className="text-sm text-zinc-650 dark:text-zinc-400">
-                Unlock full access to AI note organization for a month. Save notes and access templates with zero commitments.
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t("step2.body")}
               </p>
             </div>
           )}
@@ -2051,10 +2079,10 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 />
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
-                Get Started Now
+                {t("step3.title")}
               </h3>
-              <p className="text-sm text-zinc-650 dark:text-zinc-400">
-                Create a secure account in seconds to save your progress, edit notes, and keep AI organizing them.
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t("step3.body")}
               </p>
             </div>
           )}
@@ -2085,7 +2113,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 onClick={() => setStep(step - 1)}
                 className="rounded-lg px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
               >
-                Back
+                {t("back")}
               </button>
             ) : (
               <button
@@ -2093,7 +2121,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 onClick={handleDismiss}
                 className="text-xs font-semibold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
               >
-                Maybe later
+                {t("maybeLater")}
               </button>
             )}
 
@@ -2103,7 +2131,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 onClick={() => setStep(step + 1)}
                 className="rounded-lg bg-zinc-900 px-5 py-2 text-xs font-semibold text-white shadow hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 ml-auto"
               >
-                Next
+                {t("next")}
               </button>
             ) : (
               <div className="flex items-center gap-3 ml-auto">
@@ -2112,14 +2140,14 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   onClick={handleDismiss}
                   className="text-xs font-semibold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors sm:hidden"
                 >
-                  Maybe later
+                  {t("maybeLater")}
                 </button>
                 <button
                   type="button"
                   onClick={handleRegister}
                   className="rounded-lg bg-zinc-900 px-5 py-2 text-xs font-semibold text-white shadow hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
                 >
-                  Sign Up
+                  {t("signUp")}
                 </button>
               </div>
             )}
@@ -2137,6 +2165,7 @@ interface DeleteConfirmationDialogProps {
 }
 
 function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirmationDialogProps) {
+  const t = useTranslations("Dialogs.deleteNote");
   const [animateShow, setAnimateShow] = useState(false);
 
   useEffect(() => {
@@ -2175,9 +2204,9 @@ function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirma
           }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Delete Note?</h3>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{t("title")}</h3>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Are you sure you want to delete this note? This action cannot be undone.
+          {t("body")}
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -2186,14 +2215,14 @@ function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirma
             onClick={onClose}
             className="flex-1 sm:flex-initial rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors focus:ring-2 focus:ring-zinc-500 focus:outline-none"
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="flex-1 sm:flex-initial rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
           >
-            Delete
+            {t("confirm")}
           </button>
         </div>
       </div>
@@ -2208,6 +2237,7 @@ interface SignOutConfirmationDialogProps {
 }
 
 function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfirmationDialogProps) {
+  const t = useTranslations("Dialogs.signOut");
   const [animateShow, setAnimateShow] = useState(false);
 
   useEffect(() => {
@@ -2257,9 +2287,9 @@ function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfir
             priority
           />
         </div>
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Sign Out</h3>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{t("title")}</h3>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          Are you sure you want to sign out? Any unsaved local changes might be lost.
+          {t("body")}
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <button
@@ -2268,14 +2298,14 @@ function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfir
             onClick={onClose}
             className="flex-1 sm:flex-initial rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors focus:ring-2 focus:ring-zinc-500 focus:outline-none"
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="flex-1 sm:flex-initial rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:border-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
           >
-            Sign Out
+            {t("confirm")}
           </button>
         </div>
       </div>
