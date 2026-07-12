@@ -39,7 +39,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <I18nContext.Provider value={{ locale: "en", setLocale }}>
-        <NextIntlClientProvider locale="en" messages={enMessages}>
+        <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
           {children}
         </NextIntlClientProvider>
       </I18nContext.Provider>
@@ -48,7 +48,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <I18nContext.Provider value={{ locale, setLocale }}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
         {children}
       </NextIntlClientProvider>
     </I18nContext.Provider>

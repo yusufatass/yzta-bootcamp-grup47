@@ -88,7 +88,7 @@ export default function PremiumPage() {
             <div className="space-y-6">
               <div className="w-full h-40 flex items-center justify-center">
                 <Image
-                  src="/mascot/working-on.png"
+                  src="/mascot/spellcheck-correct.png"
                   alt="AI Magic Formatting"
                   width={150}
                   height={150}
