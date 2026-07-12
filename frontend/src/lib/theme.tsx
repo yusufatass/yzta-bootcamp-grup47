@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 export type ThemeMode = "light" | "dark" | "custom";
 
@@ -252,6 +253,7 @@ export function useTheme() {
 
 /** Beautiful Theme Popover Selector Button */
 export function ThemeToggle({ className = "" }: { className?: string }) {
+  const t = useTranslations("Theme");
   const {
     themeMode,
     theme,
@@ -308,8 +310,8 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Theme Settings"
-        title="Theme Settings"
+        aria-label={t("themeSettings")}
+        title={t("themeSettings")}
         className={`rounded-xl p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 transition-all border border-zinc-200/50 dark:border-zinc-800/50 flex items-center gap-1.5 ${
           isOpen ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 scale-95" : ""
         } ${className}`}
@@ -318,7 +320,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M4.098 19.902a3.75 3.75 0 015.304 0l6.401-6.402M4.098 19.902l9.713-9.712m-9.713 9.712l-1.33 1.33A1 1 0 005.187 23h1.365a1 1 0 00.707-.293l1.33-1.33m0 0l11.24-11.24a3.75 3.75 0 10-5.304-5.304L5.187 15.93m15.528 2.218a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zm-3.472-9.437a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zM3.75 6.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 010-1.5zM5.25 3a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H6a.75.75 0 01-.75-.75z" />
         </svg>
         <span className="text-xs font-semibold hidden md:inline">
-          {themeMode === "light" ? "Light" : themeMode === "dark" ? "Dark" : "Custom"}
+          {themeMode === "light" ? t("light") : themeMode === "dark" ? t("dark") : t("custom")}
         </span>
       </button>
 
@@ -326,13 +328,13 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         <div className="absolute right-0 mt-2 w-72 origin-top-right rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl z-50 p-4 font-sans focus:outline-none transition-all">
           <div className="flex items-center justify-between mb-3 border-b border-zinc-100 dark:border-zinc-800 pb-2">
             <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-1.5">
-              <span>🎨</span> Theme Settings
+              {t("themeSettings")}
             </span>
             <button
               onClick={() => setIsOpen(false)}
               className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-xs cursor-pointer"
             >
-              Close
+              {t("close")}
             </button>
           </div>
 
@@ -347,7 +349,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              Light
+              {t("light")}
             </button>
             <button
               type="button"
@@ -358,7 +360,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              Dark
+              {t("dark")}
             </button>
             <button
               type="button"
@@ -369,7 +371,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
-              Custom
+              {t("custom")}
             </button>
           </div>
 
@@ -379,7 +381,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
               {/* Presets grid */}
               <div>
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  PRESET PALETTES
+                  {t("presetPalettes")}
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   {PRESETS.map((p) => (
@@ -406,12 +408,12 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
               {/* Color Customizer */}
               <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  CUSTOMIZE COLORS
+                  {t("customizeColors")}
                 </span>
                 <div className="space-y-2">
                   {/* Background Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Background</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("background")}</span>
                     <input
                       type="color"
                       value={customColors.bg}
@@ -422,7 +424,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Panel Background Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Cards / Panels</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("cardsPanels")}</span>
                     <input
                       type="color"
                       value={customColors.panelBg}
@@ -433,7 +435,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Text Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Text Color</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("textColor")}</span>
                     <input
                       type="color"
                       value={customColors.text}
@@ -444,7 +446,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Accent Picker */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Accent Color</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("accentColor")}</span>
                     <input
                       type="color"
                       value={customColors.accent}
@@ -455,7 +457,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
                   {/* Dark Mode Toggle for Custom */}
                   <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Is Dark Mode Based?</span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("isDarkModeBased")}</span>
                     <button
                       type="button"
                       onClick={() => setCustomColors(customColors, !customIsDark)}

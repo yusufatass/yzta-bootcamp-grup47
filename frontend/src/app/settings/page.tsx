@@ -18,6 +18,7 @@ import { LanguageSwitcher } from "@/lib/i18n";
 
 export default function SettingsPage() {
   const t = useTranslations("Settings");
+  const tHeader = useTranslations("Header");
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<UserMe | null>(null);
@@ -120,7 +121,7 @@ export default function SettingsPage() {
                 style={{ width: 'auto', height: 'auto' }}
                 priority
               />
-              <span>Unstructured Notes</span>
+              <span>{tHeader("title")}</span>
             </div>
             <div className="w-24 h-8 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>
@@ -150,7 +151,7 @@ export default function SettingsPage() {
               className="object-contain"
               priority
             />
-            <span>Unstructured Notes</span>
+            <span>{tHeader("title")}</span>
           </Link>
 
           <div className="flex items-center gap-3">

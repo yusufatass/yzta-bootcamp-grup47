@@ -954,7 +954,7 @@ export default function Home() {
                 style={{ width: 'auto', height: 'auto' }}
                 priority
               />
-              <span>Unstructured Notes</span>
+              <span>{tHeader("title")}</span>
             </div>
             <div className="w-24 h-8 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>

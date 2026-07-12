@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/lib/i18n";
 
 export default function PremiumPage() {
   const t = useTranslations("Premium");
+  const tHeader = useTranslations("Header");
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-sans flex flex-col">
@@ -25,7 +26,7 @@ export default function PremiumPage() {
               className="object-contain"
               priority
             />
-            <span>Unstructured Notes</span>
+            <span>{tHeader("title")}</span>
           </Link>
 
           <div className="flex items-center gap-3">

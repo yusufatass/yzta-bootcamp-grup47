@@ -255,5 +255,19 @@
     "ctaTitle": "Ready to experience frictionless clarity?",
     "ctaSubtitle": "Join thousands of users turning raw information into actionable, structured notes instantly.",
     "ctaButton": "Start Free 30-Day Trial"
+  },
+  "Theme": {
+    "themeSettings": "Theme Settings",
+    "light": "Light",
+    "dark": "Dark",
+    "custom": "Custom",
+    "close": "Close",
+    "presetPalettes": "PRESET PALETTES",
+    "customizeColors": "CUSTOMIZE COLORS",
+    "background": "Background",
+    "cardsPanels": "Cards / Panels",
+    "textColor": "Text Color",
+    "accentColor": "Accent Color",
+    "isDarkModeBased": "Is Dark Mode Based?"
   }
 }

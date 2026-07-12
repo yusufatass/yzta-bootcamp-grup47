@@ -255,5 +255,19 @@
     "ctaTitle": "Sorunsuz netliği deneyimlemeye hazır mısınız?",
     "ctaSubtitle": "Dağınık bilgileri anında eyleme geçirilebilir, düzenli notlara dönüştüren binlerce kullanıcıya katılın.",
     "ctaButton": "30 Günlük Ücretsiz Denemeyi Başlat"
+  },
+  "Theme": {
+    "themeSettings": "Tema Ayarları",
+    "light": "Açık",
+    "dark": "Koyu",
+    "custom": "Özel",
+    "close": "Kapat",
+    "presetPalettes": "HAZIR PALETLER",
+    "customizeColors": "RENKLERİ ÖZELLEŞTİR",
+    "background": "Arka Plan",
+    "cardsPanels": "Kartlar / Paneller",
+    "textColor": "Yazı Rengi",
+    "accentColor": "Vurgu Rengi",
+    "isDarkModeBased": "Koyu Tema Tabanlı mı?"
   }
 }
