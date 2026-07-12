@@ -1,7 +1,7 @@
 # Progress
 
 ### Current Status
-Phase 3 (Hardening) is now fully completed! We have conducted a complete audit and hardening of the Light/Dark mode theme across all pages, components, modals, and templates, fixing all non-standard Tailwind class typos and contrast bugs. We also designed beautiful, detailed mock-up visual illustrations for the onboarding modal steps, implemented a Delete Confirmation Dialog (Improvement #10) to prevent accidental data loss with micro-animations and accessibility features, and verified that a full production build (`npm run build`) compiles cleanly without any TypeScript or Next.js issues. The application is completely ready for Phase 4 (Demo Readiness).
+Phase 3 (Hardening) is now fully completed. Phase 4 (Demo Readiness) is actively in progress with major UX enhancements: custom scrollbar for the Note History panel, custom React-controlled category filter dropdown replacing the native `<select>` element, and a new premium "Card Stack" (Not Destesi) view mode for the Note History sidebar — featuring physics-inspired stacked cards grouped by category, accordion expansion/collapse with `max-height` CSS transitions, and a minimalist view toggle button group in the sidebar header. All features have passed a full production build.
 
 ## What Works
 * Monorepo folder structure (`frontend/`, `backend/`)

@@ -106,3 +106,43 @@ body {
   --color-green-700: var(--custom-accent, #ff007f);
 }
 
+/* Custom Scrollbar Styles */
+.custom-scrollbar {
+  --sb-track: transparent;
+  --sb-thumb: #d4d4d8; /* bg-zinc-300 */
+  --sb-thumb-hover: #a1a1aa; /* bg-zinc-400 */
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+.dark .custom-scrollbar {
+  --sb-track: rgba(24, 24, 27, 0.3); /* dark:bg-zinc-900/30 */
+  --sb-thumb: #3f3f46; /* dark:bg-zinc-700 / 750 approximate */
+  --sb-thumb-hover: #52525b; /* dark:hover:bg-zinc-600 */
+}
+
+/* Custom theme mapping compatibility */
+.theme-custom .custom-scrollbar {
+  --sb-thumb: var(--color-zinc-300);
+  --sb-thumb-hover: var(--color-zinc-400);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--sb-track);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
+}
+
+

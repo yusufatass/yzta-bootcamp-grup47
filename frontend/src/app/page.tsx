@@ -114,6 +114,15 @@ export default function Home() {
   const [customSavePromptText, setCustomSavePromptText] = useState("");
   const savePromptDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Category filter dropdown state
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+
+  // View mode: list | stacks
+  const [viewMode, setViewMode] = useState<"list" | "stacks">("list");
+  // Tracks which category stacks are expanded (Set of category strings)
+  const [expandedStacks, setExpandedStacks] = useState<Set<string>>(new Set());
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastVisible(true), 10);
@@ -183,7 +192,22 @@ export default function Home() {
     };
   }, [isSavePromptDropdownOpen]);
 
-  // Escape key closes whichever prompt dropdown is open
+  // Handle click outside for category dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setIsCategoryDropdownOpen(false);
+      }
+    }
+    if (isCategoryDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isCategoryDropdownOpen]);
+
+  // Escape key closes whichever dropdown is open
   useEffect(() => {
     function handleEscKey(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -195,15 +219,18 @@ export default function Home() {
           setIsSavePromptDropdownOpen(false);
           setSelectedSavePromptId(null);
         }
+        if (isCategoryDropdownOpen) {
+          setIsCategoryDropdownOpen(false);
+        }
       }
     }
-    if (isPromptDropdownOpen || isSavePromptDropdownOpen) {
+    if (isPromptDropdownOpen || isSavePromptDropdownOpen || isCategoryDropdownOpen) {
       document.addEventListener("keydown", handleEscKey);
     }
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, [isPromptDropdownOpen, isSavePromptDropdownOpen]);
+  }, [isPromptDropdownOpen, isSavePromptDropdownOpen, isCategoryDropdownOpen]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -1102,26 +1129,61 @@ export default function Home() {
         {/* Left Sidebar: Note History */}
         <section className="w-full md:w-80 flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 max-h-[300px] md:max-h-none min-h-0">
           <div className="flex items-center justify-between mb-3 shrink-0">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center justify-between w-full">
-              <span>{tSidebar("noteHistory")}</span>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              {tSidebar("noteHistory")}
+            </h2>
+            <div className="flex items-center gap-1.5">
               <span className="text-xs font-normal text-zinc-500">
                 {tSidebar("notesCount", { count: user ? filteredNotes.length : notes.length })}
               </span>
-            </h2>
-            {selectedNote && (
-              <button
-                onClick={() => {
-                  setSelectedNote(null);
-                  setError(null);
-                  setIsEditing(false);
-                  setIsTitleEditing(false);
-                  setEditText("");
-                }}
-                className="ml-2 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
-              >
-                <span>+</span> {tSidebar("newNote")}
-              </button>
-            )}
+              {/* View Mode Toggle */}
+              {user && notes.length > 0 && (
+                <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    title="List view"
+                    className={`p-1 rounded-md transition-all ${
+                      viewMode === "list"
+                        ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-50"
+                        : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("stacks")}
+                    title="Stack view"
+                    className={`p-1 rounded-md transition-all ${
+                      viewMode === "stacks"
+                        ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-50"
+                        : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {selectedNote && (
+                <button
+                  onClick={() => {
+                    setSelectedNote(null);
+                    setError(null);
+                    setIsEditing(false);
+                    setIsTitleEditing(false);
+                    setEditText("");
+                  }}
+                  className="text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold flex items-center gap-1 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1 bg-zinc-50 dark:bg-zinc-950 transition-colors"
+                >
+                  <span>+</span> {tSidebar("newNote")}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Search & Filter Controls (only if authenticated and notes exist) */}
@@ -1152,32 +1214,65 @@ export default function Home() {
                   </button>
                 )}
               </div>
-              <div className="relative">
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl px-3 py-1.5 pr-8 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-500 cursor-pointer appearance-none"
+              <div className="relative" ref={categoryDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                  className="w-full flex items-center justify-between bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/60 rounded-xl px-3 py-1.5 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-500 cursor-pointer transition-all"
                 >
-                  <option value="All" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.All")}</option>
-                  <option value="Shopping List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Shopping List")}</option>
-                  <option value="Meeting Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Meeting Notes")}</option>
-                  <option value="Lecture Notes" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Lecture Notes")}</option>
-                  <option value="Daily Plan" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Daily Plan")}</option>
-                  <option value="Travel List" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Travel List")}</option>
-                  <option value="General / Other" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.General / Other")}</option>
-                  <option value="Plain Text" className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{tSidebar("categories.Plain Text")}</option>
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 dark:text-zinc-500">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <span className="font-semibold">{tSidebar(`categories.${categoryFilter}` as any)}</span>
+                  <svg
+                    className={`w-3 h-3 text-zinc-400 dark:text-zinc-500 transition-transform duration-200 ${
+                      isCategoryDropdownOpen ? "transform rotate-180" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
-                </div>
+                </button>
+
+                {isCategoryDropdownOpen && (
+                  <div className="absolute top-full mt-1 left-0 w-full z-40 bg-white/95 dark:bg-zinc-900/95 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg p-1 backdrop-blur-md transition-all select-none">
+                    {(
+                      [
+                        "All",
+                        "Shopping List",
+                        "Meeting Notes",
+                        "Lecture Notes",
+                        "Daily Plan",
+                        "Travel List",
+                        "General / Other",
+                        "Plain Text",
+                      ] as const
+                    ).map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setCategoryFilter(cat);
+                          setIsCategoryDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
+                          categoryFilter === cat
+                            ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
+                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-zinc-50"
+                        }`}
+                      >
+                        <span>{tSidebar(`categories.${cat}` as any)}</span>
+                        {categoryFilter === cat && <span className="text-[10px] text-zinc-500 dark:text-zinc-400">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Scrolling Note List container */}
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1 -mr-1 scrollbar-thin">
+          {/* Scrolling Note List / Stacks container */}
+          <div className="flex-1 overflow-y-auto pr-1 -mr-1 custom-scrollbar">
             {notes.length === 0 ? (
               <div className="flex-grow flex flex-col items-center justify-center p-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/10 my-2">
                 <div className="mb-3">
@@ -1203,66 +1298,215 @@ export default function Home() {
                   {tSidebar("noNotesFound.body")}
                 </p>
               </div>
-            ) : (
-              (user ? filteredNotes : notes).map((note) => (
-                <div
-                  key={note.id}
-                  onClick={() => {
-                    setSelectedNote(note);
-                    setError(null);
-                    setIsEditing(false);
-                    setIsTitleEditing(false);
-                    setEditText(note.raw_text);
-                  }}
-                  className={`group relative p-4 rounded-xl border transition-all text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${deletingNoteId === note.id ? "opacity-0 scale-95 pointer-events-none duration-300" : "duration-200"
-                    } ${selectedNote?.id === note.id
-                      ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-800 dark:ring-zinc-300 shadow-sm"
-                      : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-950/60 dark:hover:border-zinc-700"
-                    }`}
-                >
-                  {selectedNote?.id === note.id && (
-                    <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
-                  )}
-                  <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 truncate pr-6">
-                    {note.title || tSidebar("untitledNote")}
-                  </h3>
-                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
-                    {getNotePreview(note)}
-                  </p>
-                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                    <span className="text-[9px] text-zinc-400">
-                      {new Date(note.created_at).toLocaleDateString()}
-                    </span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ring-1 ring-inset ${getCategoryColor(note.category)}`}>
-                      {tSidebar(`categories.${note.category}` as any)}
-                    </span>
-                  </div>
+            ) : viewMode === "stacks" && user ? (
+              /* ── STACKS VIEW ── */
+              <div className="space-y-4 py-1">
+                {(() => {
+                  // Group filtered notes by category
+                  const groups: Record<string, typeof filteredNotes> = {};
+                  filteredNotes.forEach((note) => {
+                    const cat = note.category || "General / Other";
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(note);
+                  });
+                  return Object.entries(groups).map(([category, catNotes]) => {
+                    const isExpanded = expandedStacks.has(category);
+                    const topNote = catNotes[0];
+                    const PEEK_COUNT = Math.min(catNotes.length - 1, 2);
+                    return (
+                      <div key={category} className="rounded-2xl">
+                        {/* Stack Pile — clickable to expand/collapse */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExpandedStacks((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(category)) next.delete(category);
+                              else next.add(category);
+                              return next;
+                            });
+                          }}
+                          className="w-full text-left focus:outline-none group/stack"
+                        >
+                          {/* Physical card stack container */}
+                          <div className={`relative ${PEEK_COUNT >= 2 ? "pb-3" : PEEK_COUNT === 1 ? "pb-1.5" : ""}`}>
+                            {/* Card 3 (bottom shadow card) */}
+                            {PEEK_COUNT >= 2 && (
+                              <div
+                                aria-hidden="true"
+                                className="absolute inset-x-0 top-2 left-2 right-0 h-full rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 bg-zinc-100/80 dark:bg-zinc-800/60 z-10"
+                                style={{ transform: "rotate(-1deg) scaleX(0.96)", transformOrigin: "bottom center" }}
+                              />
+                            )}
+                            {/* Card 2 (middle shadow card) */}
+                            {PEEK_COUNT >= 1 && (
+                              <div
+                                aria-hidden="true"
+                                className="absolute inset-x-0 top-1 left-1 right-0 h-full rounded-xl border border-zinc-200 dark:border-zinc-700/80 bg-zinc-50/90 dark:bg-zinc-800/80 z-20"
+                                style={{ transform: "rotate(0.6deg) scaleX(0.98)", transformOrigin: "bottom center" }}
+                              />
+                            )}
+                            {/* Card 1 (top / most-recent note) */}
+                            <div
+                              className={`relative z-30 p-4 rounded-xl border transition-all duration-200 shadow-sm group-hover/stack:shadow-md ${
+                                selectedNote?.id === topNote.id
+                                  ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-800 dark:ring-zinc-300"
+                                  : "border-zinc-200/80 bg-white dark:border-zinc-700/80 dark:bg-zinc-900 group-hover/stack:border-zinc-300 dark:group-hover/stack:border-zinc-600"
+                              }`}
+                            >
+                              {/* Category badge row */}
+                              <div className="flex items-center justify-between mb-2">
+                                <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-semibold ring-1 ring-inset ${getCategoryColor(category)}`}>
+                                  {tSidebar(`categories.${category}` as any)}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500">
+                                    {catNotes.length} {catNotes.length === 1 ? "note" : "notes"}
+                                  </span>
+                                  <svg
+                                    className={`w-3 h-3 text-zinc-400 dark:text-zinc-500 transition-transform duration-300 ${
+                                      isExpanded ? "rotate-180" : ""
+                                    }`}
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </div>
+                              </div>
+                              <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 truncate">
+                                {topNote.title || tSidebar("untitledNote")}
+                              </h3>
+                              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1 leading-normal">
+                                {getNotePreview(topNote)}
+                              </p>
+                              <span className="text-[9px] text-zinc-400 dark:text-zinc-500 mt-1.5 block">
+                                {new Date(topNote.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
 
-                  {/* Delete button (visible on hover) */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteNote(note.id);
+                        {/* Expanded accordion — individual notes list */}
+                        <div
+                          className="overflow-hidden transition-all duration-300 ease-in-out"
+                          style={{ maxHeight: isExpanded ? `${catNotes.length * 100}px` : "0px" }}
+                        >
+                          <div className="mt-1.5 space-y-1.5 pl-2 border-l-2 border-zinc-200 dark:border-zinc-700">
+                            {catNotes.map((note, noteIdx) => (
+                              <div
+                                key={note.id}
+                                onClick={() => {
+                                  setSelectedNote(note);
+                                  setError(null);
+                                  setIsEditing(false);
+                                  setIsTitleEditing(false);
+                                  setEditText(note.raw_text);
+                                }}
+                                className={`group/item relative p-3 rounded-xl border transition-all duration-150 text-left cursor-pointer active:scale-[0.98] ${
+                                  deletingNoteId === note.id ? "opacity-0 scale-95 pointer-events-none" : ""
+                                } ${
+                                  selectedNote?.id === note.id
+                                    ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-800 dark:ring-zinc-300 shadow-sm"
+                                    : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/60 dark:bg-zinc-950/20 dark:hover:bg-zinc-950/50 dark:hover:border-zinc-700"
+                                }`}
+                              >
+                                {noteIdx === 0 && (
+                                  <span className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+                                )}
+                                <h4 className="font-semibold text-xs text-zinc-800 dark:text-zinc-200 truncate pr-6">
+                                  {note.title || tSidebar("untitledNote")}
+                                </h4>
+                                <p className="text-[9px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5 leading-normal">
+                                  {getNotePreview(note)}
+                                </p>
+                                <span className="text-[9px] text-zinc-400 dark:text-zinc-500 mt-1 block">
+                                  {new Date(note.created_at).toLocaleDateString()}
+                                </span>
+                                {/* Delete button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteNote(note.id);
+                                  }}
+                                  className="absolute top-2 right-2 opacity-0 group-hover/item:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                  title={tSidebar("deleteNote")}
+                                >
+                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            ) : (
+              /* ── LIST VIEW ── */
+              <div className="space-y-2">
+                {(user ? filteredNotes : notes).map((note) => (
+                  <div
+                    key={note.id}
+                    onClick={() => {
+                      setSelectedNote(note);
+                      setError(null);
+                      setIsEditing(false);
+                      setIsTitleEditing(false);
+                      setEditText(note.raw_text);
                     }}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    title={tSidebar("deleteNote")}
+                    className={`group relative p-4 rounded-xl border transition-all text-left cursor-pointer hover:shadow-sm active:scale-[0.98] ${deletingNoteId === note.id ? "opacity-0 scale-95 pointer-events-none duration-300" : "duration-200"
+                      } ${selectedNote?.id === note.id
+                        ? "border-zinc-800 bg-zinc-50/90 dark:border-zinc-300 dark:bg-zinc-950 ring-1 ring-zinc-800 dark:ring-zinc-300 shadow-sm"
+                        : "border-zinc-200/60 bg-zinc-50/40 hover:bg-zinc-50/80 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-950/30 dark:hover:bg-zinc-950/60 dark:hover:border-zinc-700"
+                      }`}
                   >
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
+                    {selectedNote?.id === note.id && (
+                      <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
+                    )}
+                    <h3 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 truncate pr-6">
+                      {note.title || tSidebar("untitledNote")}
+                    </h3>
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
+                      {getNotePreview(note)}
+                    </p>
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <span className="text-[9px] text-zinc-400">
+                        {new Date(note.created_at).toLocaleDateString()}
+                      </span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ring-1 ring-inset ${getCategoryColor(note.category)}`}>
+                        {tSidebar(`categories.${note.category}` as any)}
+                      </span>
+                    </div>
+
+                    {/* Delete button (visible on hover) */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteNote(note.id);
+                      }}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      title={tSidebar("deleteNote")}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </section>
