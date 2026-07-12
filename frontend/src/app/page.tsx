@@ -111,6 +111,18 @@ export default function Home() {
       setTimeout(() => setToastMessage(null), 300);
     }, 3000);
   };
+  const getNotePreview = (note: Note) => {
+    const text = note.structured_content?.markdown || note.raw_text || "";
+    return text
+      .replace(/^(\s*[-\*]\s+\[[ xX]\]\s*)/gm, "") // checkboxes
+      .replace(/^(\s*[-\*]\s+)/gm, "")           // bullet lists
+      .replace(/^(\s*#+\s*)/gm, "")              // headers
+      .replace(/\*\*|__|\*|_/g, "")              // bold/italic
+      .replace(/<\/?[^>]+(>|$)/g, "")            // strip HTML tags
+      .replace(/\s+/g, " ")                      // collapse whitespace
+      .trim();
+  };
+
 
 
   const filteredNotes = notes.filter((note) => {
@@ -159,6 +171,28 @@ export default function Home() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isSavePromptDropdownOpen]);
+
+  // Escape key closes whichever prompt dropdown is open
+  useEffect(() => {
+    function handleEscKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        if (isPromptDropdownOpen) {
+          setIsPromptDropdownOpen(false);
+          setSelectedPromptId(null);
+        }
+        if (isSavePromptDropdownOpen) {
+          setIsSavePromptDropdownOpen(false);
+          setSelectedSavePromptId(null);
+        }
+      }
+    }
+    if (isPromptDropdownOpen || isSavePromptDropdownOpen) {
+      document.addEventListener("keydown", handleEscKey);
+    }
+    return () => {
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, [isPromptDropdownOpen, isSavePromptDropdownOpen]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -1182,7 +1216,7 @@ export default function Home() {
                     {note.title || "Untitled Note"}
                   </h3>
                   <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
-                    {note.raw_text}
+                    {getNotePreview(note)}
                   </p>
                   <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                     <span className="text-[9px] text-zinc-400">
@@ -1550,7 +1584,7 @@ export default function Home() {
                                     ))}
                                   </div>
                                 </>
-                              ) : (
+                                ) : (
                                 <div className="space-y-2">
                                   <div className="flex items-center justify-between pb-1 border-b border-zinc-100 dark:border-zinc-900">
                                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Custom Instruction</span>
@@ -1567,9 +1601,13 @@ export default function Home() {
                                     onChange={(e) => setCustomPromptText(e.target.value)}
                                     placeholder="e.g. rewrite as a professional email..."
                                     rows={3}
+                                    maxLength={500}
                                     className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 resize-none"
                                   />
-                                  <div className="flex justify-end">
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-[10px] ${500 - customPromptText.length < 50 ? "text-red-500" : "text-zinc-400 dark:text-zinc-500"}`}>
+                                      {500 - customPromptText.length} chars left
+                                    </span>
                                     <button
                                       type="button"
                                       onClick={() => {
@@ -1852,9 +1890,13 @@ export default function Home() {
                                   onChange={(e) => setCustomSavePromptText(e.target.value)}
                                   placeholder="e.g. rewrite as a professional email..."
                                   rows={3}
+                                  maxLength={500}
                                   className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 resize-none"
                                 />
-                                <div className="flex justify-end">
+                                <div className="flex items-center justify-between">
+                                  <span className={`text-[10px] ${500 - customSavePromptText.length < 50 ? "text-red-500" : "text-zinc-400 dark:text-zinc-500"}`}>
+                                    {500 - customSavePromptText.length} chars left
+                                  </span>
                                   <button
                                     type="button"
                                     onClick={() => {

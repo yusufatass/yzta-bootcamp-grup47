@@ -8,6 +8,24 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 router = APIRouter(prefix="/api/notes", tags=["notes"])
 
+# Whitelist of known preset prompt types. Any value not in this set is rejected.
+VALID_PROMPT_TYPES = {"simplify", "explain", "improve"}
+CUSTOM_PROMPT_MAX_LEN = 500
+
+
+def validate_prompt_params(prompt_type: Optional[str], custom_prompt: Optional[str]) -> None:
+    """Validates and sanitizes prompt_type and custom_prompt values."""
+    if prompt_type is not None and prompt_type not in VALID_PROMPT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid prompt_type '{prompt_type}'. Must be one of: {sorted(VALID_PROMPT_TYPES)}."
+        )
+    if custom_prompt is not None and len(custom_prompt) > CUSTOM_PROMPT_MAX_LEN:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"custom_prompt exceeds maximum allowed length of {CUSTOM_PROMPT_MAX_LEN} characters."
+        )
+
 class NoteCreate(BaseModel):
     raw_text: str
     skip_ai: bool = False
@@ -63,7 +81,10 @@ async def create_note(
     ai_text = raw_text
     if len(raw_text) > 4000:
         ai_text = raw_text[:4000]
-    
+
+    # 3. Validate prompt parameters
+    validate_prompt_params(note_data.prompt_type, note_data.custom_prompt)
+
     # Check trial
     trial_days_left = get_user_trial_days_remaining(ctx.user.created_at)
     trial_ended = trial_days_left <= 0
@@ -170,7 +191,10 @@ async def update_note(
     ai_text = raw_text
     if len(raw_text) > 4000:
         ai_text = raw_text[:4000]
-        
+
+    # 3. Validate prompt parameters
+    validate_prompt_params(note_data.prompt_type, note_data.custom_prompt)
+
     # Check trial
     trial_days_left = get_user_trial_days_remaining(ctx.user.created_at)
     trial_ended = trial_days_left <= 0

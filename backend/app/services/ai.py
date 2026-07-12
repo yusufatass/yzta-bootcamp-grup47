@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Optional
+# pyrefly: ignore [missing-import]
 from openai import OpenAI
 from app.config import settings
 
@@ -29,6 +30,24 @@ CRITICAL INSTRUCTIONS FOR LANGUAGE AND CONTENT:
 2. ONLY clean up, group, and format the actual information provided in the raw note. NEVER invent, extrapolate, or add external facts, details, or items that were not present in the original input.
 3. NEVER write any meta-commentary, opinions, notes, warnings, or remarks about the raw input. Do not describe the note as a test, placeholder, short, or invalid. Do not explain what you did. Reorganize only the user's content.
 
+LANGUAGE HARD REQUIREMENT — THIS IS NOT A PREFERENCE, IT IS MANDATORY:
+Every single word in your entire response — including ALL section headings, structural labels, and template terms — MUST be in the exact same language as the user's input. There are NO exceptions.
+- If the input is in Turkish: you MUST use Turkish equivalents for ALL structural vocabulary. You are FORBIDDEN from writing English words such as "Executive Summary", "Summary", "Overview", "Action Items", "Attendees", "Topics Discussed", "Key Concepts", "Summary Points", "High Priority", "Medium Priority", or any other English structural term — even as a heading. Replace them with their natural Turkish equivalents:
+  - "Executive Summary" or "Summary" -> "Ozet" or "Yonetici Ozeti"
+  - "Overview" -> "Genel Bakis"
+  - "Action Items" -> "Aksiyon Maddeleri"
+  - "Attendees" -> "Katilimcilar"
+  - "Topics Discussed" -> "Tartisilan Konular"
+  - "Key Concepts" -> "Onemli Kavramlar"
+  - "Summary Points" -> "Ozet Noktalari"
+  - "High Priority Tasks" -> "Yuksek Oncelikli Gorevler"
+  - "Medium Priority Tasks" -> "Orta Oncelikli Gorevler"
+  - "Not specified" -> "Belirtilmedi"
+- If the input is in any other non-English language, apply the same rule: use only that language for ALL structural vocabulary. Never fall back to English for any word.
+
+TITLE AND MARKDOWN BODY RULE — DO NOT REPEAT THE TITLE:
+The "title" field and the "markdown" field are displayed separately in the UI. The markdown body MUST NOT start with a heading that merely repeats or closely paraphrases the title. Begin the markdown body directly with the first real content section (e.g. the summary/ozet section, the first category heading, or the first bullet group) — never with a top-level heading that duplicates the title. Specifically, if a heading is used at the very beginning of the markdown, it MUST be a structural section heading (e.g. '## Özet', '## Açıklama', '## Katilimcilar', etc.) and NEVER the note's title itself.
+
 You MUST respond with a JSON object. The JSON object MUST have exactly these two keys:
 1. "category": A string representing the note's category. It MUST be exactly one of these six values:
    - "Shopping List" (Only apply when the note is an actual list of items to purchase, not when it merely mentions buying something or researching a purchase)
@@ -40,21 +59,21 @@ You MUST respond with a JSON object. The JSON object MUST have exactly these two
 
 2. "structured_content": A JSON object containing:
    - "title": A concise, clear title for the note.
-   - "markdown": The note rewritten in a beautiful, readable format. Use clear headings, grouped bullet points, and highlight key details or action items.
+   - "markdown": The note rewritten in a beautiful, readable format. Use clear headings, grouped bullet points, and highlight key details or action items. Do NOT begin with a heading that repeats the title.
 
-You MUST format the "markdown" string based on the determined "category" as follows (use local language equivalents for all section headings/labels if the input is not in English, e.g. use Turkish words for Turkish input):
+You MUST format the "markdown" string based on the determined "category" as follows. IMPORTANT: use the language of the input for ALL headings — for Turkish input use the Turkish terms listed above, never English:
 - For "Shopping List": Group items by section if inferable from context. If not inferable, format as a clean, unified checklist (using `- [ ]` or `-`).
 - For "Meeting Notes": Include sections for:
-  - **Attendees** (or local equivalent): (List individuals if mentioned, otherwise write "Not specified" or local equivalent)
-  - **Topics Discussed** (or local equivalent): (Key discussion points)
-  - **Action Items** (or local equivalent): (Use checkboxes `- [ ]` showing task, owner, and deadline if mentioned, e.g. `- [ ] Task name (Owner: Name, Deadline: Date)`)
+  - **Katilimcilar** (Turkish) / **Attendees** (English): (List individuals if mentioned, otherwise write the local equivalent of "Not specified")
+  - **Tartisilan Konular** (Turkish) / **Topics Discussed** (English): (Key discussion points)
+  - **Aksiyon Maddeleri** (Turkish) / **Action Items** (English): (Use checkboxes `- [ ]` showing task, owner, and deadline if mentioned)
 - For "Lecture Notes": Structure with:
-  - **Topic Heading** (or local equivalent): (Clear main topic)
-  - **Key Concepts** (or local equivalent): (Crucial terms, formulas, or theorems with concise explanations)
-  - **Summary Points** (or local equivalent): (Key takeaways or summary)
-- For "Daily Plan": Format as a time-based schedule (if times are mentioned, e.g., `09:00 AM - Task`) or a priority-based task list (e.g. `### High Priority Tasks`, `### Medium Priority Tasks`).
+  - **Konu Basligi** (Turkish) / **Topic Heading** (English): (Clear main topic)
+  - **Onemli Kavramlar** (Turkish) / **Key Concepts** (English): (Crucial terms, formulas, or theorems with concise explanations)
+  - **Ozet Noktalari** (Turkish) / **Summary Points** (English): (Key takeaways or summary)
+- For "Daily Plan": Format as a time-based schedule (if times are mentioned) or a priority-based task list. Use language-appropriate headings (e.g. `### Yuksek Oncelikli Gorevler` for Turkish, `### High Priority Tasks` for English).
 - For "Travel List": Group packing items by category to make packing easy.
-- For "General / Other": Write a clean summary with logical section headings and bullet points.
+- For "General / Other": Write a clean summary starting directly with a logical structural heading (e.g. '## Ozet' or '## Detaylar' or '## Aciklama') and bullet points. Never start with a heading that matches the note title.
 
 Strictly adhere to the standard markdown conventions. Use headers (`##` or `###`), bold text (`**bold**`), and bullet points/lists properly. Do not write any wrappers like ```json ... ``` around the returned JSON. Output only raw JSON."""
 
@@ -218,13 +237,39 @@ def analyze_note_content(
     # Build prompt_instruction based on prompt_type or custom_prompt
     prompt_instruction = ""
     if prompt_type == "simplify":
-        prompt_instruction = "The user wants to simplify this note. Rewrite it in simpler terms, clearly and elegantly while preserving core data."
+        prompt_instruction = (
+            "SIMPLIFY MODE: Your top priority is radical simplicity. Rewrite this note as if explaining it to someone with no background knowledge — aim for a 5th-grade reading level. "
+            "Replace every piece of technical jargon, acronym, or complex term with a plain-language equivalent. Use very short sentences (10 words or fewer whenever possible). "
+            "Prefer plain bullet points over complex prose. Remove any content that is not essential to the core message. Do NOT add new sections, extra context, or explanations that weren't in the original note. "
+            "The output should feel noticeably shorter and simpler than the original."
+        )
     elif prompt_type == "explain":
-        prompt_instruction = "The user wants to explain complex jargon or concepts inside this note. Explain any complex concepts, terms, or jargon in-line or in a dedicated section."
+        prompt_instruction = (
+            "EXPLAIN MODE: Your top priority is deep comprehension. For every technical term, acronym, domain-specific concept, or piece of jargon found in this note, "
+            "add an in-line clarification in parentheses immediately after the term, e.g. 'TCP/IP (Transmission Control Protocol/Internet Protocol — the set of rules computers use to communicate over a network)'. "
+            "Then add a dedicated '## Glossary / Key Terms' section at the end listing every explained term with a 1–2 sentence plain-English definition. "
+            "Also add a '## Why It Matters' section explaining the real-world significance or application of the note's main topic. "
+            "If the note contains no jargon, still add the Why It Matters section to contextualize the content. The output should be noticeably longer and more educational than the original."
+        )
     elif prompt_type == "improve":
-        prompt_instruction = "The user wants to improve this note. Polish the grammar, flow, clarity, and ensure a professional tone."
+        prompt_instruction = (
+            "IMPROVE MODE: Your top priority is to improve clarity, flow, spelling, and grammar while strictly preserving the original author's voice, register, and perspective. "
+            "Match the register of the input: if the original note is casual and conversational, keep it casual, conversational, and warm. "
+            "If the input is written in the first person (e.g. 'I', 'me', 'my', 'ben', 'hallettim'), the output MUST remain in the first person. "
+            "Do NOT shift to distant passive voice (e.g. 'halledildi', 'anlaşılmıyor') or rewrite personal expressions into cold corporate phrasing. "
+            "The output should feel like the same person cleaned up their own quick draft, not like a third party rewrote it into a corporate report. "
+            "Keep personal requests or informal connector words (e.g. 'sana zahmet', 'valla') if they contribute to the natural, conversational warmth of the note, "
+            "simply correcting obvious typos or structuring them into clean bullets if appropriate. "
+            "Only apply a formal, polished, or academic register if the original note itself was already written in that style. "
+            "Do NOT invent information or add placeholders like 'Owner: TBD' or 'Deadline: TBD'. "
+            "Do NOT force a summary section onto short casual notes."
+        )
     elif custom_prompt and custom_prompt.strip():
-        prompt_instruction = f"The user has provided a custom instruction for this note: '{custom_prompt.strip()}'. Apply this request while structuring the note."
+        prompt_instruction = (
+            f"CUSTOM INSTRUCTION MODE: The user has provided a specific instruction: '{custom_prompt.strip()}'. "
+            "Follow this instruction faithfully while still organizing the note into the correct category and JSON structure. "
+            "The custom instruction takes priority over general formatting preferences, but the output MUST still be valid JSON with 'category' and 'structured_content' (title + markdown)."
+        )
 
     providers = [
         GroqProvider(),
