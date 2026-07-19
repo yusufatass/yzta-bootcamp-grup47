@@ -143,6 +143,14 @@ Tüm iletişim ve operasyonel aksaklıklara rağmen projenin teknik ilerlemesi s
 **Sprint Retrospective**
 - Ekip bir araya gelemediği için retro toplantısı yapılamamıştır.
 
+<details>
+<summary><strong>İletişim Durumu</strong></summary>
+<br>
+<img width="1271" height="892" alt="image" src="https://github.com/user-attachments/assets/dc7bed54-0941-4be3-bf82-abc1146dfd55" />
+<img width="1265" height="316" alt="image" src="https://github.com/user-attachments/assets/15944b33-887f-4416-8dc2-b05465e94a48" />
+<img width="1275" height="886" alt="image" src="https://github.com/user-attachments/assets/a5600d39-b9fa-4b4f-9390-edc5c5966415" />
+<img width="1271" height="947" alt="image" src="https://github.com/user-attachments/assets/c3fe061b-ee86-4a09-bab4-88f12f8860f6" />
+</details>
 ---
 
 ## 🚀 Sprint 3
