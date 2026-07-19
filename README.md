@@ -1,5 +1,6 @@
 <div align="center">
-
+<img src="frontend\public\mascot\logo.png" width="200" alt="Note Sloth Maskotu" />
+  
 # 📝 Papyrus AI
 ### Takım 47
 
