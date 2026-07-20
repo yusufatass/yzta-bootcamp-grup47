@@ -17,7 +17,7 @@ import {
   updateNote,
   renameNoteTitle
 } from "@/lib/api";
-import { ThemeToggle } from "@/lib/theme";
+import { ThemeToggle, useTheme } from "@/lib/theme";
 
 interface Note {
   id: string;
@@ -34,6 +34,7 @@ interface Note {
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const { themeMode, customIsDark } = useTheme();
   const [user, setUser] = useState<UserMe | null>(null);
   const [loading, setLoading] = useState(true);
   const [noteText, setNoteText] = useState("");
@@ -613,19 +614,19 @@ export default function Home() {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "Shopping List":
-        return "bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-950/20 dark:text-amber-400 dark:ring-amber-500/10";
+        return "bg-amber-100 text-amber-900 ring-amber-600/30 dark:bg-amber-950/60 dark:text-amber-200 dark:ring-amber-500/30 font-semibold";
       case "Meeting Notes":
-        return "bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-950/20 dark:text-blue-400 dark:ring-blue-500/10";
+        return "bg-blue-100 text-blue-900 ring-blue-600/30 dark:bg-blue-950/60 dark:text-blue-200 dark:ring-blue-500/30 font-semibold";
       case "Lecture Notes":
-        return "bg-purple-50 text-purple-700 ring-purple-600/10 dark:bg-purple-950/20 dark:text-purple-400 dark:ring-purple-500/10";
+        return "bg-purple-100 text-purple-900 ring-purple-600/30 dark:bg-purple-950/60 dark:text-purple-200 dark:ring-purple-500/30 font-semibold";
       case "Daily Plan":
-        return "bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-500/10";
+        return "bg-emerald-100 text-emerald-900 ring-emerald-600/30 dark:bg-emerald-950/60 dark:text-emerald-200 dark:ring-emerald-500/30 font-semibold";
       case "Travel List":
-        return "bg-sky-50 text-sky-700 ring-sky-600/10 dark:bg-sky-950/20 dark:text-sky-400 dark:ring-sky-500/10";
+        return "bg-sky-100 text-sky-900 ring-sky-600/30 dark:bg-sky-950/60 dark:text-sky-200 dark:ring-sky-500/30 font-semibold";
       case "Pending AI processing":
-        return "bg-zinc-100 text-zinc-600 ring-zinc-500/10 dark:bg-zinc-800 dark:text-zinc-400 animate-pulse";
+        return "bg-zinc-200 text-zinc-900 ring-zinc-500/30 dark:bg-zinc-800 dark:text-zinc-100 animate-pulse font-semibold";
       default:
-        return "bg-zinc-100 text-zinc-600 ring-zinc-500/10 dark:bg-zinc-800/50 dark:text-zinc-400";
+        return "bg-zinc-200 text-zinc-900 ring-zinc-500/30 dark:bg-zinc-800 dark:text-zinc-100 font-semibold";
     }
   };
 
@@ -806,7 +807,14 @@ export default function Home() {
       {/* Top Navigation Header */}
       <header className="sticky top-0 z-20 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md px-6 py-2.5">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <Link
+            href="/"
+            className={`text-xl font-bold flex items-center gap-2 ${
+              themeMode === "custom"
+                ? (customIsDark ? "text-[#ffffff]" : "text-[#000000]")
+                : "text-zinc-900 dark:text-white"
+            }`}
+          >
             <Image
               src="/mascot/logo.png"
               alt="Unstructured Notes Logo"
@@ -1007,17 +1015,17 @@ export default function Home() {
                   {selectedNote?.id === note.id && (
                     <div className="absolute left-0 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-lg" />
                   )}
-                  <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate pr-6">
+                  <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50 truncate pr-6">
                     {note.structured_content?.title || note.title || "Untitled Note"}
                   </p>
-                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-1.5 pr-6 leading-normal">
+                  <p className="text-xs font-normal text-zinc-700 dark:text-zinc-300 truncate mt-1.5 pr-6 leading-normal">
                     {note.raw_text}
                   </p>
-                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                    <span className="text-[9px] text-zinc-400">
+                  <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-zinc-200/60 dark:border-zinc-800">
+                    <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
                       {new Date(note.created_at).toLocaleDateString()}
                     </span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ring-1 ring-inset ${getCategoryColor(note.category)}`}>
+                    <span className={`text-[11px] px-2 py-0.5 rounded font-semibold ring-1 ring-inset ${getCategoryColor(note.category)}`}>
                       {note.category}
                     </span>
                   </div>
@@ -1127,10 +1135,10 @@ export default function Home() {
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getCategoryColor(selectedNote.category)}`}>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${getCategoryColor(selectedNote.category)}`}>
                       {selectedNote.category}
                     </span>
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       {new Date(selectedNote.created_at).toLocaleString()}
                     </span>
                   </div>

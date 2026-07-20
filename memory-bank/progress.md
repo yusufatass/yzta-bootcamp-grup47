@@ -39,48 +39,54 @@ Phase 3 (Hardening) is now fully completed! We have conducted a complete audit a
 
 
 
-## What's Left to Build
+## Notion Sprint Board Sync (Current Tasks & Status)
 
-### Phase 0 — Foundation
-- [x] Repo + monorepo structure (`frontend/`, `backend/`) and hello-world setup
-- [x] Branch strategy and PR template
-- [x] Supabase project setup (Auth + draft schema)
-- [x] API contract draft (frontend ⇄ backend)
-- [x] Early AI categorization prompt experiments (standalone, not wired in)
+Here is the status of the tasks as synced from the [Notion Sprint Report](https://app.notion.com/p/YZTA-Tak-m-47-Papyrus-AI-Sprint-Raporu-394884952fd9803cb22fcefed250e2f8?source=copy_link):
 
-### Phase 1 — Core Loop
-- [x] Register / login / email verification flow
-- [x] Note submission endpoint (authenticated)
-- [x] AI categorization service (OpenAI GPT integration)
-- [x] Note result display on frontend
-- [x] Persistent storage of categorized notes
-- [x] Anonymous sessionStorage note flow
+### Done (Completed)
+- [x] Monorepo klasör yapısı kurulumu (`frontend/`, `backend/`)
+- [x] Next.js frontend iskeleti (build alıyor)
+- [x] FastAPI backend + `/health` endpoint
+- [x] Root `.gitignore` ve `.env.example` ayarları
+- [x] Branch stratejisi (`CONTRIBUTING.md`) ve PR şablonu
+- [x] Supabase kurulum rehberi ve database şeması (`schema.sql`)
+- [x] API kontrat dökümantasyonu (`API_CONTRACT.md`)
+- [x] Kullanıcı kayıt/giriş/email doğrulama akışı (frontend + backend)
+- [x] Not gönderme endpoint'i (authenticated)
+- [x] AI kategorizasyon servisi (OpenAI GPT-4o Mini entegrasyonu)
+- [x] Kategorize edilmiş not sonucunun frontend'de gösterimi
+- [x] Notların kalıcı olarak saklanması (Supabase)
+- [x] Anonim kullanıcı sessionStorage not akışı
+- [x] Not geçmişi kenar çubuğu (her iki mod için)
+- [x] Temel edge case yönetimi (boş/kısa/uzun input)
+- [x] AI çıktı doğrulama/retry mantığı (Done in workspace)
+- [x] Yanıt süresi kontrolü (Done in workspace)
+- [x] Demo için seed'lenmiş test hesapları (Done in workspace)
+- [x] Rekabet analizi yapılması (Done in workspace)
+- [x] Delete Confirmation Dialog (Done in workspace)
+- [x] Global light/dark theme toggle (Done in workspace)
 
-### Phase 2 — Breadth & Polish
-- [x] AI prompt refined and tested across all category templates
-- [x] Note history sidebar (both modes)
-- [x] Client-side real-time Search and Category Filtering in note history sidebar (authenticated users)
-- [x] Manual inline title rename (click pencil icon → edit → Enter/blur to save; AI updates preserve custom title via title_is_custom flag)
-- [x] UI polish pass (calm/minimal direction)
-- [x] Basic edge case handling (empty/short/long input)
+### In Progress
+- [/] AI prompt şablonunun tüm kategori örnekleri için test edilmesi ve iyileştirilmesi
+- [/] UI cila çalışması (sakin/minimal yön)
+- [/] Premium page polish
+- [/] Maliyet raporu hazırlanması
+- [/] Türkçe dil desteği
+- [/] Supabase auth mail polish
+- [/] Proaktif zamana dayalı kullanıcı mesajları
+- [/] AI entegrasyon artırımı (AI integration increase)
 
-
-### Phase 3 — Hardening
-- [x] QA bug fixes
-- [x] AI output validation/retry logic
-- [x] Skip redundant update when raw text is unchanged ("Update with AI" / "Update as-is" no-ops if content hasn't changed)
-- [x] Global light/dark theme toggle (Improvement #6)
-- [x] Theme Audit & Invalid Class Typos Audited & Fixed
-- [x] Delete Confirmation Dialog (Improvement #10)
-- [x] Restore raw text button in edit view
-- [x] Response time check
-- [x] Seeded demo accounts
-
-### Phase 4 — Demo Readiness
-- [ ] Final pitch materials
-- [ ] Deployment finalized
-- [ ] README
-- [ ] Demo rehearsal
+### Not Started / Backlog
+- [ ] Hesap silme endpoint'inin oluşturulması
+- [ ] Mail delivery system ile not iletme (E-posta ile not gönderme)
+- [ ] Etiketler için card yapısı
+- [ ] Görseller için OCR entegrasyonu
+- [ ] .md formatında not indirme (Export to markdown)
+- [ ] Final sunum materyalleri (Pitch materials)
+- [ ] Deployment finalizasyonu (Canlıya alma)
+- [ ] README tamamlanması
+- [ ] Demo provası
+- [ ] Tanıtım videosu hazırlanması
 
 ## Known Issues
 * Users must add a valid `OPENAI_API_KEY` to the `backend/.env` file to trigger the actual AI note-organizing features. Without it, the application falls back gracefully with a configuration warning.

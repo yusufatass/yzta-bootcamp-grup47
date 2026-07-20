@@ -47,7 +47,7 @@ A running list of feature improvements to work through one at a time. Complete e
 - [x] Implement a custom, accessible, theme-aware delete confirmation dialog that intercepts note deletions, with smooth entry transitions and note card fade-out animations.
 
 ## Backlog (not yet started)
-- **Mascot illustrations:** Replace placeholder boxes in the onboarding modal once the mascot is designed.
+- [x] **Mascot illustrations:** Replace placeholder boxes in the onboarding modal once the mascot is designed (Completed - sloth mascot images integrated into logo, empty states, onboarding modal, and premium page).
 
 ## Working Rules
 - One item at a time: implement → test manually → check off here → next.
