@@ -14,6 +14,12 @@ export function setAuthToken(token: string): void {
 export function clearAuthToken(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("isPremium");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("subscriptionDetails");
+    sessionStorage.removeItem("isPremium");
+    sessionStorage.removeItem("userRole");
+    sessionStorage.removeItem("subscriptionDetails");
   }
 }
 

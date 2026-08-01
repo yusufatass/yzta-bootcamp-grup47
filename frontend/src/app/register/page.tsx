@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -38,13 +39,19 @@ export default function RegisterPage() {
     }
 
     setError(null);
+    setEmailError(false);
     setLoading(true);
 
     try {
       await registerUser(email, password, firstName, lastName);
       router.push("/verify");
     } catch (err: any) {
-      setError(err.message || t("errorUnexpected"));
+      if (err.message === "email_exists") {
+        setEmailError(true);
+        setError(t("errorEmailRegistered"));
+      } else {
+        setError(err.message || t("errorUnexpected"));
+      }
     } finally {
       setLoading(false);
     }
@@ -142,8 +149,15 @@ export default function RegisterPage() {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400 text-sm"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError(false);
+                }}
+                className={`mt-1 block w-full rounded-lg border px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-1 text-sm ${
+                  emailError
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
+                    : "border-zinc-300 focus:border-zinc-500 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+                }`}
                 placeholder={t("emailPlaceholder")}
               />
             </div>

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel
 from app.services.supabase import supabase_client
+from supabase import AuthApiError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 
@@ -94,11 +95,32 @@ async def register(user_data: UserRegister):
             }
         })
         user = response.user
+        
+        # Under user enumeration protection, Supabase returns a 200/201 response with an empty identities list
+        # when a user already exists. If user is not None and identities is empty/None, raise duplicate error.
+        if user and (user.identities is None or len(user.identities) == 0):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="email_exists"
+            )
+            
         email_confirmed = user.email_confirmed_at is not None if user else False
         return {
             "message": "Registration successful. Please check your email to verify your account.",
             "email_confirmed": email_confirmed
         }
+    except HTTPException as he:
+        raise he
+    except AuthApiError as e:
+        if "already registered" in e.message.lower() or "already exists" in e.message.lower():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="email_exists"
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Registration failed: {e.message}"
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -99,6 +99,8 @@ export default function SettingsPage() {
       await deleteAccount();
       clearAuthToken();
       sessionStorage.clear();
+      localStorage.removeItem("anonymous_notes");
+      localStorage.removeItem("anonymous_saved_count");
       router.push("/");
     } catch (err: any) {
       setError(err.message || t("errorDeleteAccount"));

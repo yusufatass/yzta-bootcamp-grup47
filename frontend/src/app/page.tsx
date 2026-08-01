@@ -252,8 +252,8 @@ export default function Home() {
     const checkUserAndLoadNotes = async () => {
       const token = getAuthToken();
       if (!token) {
-        // Unauthenticated flow: Load notes from sessionStorage
-        const storedNotes = sessionStorage.getItem("anonymous_notes");
+        // Unauthenticated flow: Load notes from localStorage
+        const storedNotes = localStorage.getItem("anonymous_notes");
         if (storedNotes) {
           try {
             setNotes(JSON.parse(storedNotes));
@@ -274,8 +274,8 @@ export default function Home() {
 
         setUser(currentUser);
 
-        // Perform migration if there are anonymous notes in sessionStorage
-        const storedNotes = sessionStorage.getItem("anonymous_notes");
+        // Perform migration if there are anonymous notes in localStorage
+        const storedNotes = localStorage.getItem("anonymous_notes");
         if (storedNotes) {
           try {
             const notesToMigrate = JSON.parse(storedNotes);
@@ -290,8 +290,8 @@ export default function Home() {
           } catch (migrationErr) {
             console.error("Failed to migrate anonymous notes:", migrationErr);
           } finally {
-            // Always clear sessionStorage after migration attempt to avoid repeat attempts
-            sessionStorage.removeItem("anonymous_notes");
+            // Always clear localStorage after migration attempt to avoid repeat attempts
+            localStorage.removeItem("anonymous_notes");
           }
         }
 
@@ -310,8 +310,8 @@ export default function Home() {
       } catch (err) {
         // Token was invalid or expired
         clearAuthToken();
-        // Fall back to sessionStorage notes
-        const storedNotes = sessionStorage.getItem("anonymous_notes");
+        // Fall back to localStorage notes
+        const storedNotes = localStorage.getItem("anonymous_notes");
         if (storedNotes) {
           try {
             setNotes(JSON.parse(storedNotes));
@@ -427,7 +427,7 @@ export default function Home() {
     setIsEditing(false);
     setEditText("");
     // Reload local notes
-    const storedNotes = sessionStorage.getItem("anonymous_notes");
+    const storedNotes = localStorage.getItem("anonymous_notes");
     if (storedNotes) {
       try {
         setNotes(JSON.parse(storedNotes));
@@ -490,14 +490,14 @@ export default function Home() {
 
       const updatedNotes = [newNote, ...notes];
       setNotes(updatedNotes);
-      sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
+      localStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
       setNoteText("");
       setSelectedNote(null);
 
       // Track saved count & trigger onboarding modal
-      const currentCountStr = sessionStorage.getItem("anonymous_saved_count") || "0";
+      const currentCountStr = localStorage.getItem("anonymous_saved_count") || "0";
       const newCount = parseInt(currentCountStr, 10) + 1;
-      sessionStorage.setItem("anonymous_saved_count", newCount.toString());
+      localStorage.setItem("anonymous_saved_count", newCount.toString());
 
       if (newCount === 1 || (newCount > 1 && newCount % 4 === 0)) {
         setShowOnboarding(true);
@@ -584,12 +584,12 @@ export default function Home() {
         setError(err.message || tErrors("updateFailed"));
       }
     } else {
-      const storedNotes = sessionStorage.getItem("anonymous_notes");
+      const storedNotes = localStorage.getItem("anonymous_notes");
       if (storedNotes) {
         try {
           const parsed: Note[] = JSON.parse(storedNotes);
           const updatedList = parsed.map((n) => (n.id === selectedNote.id ? updatedNote : n));
-          sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedList));
+          localStorage.setItem("anonymous_notes", JSON.stringify(updatedList));
         } catch (e) {
           console.error("Failed to save anonymous note checkbox toggle:", e);
         }
@@ -632,7 +632,7 @@ export default function Home() {
       } else {
         const updatedNotes = notes.filter((n) => n.id !== targetId);
         setNotes(updatedNotes);
-        sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
+        localStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
         setDeletingNoteId(null);
         showToast(tDialogs("deleteNote.toastSuccess"));
       }
@@ -736,7 +736,7 @@ export default function Home() {
 
       const updatedNotes = notes.map(n => n.id === mappedNote.id ? mappedNote : n);
       setNotes(updatedNotes);
-      sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
+      localStorage.setItem("anonymous_notes", JSON.stringify(updatedNotes));
       setSelectedNote(mappedNote);
       setIsEditing(false);
     }
@@ -784,15 +784,15 @@ export default function Home() {
         setNotes((prev) => prev.map(n => n.id === selectedNote.id ? selectedNote : n));
       }
     } else {
-      // Anonymous: persist to sessionStorage
-      const stored = sessionStorage.getItem("anonymous_notes");
+      // Anonymous: persist to localStorage
+      const stored = localStorage.getItem("anonymous_notes");
       if (stored) {
         try {
           const parsed: Note[] = JSON.parse(stored);
           const updatedList = parsed.map(n => n.id === updatedNote.id ? updatedNote : n);
-          sessionStorage.setItem("anonymous_notes", JSON.stringify(updatedList));
+          localStorage.setItem("anonymous_notes", JSON.stringify(updatedList));
         } catch (e) {
-          console.error("Failed to persist title rename to sessionStorage:", e);
+          console.error("Failed to persist title rename to localStorage:", e);
         }
       }
     }
@@ -1820,7 +1820,7 @@ export default function Home() {
                                       className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
                                     />
                                   </div>
-                                  <div className="space-y-0.5 max-h-48 overflow-y-auto">
+                                  <div className="space-y-0.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                                     {PRESET_PROMPTS.filter(p => {
                                       const label = tPresets(`${p.id}.label`);
                                       const desc = tPresets(`${p.id}.description`);
@@ -2117,7 +2117,7 @@ export default function Home() {
                                     className="w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
                                   />
                                 </div>
-                                <div className="space-y-0.5 max-h-48 overflow-y-auto">
+                                <div className="space-y-0.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                                   {PRESET_PROMPTS.filter(p => {
                                     const label = tPresets(`${p.id}.label`);
                                     const desc = tPresets(`${p.id}.description`);
@@ -2530,7 +2530,7 @@ function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfir
       >
         <div className="w-full flex justify-center mb-4">
           <Image
-            src="/mascot/logout-goodby.png"
+            src="/mascot/logout.png"
             alt="Sloth waving goodbye"
             width={120}
             height={120}
