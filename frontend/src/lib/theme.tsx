@@ -435,6 +435,8 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                         {p.name}
                       </span>
                     </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
