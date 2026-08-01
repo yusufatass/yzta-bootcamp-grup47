@@ -182,7 +182,7 @@ export default function PremiumPage() {
             <div className="space-y-6">
               <div className="w-full h-40 flex items-center justify-center">
                 <Image
-                  src="/mascot/safe-sloth.png"
+                  src="/mascot/safesloth.png"
                   alt="Privacy and Security"
                   width={150}
                   height={150}

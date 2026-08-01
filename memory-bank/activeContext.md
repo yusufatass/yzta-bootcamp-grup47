@@ -5,13 +5,16 @@
 Phase 4 — Demo Readiness. We have successfully finalized Phase 3 (Hardening) by completing a comprehensive Light/Dark Mode theme audit across all pages and components, fixing all custom zinc shade typos, adding standard option background styling, enhancing the onboarding modal walkthrough with beautiful CSS mock-ups, implementing a custom and accessible Delete Confirmation Dialog, adding a conditional "Restore raw text" editor feature, styling the Note History scrollbar, customising the category filter dropdown, and verifying full system compilation and build stability.
 
 ## Recent Changes
+* **[Premium Feature Card Mascot Image Path Casing Fix — 2026-08-02]** Fixed a broken image on the 4th Premium feature card ("Cloud Backed & Encrypted") in the live Vercel production build:
+  - **Path & Casing Correction**: Updated the image source path in `frontend/src/app/premium/page.tsx` from `/mascot/safe-sloth.png` to `/mascot/safesloth.png` to match the exact filename and casing of the tracked asset in `frontend/public/mascot/`.
+  - **Verification**: Confirmed the file is tracked in Git, located directly under `frontend/public/mascot/`, and verified successful Next.js production build (`npm run build`) locally with no errors or warnings.
 * **[Exit Confirmation Dialog Differentiation — 2026-08-02]** Differentiated the mascot graphics used in exit-related confirmation dialogs:
   - **Normal Sign-Out / Logout**: Updated the modal in `frontend/src/app/page.tsx` to display `/mascot/logout.png`.
   - **Account Deletion**: Kept the modal in `frontend/src/app/settings/page.tsx` pointing to `/mascot/logout-goodby.png`.
   - **Styling Parity**: Maintained exact sizing, aspect ratio, transparent rendering, and padding styling across both dialog images.
   - **Verification**: Validated compilation via a successful Next.js production build (`npm run build`) with Exit Code 0.
 * **[Premium Showcase Refinements & Auth Caching Hardening — 2026-08-02]** Refined the 4th Premium feature card's assets, copywriting, and handled unauthenticated logout caching bugs:
-  - **Clean Mascot Graphic**: Swapped the checkered background asset with `/mascot/safe-sloth.png` (a clean transparent sloth/safe graphic provided by the user).
+  - **Clean Mascot Graphic**: Swapped the checkered background asset with `/mascot/safesloth.png` (a clean transparent sloth/safe graphic provided by the user).
   - **Copywriting Refinement**: Rewrote the 4th card's copy to explicitly highlight the transition from local storage to secure cloud infrastructure (Heading: *"Cloud Backed & Encrypted"* / *"Bulut Destekli ve Şifreli"*; Body: *"Say goodbye to local browser cookie limits. As a Premium member, your notes are automatically backed up to our encrypted cloud database — accessible anytime, anywhere, with zero risk of data loss."*).
   - **Authentication Caching Fix**: Audited the client-side logout flow to ensure cached states (`isPremium`, `userRole`, `subscriptionDetails`) are explicitly removed from both `localStorage` and `sessionStorage` in the centralized `clearAuthToken()` method (executed on sign out and account deletion).
   - **Conditional Premium badge**: Added real-time user session status fetching on `/premium`. The `"Premium Shield Active"` badge now strictly renders only if a premium user session is active (`user && !user.trial_ended`), defaulting to a clean guest `"Upgrade to Premium"` badge when unauthenticated. The bottom CTA buttons also dynamically swap based on the user's subscription status.
