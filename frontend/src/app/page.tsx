@@ -975,7 +975,7 @@ export default function Home() {
             <div className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <Image
                 src="/mascot/logo.png"
-                alt="Unstructured Notes Logo"
+                alt="Note Sloth Logo"
                 width={51}
                 height={28}
                 className="object-contain"
@@ -1010,7 +1010,7 @@ export default function Home() {
           >
             <Image
               src="/mascot/logo.png"
-              alt="Unstructured Notes Logo"
+              alt="Note Sloth Logo"
               width={51}
               height={28}
               className="object-contain"

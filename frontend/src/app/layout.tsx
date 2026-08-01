@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Unstructured Notes — AI-Assisted Note Taking",
+  title: "Note Sloth — AI-Assisted Note Taking",
   description: "Write freely, let AI organize. A fast, minimal note-taking app with AI categorization.",
 };
 

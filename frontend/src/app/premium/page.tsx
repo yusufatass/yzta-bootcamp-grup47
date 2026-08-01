@@ -19,7 +19,7 @@ export default function PremiumPage() {
           <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
             <Image
               src="/mascot/logo.png"
-              alt="Antigravity logo"
+              alt="Note Sloth Logo"
               width={51}
               height={28}
               style={{ width: 'auto', height: 'auto' }}

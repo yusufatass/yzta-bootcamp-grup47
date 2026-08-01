@@ -6,8 +6,8 @@ from app.routers.auth import router as auth_router
 from app.routers.notes import router as notes_router
 
 app = FastAPI(
-    title="Unstructured Notes Organizer API",
-    description="Backend service for organizing unstructured notes using AI",
+    title="Note Sloth API",
+    description="Backend service for Note Sloth - organizing unstructured notes using AI",
     version="0.1.0",
 )
 
@@ -57,12 +57,12 @@ async def health_check():
     return {
         "status": "healthy",
         "version": "0.1.0",
-        "message": "Unstructured Notes Organizer Backend is running",
+        "message": "Note Sloth Backend is running",
     }
 
 
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to the Unstructured Notes Organizer API. Access /docs for swagger UI."
+        "message": "Welcome to the Note Sloth API. Access /docs for swagger UI."
     }

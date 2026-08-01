@@ -1,6 +1,6 @@
 {
   "Header": {
-    "title": "Unstructured Notes",
+    "title": "Note Sloth",
     "premium": "Premium",
     "trialEnded": "Trial Ended",
     "aiActive": "AI Active ({days}d left)",
@@ -236,7 +236,7 @@
     "deleteAccountDesc": "Permanently delete your profile and wipe all associated notes from the database. This action is irreversible.",
     "deleteAccount": "Delete Account",
     "deleting": "Deleting...",
-    "dialogBody": "Are you absolutely sure? This action is permanent and will immediately delete your profile along with all your saved unstructured notes.",
+    "dialogBody": "Are you absolutely sure? This action is permanent and will immediately delete your profile along with all your saved Note Sloth notes.",
     "cancel": "Cancel"
   },
   "Premium": {

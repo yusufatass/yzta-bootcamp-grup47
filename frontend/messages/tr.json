@@ -1,6 +1,6 @@
 {
   "Header": {
-    "title": "Dağınık Notlar",
+    "title": "Note Sloth",
     "premium": "Premium",
     "trialEnded": "Deneme Süresi Bitti",
     "aiActive": "Yapay Zeka Aktif ({days} gün kaldı)",
@@ -236,7 +236,7 @@
     "deleteAccountDesc": "Profilinizi kalıcı olarak silin ve veritabanındaki tüm ilişkili notları temizleyin. Bu işlem geri alınamaz.",
     "deleteAccount": "Hesabı Sil",
     "deleting": "Siliniyor...",
-    "dialogBody": "Kesinlikle emin misiniz? Bu işlem kalıcıdır ve profilinizle birlikte tüm kayıtlı dağınık notlarınızı hemen silecektir.",
+    "dialogBody": "Kesinlikle emin misiniz? Bu işlem kalıcıdır ve profilinizle birlikte tüm kayıtlı Note Sloth notlarınızı hemen silecektir.",
     "cancel": "İptal"
   },
   "Premium": {

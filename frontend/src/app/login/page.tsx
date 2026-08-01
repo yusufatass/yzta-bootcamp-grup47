@@ -52,7 +52,7 @@ export default function LoginPage() {
         <Link href="/" className="inline-flex items-center gap-2 text-zinc-605 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors text-sm font-semibold">
           <Image
             src="/mascot/logo.png"
-            alt="Antigravity logo"
+            alt="Note Sloth Logo"
             width={51}
             height={28}
             style={{ width: 'auto', height: 'auto' }}
