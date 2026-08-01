@@ -97,7 +97,7 @@ export const PRESETS: PresetTheme[] = [
   },
   {
     id: "forest",
-    name: "Forest",
+    name: "Forest (Doğa)",
     isDark: false,
     colors: {
       bg: "#f0f4f1",
@@ -119,7 +119,7 @@ export const PRESETS: PresetTheme[] = [
   },
   {
     id: "cyberpunk",
-    name: "Cyberpunk",
+    name: "Cyberpunk (Neon)",
     isDark: true,
     colors: {
       bg: "#0b0917",
@@ -130,13 +130,35 @@ export const PRESETS: PresetTheme[] = [
   },
   {
     id: "nord",
-    name: "Nord Ice",
+    name: "Nord Ice (Kuzey)",
     isDark: true,
     colors: {
       bg: "#1e2430",
       panelBg: "#293140",
       text: "#f8fafc",
       accent: "#38bdf8",
+    },
+  },
+  {
+    id: "midnight",
+    name: "Midnight (Gece)",
+    isDark: true,
+    colors: {
+      bg: "#0f172a",
+      panelBg: "#1e293b",
+      text: "#f8fafc",
+      accent: "#818cf8",
+    },
+  },
+  {
+    id: "monochrome",
+    name: "Monochrome (Mono)",
+    isDark: true,
+    colors: {
+      bg: "#18181b",
+      panelBg: "#27272a",
+      text: "#fafafa",
+      accent: "#a1a1aa",
     },
   },
 ];
@@ -413,77 +435,6 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                         {p.name}
                       </span>
                     </button>
-                  ))}
-                </div>
-              </div>
-              {/* Color Customizer */}
-              <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  {t("customizeColors")}
-                </span>
-                <div className="space-y-2">
-                  {/* Background Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("background")}</span>
-                    <input
-                      type="color"
-                      value={customColors.bg}
-                      onChange={(e) => handleCustomColorChange("bg", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Panel Background Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("cardsPanels")}</span>
-                    <input
-                      type="color"
-                      value={customColors.panelBg}
-                      onChange={(e) => handleCustomColorChange("panelBg", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Text Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("textColor")}</span>
-                    <input
-                      type="color"
-                      value={customColors.text}
-                      onChange={(e) => handleCustomColorChange("text", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Accent Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("accentColor")}</span>
-                    <input
-                      type="color"
-                      value={customColors.accent}
-                      onChange={(e) => handleCustomColorChange("accent", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Dark Mode Toggle for Custom */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("isDarkModeBased")}</span>
-                    <button
-                      type="button"
-                      onClick={() => setCustomColors(customColors, !customIsDark)}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        customIsDark ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-700"
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          customIsDark ? "translate-x-4" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           )}
