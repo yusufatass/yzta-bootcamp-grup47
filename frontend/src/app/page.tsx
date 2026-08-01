@@ -17,7 +17,7 @@ import {
   updateNote,
   renameNoteTitle
 } from "@/lib/api";
-import { ThemeToggle } from "@/lib/theme";
+import { ThemeToggle, useTheme } from "@/lib/theme";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/lib/i18n";
 
@@ -73,6 +73,7 @@ export default function Home() {
   const tOnboarding = useTranslations("Onboarding");
 
   const [mounted, setMounted] = useState(false);
+  const { themeMode, customIsDark } = useTheme();
   const [user, setUser] = useState<UserMe | null>(null);
   const [loading, setLoading] = useState(true);
   const [noteText, setNoteText] = useState("");
@@ -866,7 +867,7 @@ export default function Home() {
         const content = text.substring(index + openTag.length, closingIndex);
         if (tokenType === "bold") {
           parts.push(
-            <strong key={index} className="font-bold text-zinc-950 dark:text-white">
+            <strong key={index} className="font-bold text-zinc-950 dark:text-zinc-100">
               {parseInline(content)}
             </strong>
           );
@@ -971,7 +972,7 @@ export default function Home() {
       <div className="h-screen max-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col overflow-hidden">
         <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-2.5">
           <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <div className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <div className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <Image
                 src="/mascot/logo.png"
                 alt="Unstructured Notes Logo"
@@ -999,7 +1000,14 @@ export default function Home() {
       {/* Top Navigation Header */}
       <header className="sticky top-0 z-20 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md px-6 py-2.5">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <Link
+            href="/"
+            className={`text-xl font-bold flex items-center gap-2 ${
+              themeMode === "custom"
+                ? (customIsDark ? "text-[#ffffff]" : "text-[#000000]")
+                : "text-zinc-900 dark:text-zinc-100"
+            }`}
+          >
             <Image
               src="/mascot/logo.png"
               alt="Unstructured Notes Logo"
@@ -1072,7 +1080,7 @@ export default function Home() {
                       />
                       <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg py-1.5 z-40 animate-in fade-in slide-in-from-top-1 duration-100">
                         <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800 text-left">
-                          <p className="text-[11px] font-bold text-zinc-900 dark:text-white truncate">
+                          <p className="text-[11px] font-bold text-zinc-900 dark:text-zinc-100 truncate">
                             {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "Welcome"}
                           </p>
                           <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
@@ -1590,7 +1598,7 @@ export default function Home() {
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getCategoryColor(selectedNote.category)}`}>
                       {tSidebar(`categories.${selectedNote.category}` as any)}
                     </span>
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       {new Date(selectedNote.created_at).toLocaleString()}
                     </span>
                   </div>
@@ -1624,7 +1632,7 @@ export default function Home() {
                 {isUpdating && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/85 flex flex-col items-center justify-center rounded-2xl backdrop-blur-[2px] z-10">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mb-4"></div>
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-white animate-pulse">
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 animate-pulse">
                       {user?.trial_ended ? tWorkspace("saving") : tWorkspace("organizing")}
                     </p>
                   </div>
@@ -1936,7 +1944,7 @@ export default function Home() {
             {isOrganizing && (
               <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/85 flex flex-col items-center justify-center rounded-2xl backdrop-blur-[2px] z-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white mb-4"></div>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-white animate-pulse">
+                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 animate-pulse">
                   {user?.trial_ended ? tWorkspace("saving") : tWorkspace("organizing")}
                 </p>
               </div>
@@ -2282,7 +2290,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   priority
                 />
               </div>
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
                 {t("step1.title")}
               </h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -2302,7 +2310,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   priority
                 />
               </div>
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
                 {t("step2.title")}
               </h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -2322,7 +2330,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   priority
                 />
               </div>
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
                 {t("step3.title")}
               </h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -2448,7 +2456,7 @@ function DeleteConfirmationDialog({ isOpen, onClose, onConfirm }: DeleteConfirma
           }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{t("title")}</h3>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{t("title")}</h3>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           {t("body")}
         </p>
@@ -2531,7 +2539,7 @@ function SignOutConfirmationDialog({ isOpen, onClose, onConfirm }: SignOutConfir
             priority
           />
         </div>
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{t("title")}</h3>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{t("title")}</h3>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           {t("body")}
         </p>

@@ -41,48 +41,54 @@ Phase 3 (Hardening) is now fully completed. Phase 4 (Demo Readiness) is actively
 * Multi-LLM AI Fallback: Refactored the AI service to use a clean provider abstraction. The service attempts note analysis with Groq (Llama-3.3-70b-versatile) first, retrying once on failure. If Groq is unavailable or fails after its retry, it automatically falls back to OpenAI GPT-4o Mini. Both providers share the same validation and JSON schema contract, logging success without exposing full note contents.
 * AI Prompt Quality Fixes (2026-07-12): Two production-observed issues resolved in the system prompt: (1) **Language leakage** — models would default to English structural terms ("Executive Summary", "Action Items") even in fully Turkish notes. Fixed by adding an emphatic LANGUAGE HARD REQUIREMENT block with an explicit forbidden-terms list and concrete Turkish translations for all template vocabulary. Per-category templates updated to show Turkish/English headings side-by-side, removing ambiguous "or local equivalent" guidance. (2) **Redundant title in body** — the AI would often emit the note title as the first `##` heading inside `markdown`, duplicating what the UI already renders above the content. Fixed by a new TITLE AND MARKDOWN BODY RULE instructing the model to start the markdown directly with the first real content section. Also **refactored "Improve" mode** to remove the forced "Executive Summary" (letting summaries occur naturally only for long/dense notes), stop fabricating TBD action placeholders, and **strictly preserve the author's voice, register, and grammatical perspective** (casual/first-person tone is kept casual/first-person instead of being flattened into distant passive-voice corporate speak). All changes verified live: a casual coworker message maintained first-person verbs, kept warm conversational elements (like 'valla', 'sana zahmet'), corrected typos, and avoided duplicating the title or inventing fake sections/placeholders.
 
-## What's Left to Build
+## Notion Sprint Board Sync (Current Tasks & Status)
 
-### Phase 0 — Foundation
-- [x] Repo + monorepo structure (`frontend/`, `backend/`) and hello-world setup
-- [x] Branch strategy and PR template
-- [x] Supabase project setup (Auth + draft schema)
-- [x] API contract draft (frontend ⇄ backend)
-- [x] Early AI categorization prompt experiments (standalone, not wired in)
+Here is the status of the tasks as synced from the [Notion Sprint Report](https://app.notion.com/p/YZTA-Tak-m-47-Papyrus-AI-Sprint-Raporu-394884952fd9803cb22fcefed250e2f8?source=copy_link):
 
-### Phase 1 — Core Loop
-- [x] Register / login / email verification flow
-- [x] Note submission endpoint (authenticated)
-- [x] AI categorization service (OpenAI GPT integration)
-- [x] Note result display on frontend
-- [x] Persistent storage of categorized notes
-- [x] Anonymous sessionStorage note flow
+### Done (Completed)
+- [x] Monorepo klasör yapısı kurulumu (`frontend/`, `backend/`)
+- [x] Next.js frontend iskeleti (build alıyor)
+- [x] FastAPI backend + `/health` endpoint
+- [x] Root `.gitignore` ve `.env.example` ayarları
+- [x] Branch stratejisi (`CONTRIBUTING.md`) ve PR şablonu
+- [x] Supabase kurulum rehberi ve database şeması (`schema.sql`)
+- [x] API kontrat dökümantasyonu (`API_CONTRACT.md`)
+- [x] Kullanıcı kayıt/giriş/email doğrulama akışı (frontend + backend)
+- [x] Not gönderme endpoint'i (authenticated)
+- [x] AI kategorizasyon servisi (OpenAI GPT-4o Mini entegrasyonu)
+- [x] Kategorize edilmiş not sonucunun frontend'de gösterimi
+- [x] Notların kalıcı olarak saklanması (Supabase)
+- [x] Anonim kullanıcı sessionStorage not akışı
+- [x] Not geçmişi kenar çubuğu (her iki mod için)
+- [x] Temel edge case yönetimi (boş/kısa/uzun input)
+- [x] AI çıktı doğrulama/retry mantığı (Done in workspace)
+- [x] Yanıt süresi kontrolü (Done in workspace)
+- [x] Demo için seed'lenmiş test hesapları (Done in workspace)
+- [x] Rekabet analizi yapılması (Done in workspace)
+- [x] Delete Confirmation Dialog (Done in workspace)
+- [x] Global light/dark theme toggle (Done in workspace)
 
-### Phase 2 — Breadth & Polish
-- [x] AI prompt refined and tested across all category templates
-- [x] Note history sidebar (both modes)
-- [x] Client-side real-time Search and Category Filtering in note history sidebar (authenticated users)
-- [x] Manual inline title rename (click pencil icon → edit → Enter/blur to save; AI updates preserve custom title via title_is_custom flag)
-- [x] UI polish pass (calm/minimal direction)
-- [x] Basic edge case handling (empty/short/long input)
+### In Progress
+- [/] AI prompt şablonunun tüm kategori örnekleri için test edilmesi ve iyileştirilmesi
+- [/] UI cila çalışması (sakin/minimal yön)
+- [/] Premium page polish
+- [/] Maliyet raporu hazırlanması
+- [/] Türkçe dil desteği
+- [/] Supabase auth mail polish
+- [/] Proaktif zamana dayalı kullanıcı mesajları
+- [/] AI entegrasyon artırımı (AI integration increase)
 
-
-### Phase 3 — Hardening
-- [x] QA bug fixes
-- [x] AI output validation/retry logic
-- [x] Skip redundant update when raw text is unchanged ("Update with AI" / "Update as-is" no-ops if content hasn't changed)
-- [x] Global light/dark theme toggle (Improvement #6)
-- [x] Theme Audit & Invalid Class Typos Audited & Fixed
-- [x] Delete Confirmation Dialog (Improvement #10)
-- [x] Restore raw text button in edit view
-- [x] Response time check
-- [x] Seeded demo accounts
-
-### Phase 4 — Demo Readiness
-- [ ] Final pitch materials
-- [ ] Deployment finalized
-- [ ] README
-- [ ] Demo rehearsal
+### Not Started / Backlog
+- [ ] Hesap silme endpoint'inin oluşturulması
+- [ ] Mail delivery system ile not iletme (E-posta ile not gönderme)
+- [ ] Etiketler için card yapısı
+- [ ] Görseller için OCR entegrasyonu
+- [ ] .md formatında not indirme (Export to markdown)
+- [ ] Final sunum materyalleri (Pitch materials)
+- [ ] Deployment finalizasyonu (Canlıya alma)
+- [ ] README tamamlanması
+- [ ] Demo provası
+- [ ] Tanıtım videosu hazırlanması
 
 ## Known Issues
 * Users must add a valid `OPENAI_API_KEY` to the `backend/.env` file to trigger the actual AI note-organizing features. Without it, the application falls back gracefully with a configuration warning.

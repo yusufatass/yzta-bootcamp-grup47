@@ -59,13 +59,14 @@ export function generateFullColors(
   accent: string,
   isDark: boolean
 ): CustomColors {
-  const border = blendHex(bg, text, 0.12);
-  const borderDarker = blendHex(bg, text, 0.20);
-  const borderLighter = blendHex(bg, text, 0.06);
-  const textMuted = blendHex(bg, text, 0.45);
-  const textSecondary = blendHex(bg, text, 0.65);
-  const accentHover = blendHex(accent, isDark ? "#ffffff" : "#000000", 0.12);
-  const accentLight = blendHex(bg, accent, 0.10);
+  const border = blendHex(bg, text, 0.14);
+  const borderDarker = blendHex(bg, text, 0.22);
+  const borderLighter = blendHex(bg, text, 0.08);
+  // High-contrast muted & secondary text blending
+  const textMuted = blendHex(text, bg, 0.25);
+  const textSecondary = blendHex(text, bg, 0.12);
+  const accentHover = blendHex(accent, isDark ? "#ffffff" : "#000000", 0.14);
+  const accentLight = blendHex(bg, accent, 0.12);
 
   return {
     bg,
@@ -85,46 +86,79 @@ export function generateFullColors(
 export const PRESETS: PresetTheme[] = [
   {
     id: "sepia",
-    name: "Sepia",
+    name: "Sepia (Retro)",
     isDark: false,
     colors: {
-      bg: "#f4efe2",
-      panelBg: "#fcfaf2",
-      text: "#2b2b2b",
-      accent: "#8c6239",
+      bg: "#f8f4eb",
+      panelBg: "#ffffff",
+      text: "#1a1612",
+      accent: "#8c521f",
     },
   },
   {
     id: "forest",
-    name: "Forest",
+    name: "Forest (Doğa)",
     isDark: false,
     colors: {
-      bg: "#eef1ed",
-      panelBg: "#f7f9f6",
-      text: "#1e2f23",
-      accent: "#2a6f97",
+      bg: "#f0f4f1",
+      panelBg: "#ffffff",
+      text: "#0c1d13",
+      accent: "#1b6943",
+    },
+  },
+  {
+    id: "sakura",
+    name: "Sakura (Çiçek)",
+    isDark: false,
+    colors: {
+      bg: "#fff0f3",
+      panelBg: "#ffffff",
+      text: "#2b0f17",
+      accent: "#d6336c",
     },
   },
   {
     id: "cyberpunk",
-    name: "Cyberpunk",
+    name: "Cyberpunk (Neon)",
     isDark: true,
     colors: {
-      bg: "#0a0915",
-      panelBg: "#13112b",
-      text: "#00f5ff",
+      bg: "#0b0917",
+      panelBg: "#16132e",
+      text: "#00f0ff",
       accent: "#ff007f",
     },
   },
   {
     id: "nord",
-    name: "Nord Ice",
+    name: "Nord Ice (Kuzey)",
     isDark: true,
     colors: {
-      bg: "#2e3440",
-      panelBg: "#3b4252",
-      text: "#eceff4",
-      accent: "#88c0d0",
+      bg: "#1e2430",
+      panelBg: "#293140",
+      text: "#f8fafc",
+      accent: "#38bdf8",
+    },
+  },
+  {
+    id: "midnight",
+    name: "Midnight (Gece)",
+    isDark: true,
+    colors: {
+      bg: "#0f172a",
+      panelBg: "#1e293b",
+      text: "#f8fafc",
+      accent: "#818cf8",
+    },
+  },
+  {
+    id: "monochrome",
+    name: "Monochrome (Mono)",
+    isDark: true,
+    colors: {
+      bg: "#18181b",
+      panelBg: "#27272a",
+      text: "#fafafa",
+      accent: "#a1a1aa",
     },
   },
 ];
@@ -402,76 +436,6 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
                       </span>
                     </button>
                   ))}
-                </div>
-              </div>
-
-              {/* Color Customizer */}
-              <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  {t("customizeColors")}
-                </span>
-                <div className="space-y-2">
-                  {/* Background Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("background")}</span>
-                    <input
-                      type="color"
-                      value={customColors.bg}
-                      onChange={(e) => handleCustomColorChange("bg", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Panel Background Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("cardsPanels")}</span>
-                    <input
-                      type="color"
-                      value={customColors.panelBg}
-                      onChange={(e) => handleCustomColorChange("panelBg", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Text Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("textColor")}</span>
-                    <input
-                      type="color"
-                      value={customColors.text}
-                      onChange={(e) => handleCustomColorChange("text", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Accent Picker */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("accentColor")}</span>
-                    <input
-                      type="color"
-                      value={customColors.accent}
-                      onChange={(e) => handleCustomColorChange("accent", e.target.value)}
-                      className="h-5 w-8 border-0 bg-transparent cursor-pointer rounded overflow-hidden"
-                    />
-                  </div>
-
-                  {/* Dark Mode Toggle for Custom */}
-                  <div className="flex items-center justify-between gap-2 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/30 dark:bg-zinc-950/20">
-                    <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">{t("isDarkModeBased")}</span>
-                    <button
-                      type="button"
-                      onClick={() => setCustomColors(customColors, !customIsDark)}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        customIsDark ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-700"
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          customIsDark ? "translate-x-4" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
