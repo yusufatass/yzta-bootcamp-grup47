@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,9 +13,15 @@ app = FastAPI(
 )
 
 # Configure CORS so frontend can communicate with the backend
+origins = [
+    "http://localhost:3000",
+    os.environ.get("FRONTEND_URL", ""),
+]
+allow_origins = [origin for origin in origins if origin]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
