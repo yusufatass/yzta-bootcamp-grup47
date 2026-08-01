@@ -16,7 +16,7 @@ export default function PremiumPage() {
       {/* Thinner Sticky Header */}
       <header className="sticky top-0 z-20 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-md px-6 py-2.5">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
             <Image
               src="/mascot/logo.png"
               alt="Antigravity logo"
@@ -51,7 +51,7 @@ export default function PremiumPage() {
             </svg>
             <span>{t("shieldActive")}</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-zinc-900 dark:text-zinc-100 leading-tight">
             {t("titlePart1")}<span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">{t("titleHighlight")}</span>{t("titlePart2")}
           </h1>
           <p className="text-sm sm:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
@@ -75,7 +75,7 @@ export default function PremiumPage() {
                 />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{t("feature1Title")}</h3>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t("feature1Title")}</h3>
                 <p className="text-sm text-zinc-550 dark:text-zinc-400 leading-relaxed">
                   {t("feature1Desc")}
                 </p>
@@ -97,7 +97,7 @@ export default function PremiumPage() {
                 />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{t("feature2Title")}</h3>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t("feature2Title")}</h3>
                 <p className="text-sm text-zinc-550 dark:text-zinc-400 leading-relaxed">
                   {t("feature2Desc")}
                 </p>
@@ -119,7 +119,7 @@ export default function PremiumPage() {
                 />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{t("feature3Title")}</h3>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t("feature3Title")}</h3>
                 <p className="text-sm text-zinc-550 dark:text-zinc-400 leading-relaxed">
                   {t("feature3Desc")}
                 </p>
@@ -130,7 +130,7 @@ export default function PremiumPage() {
 
         {/* CTA Bottom Section */}
         <div className="mt-16 text-center space-y-6 bg-gradient-to-r from-amber-500/10 to-amber-600/5 dark:from-amber-500/5 dark:to-zinc-900/5 border border-amber-500/25 dark:border-amber-500/15 rounded-3xl p-8 sm:p-12 max-w-3xl w-full">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">
             {t("ctaTitle")}
           </h2>
           <p className="text-sm text-zinc-550 dark:text-zinc-400 max-w-xl mx-auto">
