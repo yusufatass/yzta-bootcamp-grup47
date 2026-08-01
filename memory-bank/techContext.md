@@ -37,3 +37,13 @@ Monorepo. Distinct directories for frontend and backend:
 * Clean naming, avoid spaghetti code
 * Reusable abstractions and separation of concerns
 * Code written to be reviewable and learnable from — most of the team is early-career
+
+## Database Schema (public.notes)
+* `id` (UUID, Primary Key)
+* `user_id` (UUID, ForeignKey to auth.users)
+* `raw_text` (TEXT, Current note text in editor)
+* `original_raw_text` (TEXT, First ever unstructured text, set once on creation)
+* `category` (VARCHAR, AI categorized or Plain Text)
+* `structured_content` (JSONB, containing `title` and `markdown`)
+* `title_is_custom` (BOOLEAN, locks title from auto-update)
+* `created_at` (TIMESTAMP WITH TIME ZONE)

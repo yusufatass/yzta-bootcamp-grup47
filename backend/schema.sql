@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.notes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     raw_text TEXT NOT NULL,
+    original_raw_text TEXT, -- The note's first original unstructured text (set once on creation, never updated)
     category VARCHAR(50) NOT NULL, -- Fixed categories: 'Shopping List', 'Meeting Notes', 'Lecture Notes', 'Daily Plan', 'Travel List', 'General / Other'
     structured_content JSONB NOT NULL, -- Houses structured content like markdown sections, headings, bullet points
     title_is_custom BOOLEAN NOT NULL DEFAULT FALSE, -- True when the user has manually renamed the title; AI updates will not overwrite it
@@ -16,6 +17,8 @@ CREATE TABLE IF NOT EXISTS public.notes (
 
 -- Run this migration on existing databases:
 -- ALTER TABLE public.notes ADD COLUMN IF NOT EXISTS title_is_custom BOOLEAN NOT NULL DEFAULT FALSE;
+-- ALTER TABLE public.notes ADD COLUMN IF NOT EXISTS original_raw_text TEXT;
+-- UPDATE public.notes SET original_raw_text = raw_text WHERE original_raw_text IS NULL;
 
 -- Enable Row Level Security (RLS) so users can only read/write their own notes
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;

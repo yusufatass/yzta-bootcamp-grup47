@@ -53,3 +53,15 @@ When the schema evolves after the initial setup, apply the following migrations 
 ALTER TABLE public.notes
   ADD COLUMN IF NOT EXISTS title_is_custom BOOLEAN NOT NULL DEFAULT FALSE;
 ```
+
+### Migration 002 — Add `original_raw_text` column (for original unstructured text toggle)
+
+```sql
+ALTER TABLE public.notes
+  ADD COLUMN IF NOT EXISTS original_raw_text TEXT;
+
+-- For existing notes, copy raw_text to original_raw_text
+UPDATE public.notes
+  SET original_raw_text = raw_text
+  WHERE original_raw_text IS NULL;
+```
