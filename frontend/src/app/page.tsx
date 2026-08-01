@@ -1598,7 +1598,6 @@ export default function Home() {
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getCategoryColor(selectedNote.category)}`}>
                       {tSidebar(`categories.${selectedNote.category}` as any)}
                     </span>
-                    </span>
                     <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       {new Date(selectedNote.created_at).toLocaleString()}
                     </span>
