@@ -16,7 +16,7 @@
 
 | İsim | Rol | LinkedIn | GitHub |
 |---|---|---|---|
-| **Yusuf Ataş** | Scrum Master | Project Developer | [LinkedIn Profil](https://linkedin.com/in/yusuf-atas34) | [GitHub Profil](https://github.com/yusufatass) |
+| **Yusuf Ataş** | Scrum Master / Project Developer | [LinkedIn Profil](https://linkedin.com/in/yusuf-atas34) | [GitHub Profil](https://github.com/yusufatass) |
 | **Mehmet Kaan Karataş** | Product Owner | [LinkedIn Profil](https://linkedin.com/in/username) | [GitHub Profil](https://github.com/memo6101) |
 | **Nermin Aybike Ertürk** | Frontend Developer | [LinkedIn Profil](https://linkedin.com/in/nermin-aybike-ertürk-0745ba249/) | [GitHub Profil](https://github.com/aybkertrk) |
 
