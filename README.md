@@ -7,6 +7,8 @@
 *Düşüncelerinizi aklınızdan geçtiği gibi yazın — gerisini yapay zeka halletsin.*
 
 [![Live App](https://img.shields.io/badge/🚀_Canlı_Uygulama-Note_Sloth-7c3aed?style=for-the-badge)](https://yzta-bootcamp-grup47.vercel.app/)
+[![Product Video](https://img.shields.io/badge/🎬_Ürün_Videosu-İzle-red?style=for-the-badge)](https://youtu.be/rK2cU5vpHi4)
+[![Presentation Document](https://img.shields.io/badge/📊_Sunum_Dokümanı-İncele-blue?style=for-the-badge)](https://drive.google.com/file/d/12uZTfZ1xxUUXzFNPrdXVxuOJpZtGTpOU/view?usp=sharing)
 
 </div>
 
@@ -17,7 +19,7 @@
 | İsim | Rol | LinkedIn | GitHub |
 |---|---|---|---|
 | **Yusuf Ataş** | Scrum Master / Project Developer | [LinkedIn Profil](https://linkedin.com/in/yusuf-atas34) | [GitHub Profil](https://github.com/yusufatass) |
-| **Mehmet Kaan Karataş** | Product Owner | [LinkedIn Profil](https://linkedin.com/in/username) | [GitHub Profil](https://github.com/memo6101) |
+| **Mehmet Kaan Karataş** | Product Owner | [LinkedIn Profil](https://www.linkedin.com/in/mehmet-kaan-karata%C5%9F-b46754115/) | [GitHub Profil](https://github.com/memo6101) |
 | **Nermin Aybike Ertürk** | Frontend Developer | [LinkedIn Profil](https://linkedin.com/in/nermin-aybike-ertürk-0745ba249/) | [GitHub Profil](https://github.com/aybkertrk) |
 
 ---
