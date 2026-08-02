@@ -1,10 +1,12 @@
 <div align="center">
 <img src="frontend\public\mascot\logo.png" width="200" alt="Note Sloth Maskotu" />
   
-# 📝 Papyrus AI
+# 📝 Note Sloth
 ### Takım 47
 
 *Düşüncelerinizi aklınızdan geçtiği gibi yazın — gerisini yapay zeka halletsin.*
+
+[![Live App](https://img.shields.io/badge/🚀_Canlı_Uygulama-Note_Sloth-7c3aed?style=for-the-badge)](https://yzta-bootcamp-grup47.vercel.app/)
 
 </div>
 
@@ -12,11 +14,11 @@
 
 ## 👥 Takım Elemanları
 
-| İsim | Rol |
-|---|---|
-| Mehmet Kaan Karataş | Product Owner |
-| Yusuf Ataş | Scrum Master |
-| Nermin Aybike Ertürk | Frontend Developer |
+| İsim | Rol | LinkedIn | GitHub |
+|---|---|---|---|
+| **Yusuf Ataş** | Scrum Master | Project Developer | [LinkedIn Profil](https://linkedin.com/in/yusuf-atas34) | [GitHub Profil](https://github.com/yusufatass) |
+| **Mehmet Kaan Karataş** | Product Owner | [LinkedIn Profil](https://linkedin.com/in/username) | [GitHub Profil](https://github.com/memo6101) |
+| **Nermin Aybike Ertürk** | Frontend Developer | [LinkedIn Profil](https://linkedin.com/in/nermin-aybike-ertürk-0745ba249/) | [GitHub Profil](https://github.com/aybkertrk) |
 
 ---
 
@@ -43,7 +45,7 @@ Düşüncelerini hızlıca ve düzensiz şekilde not almak isteyen, ancak bu not
 
 ### 🔗 Product Backlog
 
-[Notion — Papyrus AI Sprint Raporu](https://app.notion.com/p/YZTA-Tak-m-47-Papyrus-AI-Sprint-Raporu-394884952fd9803cb22fcefed250e2f8?source=copy_link)
+[Notion — Note Sloth Sprint Raporu](https://app.notion.com/p/YZTA-Tak-m-47-Papyrus-AI-Sprint-Raporu-394884952fd9803cb22fcefed250e2f8?source=copy_link)
 
 ---
 
@@ -151,8 +153,29 @@ Tüm iletişim ve operasyonel aksaklıklara rağmen projenin teknik ilerlemesi s
 <img width="1275" height="886" alt="image" src="https://github.com/user-attachments/assets/a5600d39-b9fa-4b4f-9390-edc5c5966415" />
 <img width="1271" height="947" alt="image" src="https://github.com/user-attachments/assets/c3fe061b-ee86-4a09-bab4-88f12f8860f6" />
 </details>
+
 ---
 
 ## 🚀 Sprint 3
 
-*(devam ediyor...)*
+**Backlog düzeni ve Story seçimleri**
+Final sprinti kapsamında kalan ürün backlog maddeleri gözden geçirilmiş, uygulamanın yayına alınması, hataların giderilmesi (bug fixing), UX cilalamaları ve bitirme sunumuna hazırlık görevlerine öncelik verilmiştir.
+
+Story'ler yapılacak son rötuşlara ve deployment task'lerine bölünmüştür.
+
+**Ekip İletişimi**
+Sprint boyunca aktif iletişim kanallarındaki durağanlık devam etmiş; sürecin takibi, koordinasyon ve teslimat hazırlıkları için sprint genelinde 1 adet online senkron toplantı gerçekleştirilmiştir. Bu toplantıda projenin son durumu netleştirilmiş, deploy süreçleri ve sunum içerikleri netleştirilmiştir.
+
+**Sprint 3 Hedefleri ve Tamamlananlar**
+- **Uygulamanın Canlıya Alınması (Deploy):** Next.js frontend ve FastAPI backend servisleri canlı ortama başarıyla dağıtıldı, ortam değişkenleri ve Supabase prod yapılandırmaları tamamlandı.
+- **Final Sunumunun Hazırlanması:** Proje fikrini, mimarisini, teknik kazanımları ve ürün demo süreçlerini içeren kapsamlı bitirme sunum slaytları hazırlandı.
+- **Arayüz ve Performans İyileştirmeleri:** Ürün içi son görsel düzenlemeler yapıldı, mobil uyumluluk ve UI/UX detayları optimize edildi.
+- **Uçtan Uca Test ve Hata Düzeltmeleri:** Anonim ve kayıtlı kullanıcı akışları, AI yanıt süreleri, yedekli LLM geçişleri (failover) ve dil değişim dinamikleri canlı ortamda test edilerek performans stabil hale getirildi.
+- **Video İçeriğinin Hazırlanması:** Proje fikrini, mimarisini, teknik kazanımları ve ürün demo süreçlerini içeren video hazırlandı.
+
+**Sprint Review**
+Sprint 3 süresince Note Sloth uygulamasının tüm temel işlevleri eksiksiz olarak tamamlanmış, prodüksiyon ortamına taşınmış ve nihai proje sunumu hazır hale getirilmiştir. Gerçekleştirilen tek ekip toplantısında ürünün son hali incelenmiş ve akademiye teslim edilecek çıktılar onaylanmıştır.
+
+**Sprint Retrospective**
+- Projenin başından sonuna kadar yaşanan ekip içi iletişim ve sorumluluk alma aksaklıklarına rağmen, Note Sloth teknik ve görsel açıdan hedeflenen kalitede başarıyla yayına alınmıştır.
+- Sınırlı aktif katılım ile yürütülen bu süreçte, doğru mimari kararlar (Next.js, FastAPI, Supabase, Multi-LLM) sayesinde projenin tek bir ana geliştirici aksı üzerinde bile zamanında ve yüksek kaliteyle bitirilebileceği tecrübe edilmiştir.
